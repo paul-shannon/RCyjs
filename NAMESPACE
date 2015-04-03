@@ -1,0 +1,93 @@
+exportClasses(RCyjsClass)
+
+exportMethods(
+   setGraph,
+   getNodes,
+
+   setDefaultNodeSize,
+   setDefaultNodeWidth,
+   setDefaultNodeHeight,
+   setDefaultNodeColor,
+   setDefaultNodeShape,
+   setDefaultNodeFontColor,
+   setDefaultNodeFontSize,
+   setDefaultNodeBorderWidth,
+   setDefaultNodeBorderColor,
+
+   setDefaultEdgeFontSize,
+
+   setDefaultEdgeTargetArrowShape,
+   setDefaultEdgeColor,
+   setDefaultEdgeTargetArrowColor,
+   setDefaultEdgeFontSize,
+   setDefaultEdgeWidth,
+   setDefaultEdgeLineColor,
+   setDefaultEdgeFont,
+   setDefaultEdgeFontWeight,
+   setDefaultEdgeTextOpacity,
+   setDefaultEdgeLineStyle,
+   setDefaultEdgeOpacity,
+   setDefaultEdgeSourceArrowColor,
+   setDefaultEdgeSourceArrowShape,
+
+   getSelectedNodes,
+   setNodeLabelRule,
+   setNodeLabelAlignment,
+   setNodeSizeRule,
+   setNodeColorRule,
+   setNodeShapeRule,
+    
+   setEdgeColorRule,
+   setEdgeWidthRule,
+   setEdgeTargetArrowShapeRule,
+   setEdgeTargetArrowColorRule,
+   setEdgeSourceArrowShapeRule,
+   setEdgeSourceArrowColorRule,
+    
+   redraw,
+   layoutStrategies,
+   layout,
+   getPosition,
+   setPosition,
+   getLayout,
+   saveLayout,
+   restoreLayout,
+   fitContent,
+   fitSelectedContent,
+   selectNodes,
+   clearSelection,
+   getZoom,
+   setZoom,
+   setBackgroundColor
+   )
+
+export(
+   RCyjs,
+   simpleDemoGraph,
+   createTestGraph,
+   biocGraphToCytoscapeJSON,
+   noa,
+   eda,
+   noaNames,
+   edaNames
+   )
+
+
+importClassesFrom(methods, character, integer)
+
+import(BiocGenerics)
+import(graph)
+importFrom(jsonlite,fromJSON)
+importFrom(methods, new)
+import(BrowserViz)
+import(httpuv)
+importFrom(igraph,graph.attributes)
+importFrom(igraph,V)
+importFrom(igraph,"V<-")
+importFrom(igraph,list.vertex.attributes)
+importFrom(igraph,vertex.attributes)
+importFrom(igraph,get.edgelist)
+importFrom(igraph,ecount)
+importFrom(igraph,edge.attributes)
+importFrom(igraph,list.edge.attributes)
+

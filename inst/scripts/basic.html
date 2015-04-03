@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Rcyjs Demo</title>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-2.1.1.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-ui-1.11.2.min.js"></script>
+   <link   rel="stylesheet" href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery-ui-1.11.2.css">
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.3.11.min.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery.cytoscape.js-panzoom.js"></script>
+   <link   href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery.cytoscape.js-panzoom.css" 
+           rel="stylesheet" 
+           type="text/css" />
+   <link   href="http://oncoscape.sttrcancer.org/oncoscape/fonts/font-awesome-4.0.3/css/font-awesome.css" 
+           rel="stylesheet" 
+           type="text/css" />
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/BrowserViz.js"></script>
+
+<style>
+
+#cyDiv {
+  margin: auto;
+  width: 500px;
+  height: 500px;
+  border: 1px solid #444;
+  border-radius:5px;
+  display: block;
+  z-index: 1;
+  }
+</style>
+
+<script>
+//----------------------------------------------------------------------------------------------------
+var cy;  // keep this outside of module scope so it can be manipulated in the console
+var zzz;
+
+var RCyjsModule = (function(){
+
+  //var webSocketURL = window.location.href.replace("http://", "ws://");
+  //var websocket = new WebSocket(webSocketURL);
+  //var dispatchOptions = {};
+  //var onReadyFunctions = [];
+  var cyDiv;
+  var vizmaps = [];
+  var graph;
+
+  var bvHub;
+
+//----------------------------------------------------------------------------------------------------
+function initialize(bvHubX)
+{
+   bvHub = bvHubX;
+   addMessageHandlers();
+
+} // initialize
+//----------------------------------------------------------------------------------------------------
+function initializeUI()
+{
+   cyDiv = $("#cyDiv");
+   $(window).resize(handleWindowResize);
+   handleWindowResize();
+
+} // initializeUI
+//----------------------------------------------------------------------------------------------------
+function handleWindowResize ()
+{
+   //console.log("cy resize: " + $(window).width() + ", " + $(window).height());
+   cyDiv.width(0.95 * $(window).width());
+   cyDiv.height(0.90 * $(window).height());
+   //cy.resize();
+   //cy.fit(50);
+
+} // handleWindowResize
+//--------------------------------------------------------------------------------
+function addMessageHandlers()
+{
+   bvHub.addMessageHandler("setGraph",             setGraph);
+   bvHub.addMessageHandler("getNodes",             getNodes);
+   bvHub.addMessageHandler("getSelectedNodes",     getSelectedNodes);
+
+   bvHub.addMessageHandler("setNodeLabelRule",      setNodeLabelRule);
+   bvHub.addMessageHandler("setNodeLabelAlignment", setNodeLabelAlignment);
+
+   bvHub.addMessageHandler("setNodeSizeRule",      setNodeSizeRule);
+   bvHub.addMessageHandler("setNodeColorRule",     setNodeColorRule);
+   bvHub.addMessageHandler("setNodeShapeRule",     setNodeShapeRule);
+
+   bvHub.addMessageHandler("setEdgeColorRule",             setEdgeColorRule);
+   bvHub.addMessageHandler("setEdgeWidthRule",             setEdgeWidthRule);
+   bvHub.addMessageHandler("setEdgeTargetArrowShapeRule",  setEdgeTargetArrowShapeRule);
+   bvHub.addMessageHandler("setEdgeTargetArrowColorRule",  setEdgeTargetArrowColorRule);
+   bvHub.addMessageHandler("setEdgeSourceArrowShapeRule",  setEdgeSourceArrowShapeRule);
+   bvHub.addMessageHandler("setEdgeSourceArrowColorRule",  setEdgeSourceArrowColorRule);
+
+   bvHub.addMessageHandler("redraw",               redraw);
+   bvHub.addMessageHandler("fit",                  fit);
+   bvHub.addMessageHandler("getZoom",              getZoom);
+   bvHub.addMessageHandler("setZoom",              setZoom);
+   bvHub.addMessageHandler("setBackgroundColor",   setBackgroundColor);
+   bvHub.addMessageHandler("layoutStrategies",     layoutStrategies);
+   bvHub.addMessageHandler("doLayout",             doLayout);
+   bvHub.addMessageHandler("getNodeSize",          getNodeSize);
+   bvHub.addMessageHandler("getPosition",          getPosition);
+   bvHub.addMessageHandler("setPosition",          setPosition);
+
+   bvHub.addMessageHandler("getLayout",            getLayout);
+   bvHub.addMessageHandler("setLayout",            setLayout);
+   bvHub.addMessageHandler("selectNodes",          selectNodes);
+   bvHub.addMessageHandler("clearSelection",       clearSelection);
+
+   bvHub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor);
+   bvHub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape);
+
+   bvHub.addMessageHandler("setDefaultNodeSize",   setDefaultNodeSize);
+   bvHub.addMessageHandler("setDefaultNodeWidth",  setDefaultNodeWidth);
+   bvHub.addMessageHandler("setDefaultNodeHeight", setDefaultNodeHeight);
+   bvHub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor);
+   bvHub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape);
+   bvHub.addMessageHandler("setDefaultNodeFontColor", setDefaultNodeFontColor);
+   bvHub.addMessageHandler("setDefaultNodeFontSize", setDefaultNodeFontSize);
+   bvHub.addMessageHandler("setDefaultNodeBorderWidth", setDefaultNodeBorderWidth);
+   bvHub.addMessageHandler("setDefaultNodeBorderColor", setDefaultNodeBorderColor);
+
+   bvHub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize);
+   bvHub.addMessageHandler("setDefaultEdgeTargetArrowShape", setDefaultEdgeTargetArrowShape);
+   bvHub.addMessageHandler("setDefaultEdgeColor", setDefaultEdgeColor);
+   bvHub.addMessageHandler("setDefaultEdgeTargetArrowColor", setDefaultEdgeTargetArrowColor);
+   bvHub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize);
+   bvHub.addMessageHandler("setDefaultEdgeWidth", setDefaultEdgeWidth);
+   bvHub.addMessageHandler("setDefaultEdgeLineColor", setDefaultEdgeLineColor);
+   bvHub.addMessageHandler("setDefaultEdgeFont", setDefaultEdgeFont);
+   bvHub.addMessageHandler("setDefaultEdgeFontWeight", setDefaultEdgeFontWeight);
+   bvHub.addMessageHandler("setDefaultEdgeTextOpacity", setDefaultEdgeTextOpacity);
+   bvHub.addMessageHandler("setDefaultEdgeLineStyle", setDefaultEdgeLineStyle);
+   bvHub.addMessageHandler("setDefaultEdgeOpacity", setDefaultEdgeOpacity);
+   bvHub.addMessageHandler("setDefaultEdgeSourceArrowColor", setDefaultEdgeSourceArrowColor);
+   bvHub.addMessageHandler("setDefaultEdgeSourceArrowShape", setDefaultEdgeSourceArrowShape);
+
+} // addMessageHandlers
+//----------------------------------------------------------------------------------------------------
+function redraw(msg)
+{
+   update();
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // redraw
+//----------------------------------------------------------------------------------------------------
+function fit(msg)
+{
+   cy.fit()
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // fit
+//----------------------------------------------------------------------------------------------------
+function setZoom(msg)
+{
+   var newFactor = msg.payload   
+   var box = cy.extent();
+   var center = {x: box.x1 + (box.w/2), y: box.y1 + (box.h/2)};
+   cy.zoom({level: newFactor, position: center});
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setZoom
+//----------------------------------------------------------------------------------------------------
+function getZoom(msg)
+{
+   result = cy.zoom();
+   returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
+   console.log(returnMsg);
+   bvHub.send(returnMsg);
+
+} // getZoom
+//----------------------------------------------------------------------------------------------------
+function setBackgroundColor(msg)
+{
+   var newValue = msg.payload   
+   cyDiv.css({"background-color": newValue});
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setZoom
+//----------------------------------------------------------------------------------------------------
+function update()
+{
+   cy.style().update()
+
+} // update
+//----------------------------------------------------------------------------------------------------
+function setNodeLabelRule(msg)
+{
+   var controllingAttribute = msg.payload;
+   var valueString = "data(" + controllingAttribute + ")";
+   cy.style().selector('node').css({content: valueString});
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeLabelRule
+//----------------------------------------------------------------------------------------------------
+function setNodeLabelAlignment(msg)
+{
+   var horizontalPosition = msg.payload.horizontal;
+   var verticalPosition = msg.payload.vertical;
+   cy.style().selector('node').css({"text-halign": horizontalPosition});
+   cy.style().selector('node').css({"text-valign": verticalPosition});
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeLabelAlignment
+//----------------------------------------------------------------------------------------------------
+function setNodeSizeRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setNodeSizeRule: " + controllingAttribute);
+   var controlPoints = msg.payload.controlPoints;
+   var nodeSizes = msg.payload.nodeSizes;
+   console.log(controlPoints);
+   console.log(nodeSizes);
+
+      // the controlPoints describe 1 or more segments, each defined by successive overlapping
+      // pairs.  thus, control points of 0,1,2,3 define 3 segments >=0 <1, >= 1 <2, >= 2 <=3
+      // since cyjs only allows two control points per css "mapData" call, we issue
+      // as many calls as there are segments, conditioning each by first selecting the range
+      //
+      // example, from hypoxiaVizmap.js
+      //
+      //    "selector" : "node[score > 0.0][score < 12]",
+      //    "css" : {
+      // "background-color" : "mapData(score,0.0,12,rgb(255,255,255),rgb(255,0,0))"
+
+
+      // three forms:
+      // cy.style().selector("node[count<=1]").css
+
+   var segmentCount = controlPoints.length - 1;
+
+   for(var seg=0; seg < segmentCount; seg++){
+     var minVal = controlPoints[seg];
+     var maxVal = controlPoints[seg+1];
+     var minSize = nodeSizes[seg];
+     var maxSize = nodeSizes[seg+1];
+
+        // on first and last segment, make sure the bounds are inclusive
+
+     var lowerBoundOperator = " > ";
+     var upperBoundOperator = " < ";
+     if(seg == 0) lowerBoundOperator = " >= ";
+     if(seg == (segmentCount - 1)) upperBoundOperator = " <= ";
+
+     var selectorString = "node[" + controllingAttribute + lowerBoundOperator + minVal + "]" +
+                              "[" + controllingAttribute + upperBoundOperator  + maxVal + "]";
+     var mappingString = "mapData(" + controllingAttribute + "," + minVal + "," + maxVal + 
+                                                           "," + minSize + "," + maxSize + ")";
+     console.log("selectorString: " + selectorString);
+     console.log("mapping string: " + mappingString);
+
+     //selectorString = 'node';
+     cy.style().selector(selectorString).css({width: mappingString});
+     cy.style().selector(selectorString).css({height: mappingString});
+     } // for seg
+
+   //cy.style().selector('node').css(width: "mapData(count,0,100, 20, 200)");
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeSizeRule
+//----------------------------------------------------------------------------------------------------
+function setNodeColorRule(msg)
+{
+   var mode = msg.payload.mode;
+   if(mode == "interpolate")
+      setNodeColorInterpolatingRule(msg)
+   else if (mode == "lookup")
+      setNodeColorLookupRule(msg)
+   else
+      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+
+} // setNodeColorRule
+//----------------------------------------------------------------------------------------------------
+function setNodeColorLookupRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setNodeColorRule: " + controllingAttribute);
+   var states = msg.payload.controlPoints;
+   var nodeColors = msg.payload.nodeColors;
+
+   for(var i=0; i < states.length; i++){
+     var color = nodeColors[i];
+     var state = states[i];
+     var selectorString = "node[" + controllingAttribute + "='"  + state + "']";
+     console.log("selectorString: " + selectorString);
+     cy.style().selector(selectorString).css({"background-color": color});
+     } // for seg
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeColorLookupRule
+//----------------------------------------------------------------------------------------------------
+function setNodeColorInterpolatingRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setNodeColorRule: " + controllingAttribute);
+   var controlPoints = msg.payload.controlPoints;
+   var nodeColors = msg.payload.nodeColors;
+
+
+      // the controlPoints describe 1 or more segments, each defined by successive overlapping
+      // pairs.  thus, control points of 0,1,2,3 define 3 segments >=0 <1, >= 1 <2, >= 2 <=3
+      // since cyjs only allows two control points per css "mapData" call, we issue
+      // as many calls as there are segments, conditioning each by first selecting the range
+      //
+      // example, from hypoxiaVizmap.js
+      //
+      //    "selector" : "node[score > 0.0][score < 12]",
+      //    "css" : {
+      // "background-color" : "mapData(score,0.0,12,rgb(255,255,255),rgb(255,0,0))"
+
+
+      // three forms:
+      // cy.style().selector("node[count<=1]").css
+
+   var segmentCount = controlPoints.length - 1;
+
+   for(var seg=0; seg < segmentCount; seg++){
+     var minVal = controlPoints[seg];
+     var maxVal = controlPoints[seg+1];
+     var startColor = nodeColors[seg];
+     var endColor = nodeColors[seg+1];
+
+        // on first and last segment, make sure the (start, end) bounds (respectively) are inclusive
+
+     var lowerBoundOperator = " > ";
+     var upperBoundOperator = " <= ";
+     if(seg == 0) lowerBoundOperator = " >= ";
+
+     var selectorString = "node[" + controllingAttribute + lowerBoundOperator + minVal + "]" +
+                              "[" + controllingAttribute + upperBoundOperator  + maxVal + "]";
+     var mappingString = "mapData(" + controllingAttribute + "," + minVal + "," + maxVal + 
+                                                           "," + startColor + "," + endColor + ")";
+     console.log("selectorString: " + selectorString);
+     console.log("mapping string: " + mappingString);
+
+     cy.style().selector(selectorString).css({"background-color": mappingString});
+     } // for seg
+
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeColorInterpolatingRule
+//----------------------------------------------------------------------------------------------------
+function setNodeShapeRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setNodeShapeRule: " + controllingAttribute);
+   var states = msg.payload.controlPoints;
+   var nodeShapes = msg.payload.nodeShapes;
+
+   for(var i=0; i < states.length; i++){
+     var shape = nodeShapes[i];
+     var state = states[i];
+     var selectorString = "node[" + controllingAttribute + "='"  + state + "']";
+     console.log("selectorString: " + selectorString);
+     cy.style().selector(selectorString).css({"shape": shape});
+     } // for seg
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeShapeRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeColorRule(msg)
+{
+   var mode = msg.payload.mode;
+   if(mode === "interpolate")
+      setEdgeColorInterpolatingRule(msg)
+   else if (mode == "lookup")
+      setEdgeColorLookupRule(msg)
+   else
+      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+
+} // setEdgeColorRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeColorLookupRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setEdgeColorRule: " + controllingAttribute);
+   var states = msg.payload.controlPoints;
+   var colors = msg.payload.edgeColors;
+
+   for(var i=0; i < states.length; i++){
+     var color = colors[i];
+     var state = states[i];
+     var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
+     console.log("selectorString: " + selectorString);
+     cy.style().selector(selectorString).css({"line-color": color});
+     } // for seg
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeColorLookupRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeColorInterpolatingRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setEdgeColorRule, interpolated: " + controllingAttribute);
+   var controlPoints = msg.payload.controlPoints;
+   var edgeColors = msg.payload.edgeColors;
+
+
+      // the controlPoints describe 1 or more segments, each defined by successive overlapping
+      // pairs.  thus, control points of 0,1,2,3 define 3 segments >=0 <1, >= 1 <2, >= 2 <=3
+      // since cyjs only allows two control points per css "mapData" call, we issue
+      // as many calls as there are segments, conditioning each by first selecting the range
+      //
+      // example, from hypoxiaVizmap.js
+      //
+      //    "selector" : "edge[score > 0.0][score < 12]",
+      //    "css" : {
+      // "line-color" : "mapData(score,0.0,12,rgb(255,255,255),rgb(255,0,0))"
+
+
+      // three forms:
+      // cy.style().selector("edge[count<=1]").css
+
+   var segmentCount = controlPoints.length - 1;
+
+   for(var seg=0; seg < segmentCount; seg++){
+     var minVal = controlPoints[seg];
+     var maxVal = controlPoints[seg+1];
+     var startColor = edgeColors[seg];
+     var endColor = edgeColors[seg+1];
+
+        // on first and last segment, make sure the (start, end) bounds (respectively) are inclusive
+
+     var lowerBoundOperator = " > ";
+     var upperBoundOperator = " <= ";
+     if(seg == 0) lowerBoundOperator = " >= ";
+
+     var selectorString = "edge[" + controllingAttribute + lowerBoundOperator + minVal + "]" +
+                              "[" + controllingAttribute + upperBoundOperator  + maxVal + "]";
+     var mappingString = "mapData(" + controllingAttribute + "," + minVal + "," + maxVal + 
+                                                           "," + startColor + "," + endColor + ")";
+     console.log("selectorString: " + selectorString);
+     console.log("mapping string: " + mappingString);
+
+     cy.style().selector(selectorString).css({"line-color": mappingString});
+     } // for seg
+
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeColorInterpolatingRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeWidthRule(msg)
+{
+   var mode = msg.payload.mode;
+
+   if(mode === "interpolate")
+      setEdgeWidthInterpolatingRule(msg)
+   else if (mode == "lookup")
+      setEdgeWidthLookupRule(msg)
+   else
+      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+
+} // setEdgeWidthRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeWidthInterpolatingRule(msg)
+{
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeWidthInterpolatingRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeWidthLookupRule(msg)
+{
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeWidthLookupRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeTargetArrowShapeRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   var states = msg.payload.controlPoints;
+   var shapes = msg.payload.edgeShapes;
+
+   for(var i=0; i < states.length; i++){
+     var shape = shapes[i];
+     var state = states[i];
+     var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
+     console.log("selectorString: " + selectorString);
+     console.log("  newShape: " + shape);
+     cy.style().selector(selectorString).css({"target-arrow-shape": shape});
+
+     } // for seg
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeTargetArrowShapeRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeTargetArrowColorRule(msg)
+{
+   var mode = msg.payload.mode;
+
+   if(mode === "interpolate")
+      setEdgeTargetArrowColorInterpolatingRule(msg)
+   else if (mode == "lookup")
+      setEdgeTargetArrowColorLookupRule(msg)
+   else
+      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+
+} // setEdgeTargetArrowColorRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeTargetArrowColorInterpolatingRule(msg)
+{
+   bvHub.send({cmd: msg.callback, status: "not yet implemented", callback: "", payload: ""});
+
+} // setEdgeTargetArrowColorInterpolatingRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeTargetArrowColorLookupRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setEdgeTargetArrowColorLookupRule: " + controllingAttribute);
+   var states = msg.payload.controlPoints;
+   var colors = msg.payload.colors;
+
+   for(var i=0; i < states.length; i++){
+     var color = colors[i];
+     var state = states[i];
+     var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
+     console.log("selectorString: " + selectorString);
+     cy.style().selector(selectorString).css({"target-arrow-color": color});
+     } // for seg
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeTargetArrowColorLookupRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeSourceArrowColorInterpolatingRule(msg)
+{
+   bvHub.send({cmd: msg.callback, status: "not yet implemented", callback: "", payload: ""});
+
+} // setEdgeSourceArrowColorInterpolatingRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeSourceArrowShapeRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   var states = msg.payload.controlPoints;
+   var shapes = msg.payload.edgeShapes;
+
+   for(var i=0; i < states.length; i++){
+     var shape = shapes[i];
+     var state = states[i];
+     var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
+     console.log("selectorString: " + selectorString);
+     console.log("  newShape: " + shape);
+     cy.style().selector(selectorString).css({"source-arrow-shape": shape});
+     } // for seg
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeSourceArrowShapeRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeSourceArrowColorRule(msg)
+{
+   var mode = msg.payload.mode;
+
+   if(mode === "interpolate")
+      setEdgeSourceArrowColorInterpolatingRule(msg)
+   else if (mode == "lookup")
+      setEdgeSourceArrowColorLookupRule(msg)
+   else
+      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeSourceArrowColorRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeSourceArrowColorLookupRule(msg)
+{
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setEdgeSourceArrowColorLookupRule: " + controllingAttribute);
+   var states = msg.payload.controlPoints;
+   var colors = msg.payload.colors;
+
+   for(var i=0; i < states.length; i++){
+     var color = colors[i];
+     var state = states[i];
+     var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
+     console.log("selectorString: " + selectorString);
+     cy.style().selector(selectorString).css({"source-arrow-color": color});
+     } // for seg
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeSourceArrowColorLookupRule
+//----------------------------------------------------------------------------------------------------
+function setEdgeSourceArrowColorInterpolatingRule(msg)
+{
+   bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "not implemented yet"});
+
+} // setEdgeSourceArrowColorInterpolatingRule
+//----------------------------------------------------------------------------------------------------
+function getNodeSize(msg)
+{
+   console.log("=== getNodeSize");
+   var nodeID = msg.payload;
+   var filterString = "node[id='" + nodeID + "']";
+   var width = cy.filter(filterString).css("width");
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: width});
+
+} // getNodeSize
+//----------------------------------------------------------------------------------------------------
+function fit(msg)
+{
+   console.log("=== fit");
+   cy.fit()
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // fit
+//----------------------------------------------------------------------------------------------------
+function layoutStrategies(msg)
+{
+   console.log("=== layoutStrategies");
+   var strategies = ["random", "grid", "circle", "concentric", "breadthfirst", "cose"];
+     // not yet working:   "dagre", "cola", "springy";
+
+   console.log("== layoutStrategies bvHub.sending " + strategies.length + " strategies");
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: strategies});
+
+} // layoutStragegies
+//----------------------------------------------------------------------------------------------------
+function doLayout(msg)
+{
+   console.log("=== doLayout");
+   var strategy = msg.payload;
+   cy.layout({name: strategy});
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // doLayout
+//----------------------------------------------------------------------------------------------------
+function getLayout(msg)
+{
+   console.log("=== getLayout");
+   //layout = JSON.stringify(cy.nodes().map(function(n){return{id:n.id(), position:n.position()}}));
+   layout = JSON.stringify(cy.nodes().map(function(n){return{id: n.id(), 
+                                                              x: n.position().x,
+                                                              y: n.position().y}}));
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
+
+} // getLayout
+//----------------------------------------------------------------------------------------------------
+function getPosition(msg)
+{
+   console.log("=== getPosition");
+     // if payload is empty, we interpret that as "get all nodes"
+   var nodeNames = msg.payload;
+   var allNodes = false;
+   var targetIDs = [];
+
+   if(nodeNames.length == 0){ // either an empty string or an empty array
+      allNodes = true;
+      }
+   else if(typeof(nodeNames) == "string")
+     targetIDs = [nodeNames];
+   else
+     targetIDs = nodeNames;
+
+   var filterStrings = [];
+
+   for(var i=0; i < targetIDs.length; i++){
+     var s = '[id="' + targetIDs[i] + '"]';
+     filterStrings.push(s);
+     } // for i
+
+   var nodesToSelect = cy.nodes(filterStrings.join());
+
+   if(allNodes)
+      layout = JSON.stringify(cy.nodes().map(function(n){return{id: n.id(), 
+                                                                x: n.position().x,
+                                                                y: n.position().y}}));
+   else{
+      layout = JSON.stringify(nodesToSelect.map(function(n){return{id: n.id(), 
+                                                                x: n.position().x,
+                                                                y: n.position().y}}));
+      } // else: subset of nodes specified
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
+
+} // getPosition
+//----------------------------------------------------------------------------------------------------
+function setPosition(msg)
+{
+   console.log("==== setPosition");
+   console.log(msg.payload);
+     // there will be 1 or more position objects, each with id, x, and y values
+   var positionObjects = msg.payload;
+
+     // create a subset of all nodes, including only those in positionObjects
+   var filterStrings = [];
+   for(var i=0; i < positionObjects.length; i++){
+     var s = '[id="' + positionObjects[i].id + '"]';
+     filterStrings.push(s);
+     } // for i
+   var nodeSubset = cy.nodes(filterStrings.join());
+   console.log("basic.html, setting position on nodes, count: " + nodeSubset.length);
+
+   nodeSubset.positions(function(i, node){return{x: positionObjects[i].x, y: positionObjects[i].y}})
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setPosition
+//----------------------------------------------------------------------------------------------------
+function setLayout(msg)
+{
+   console.log("==== setLayout");
+   console.log(msg.payload);
+
+   function setPosition(node){
+     var id = node.id; 
+     var xPos=node.position.x; 
+     var yPos=node.position.y; 
+     var filterString = 'node[id="' + id + '"]'
+     ccy.filter(filterString).position(node.position);
+     } // setPosition
+
+   layout.map(setPosition)
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setLayout
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeSize(msg)
+{
+  var newSize = msg.payload;
+  cy.style().selector('node').css({"height": newSize});
+  cy.style().selector('node').css({"width": newSize});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeSize
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeWidth(msg)
+{
+  var newSize = msg.payload;
+  cy.style().selector('node').css({"width": newSize});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeWidth
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeHeight(msg)
+{
+  var newSize = msg.payload;
+  cy.style().selector('node').css({"height": newSize});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeHeight
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeColor(msg)
+{
+  var newColor = msg.payload;
+  cy.style().selector("node").css({"background-color": newColor});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeColor
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeShape(msg)
+{
+  var newShape = msg.payload;
+  cy.style().selector("node").css({"shape": newShape});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeColor
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeFontColor(msg)
+{
+  var color = msg.payload;
+  cy.style().selector("node").css({"color": color});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeFontColor
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeFontSize(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("node").css({"font-size": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeFontSize
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeBorderWidth(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("node").css({"border-width": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeBorderWidth
+//----------------------------------------------------------------------------------------------------
+function setDefaultNodeBorderColor(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("node").css({"border-color": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeBorderColor
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeFontSize(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"font-size": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdge
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeTargetArrowShape(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"target-arrow-shape": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeTargetArrowShape
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeColor(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"line-color": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdge
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeTargetArrowColor(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"target-arrow-color": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdge
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeFontSize(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"font-size": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeFontSize
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeWidth(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"width": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeWidth
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeLineColor(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"line-color": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeLineColor
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeFont(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"font-family": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeFont
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeFontWeight(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"font-weight": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeFontWeight
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeTextOpacity(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"text-opacity": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeTextOpacity
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeLineStyle(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"line-style": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeLineStyle
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeOpacity(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"opacity": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeOpacity
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeSourceArrowColor(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"source-arrow-color": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeSourceArrowColor
+//----------------------------------------------------------------------------------------------------
+function setDefaultEdgeSourceArrowShape(msg)
+{
+  var newValue = msg.payload;
+  cy.style().selector("edge").css({"source-arrow-shape": newValue});
+
+  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultEdgeSourceArrayShape
+//----------------------------------------------------------------------------------------------------
+function selectNodes(msg)
+{
+   console.log("==== selectNodes");
+   console.log(msg.payload);
+   var nodeIDs = msg.payload;
+   var filterStrings = [];
+
+   for(var i=0; i < nodeIDs.length; i++){
+     var s = '[id="' + nodeIDs[i] + '"]';
+     filterStrings.push(s);
+     } // for i
+
+   var nodesToSelect = cy.nodes(filterStrings.join());
+   nodesToSelect.select()
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // selectedNodes
+//----------------------------------------------------------------------------------------------------
+function clearSelection(msg)
+{
+   console.log("==== clearSelection");
+   cy.filter("node:selected").unselect()
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // clearSelection
+//----------------------------------------------------------------------------------------------------
+function getNodeLabel(msg)
+{
+   //nodesOfInterest = msg.payload;
+   //cy.filter("node:selected")[0].data('label')
+
+} // getNodeLabel
+//----------------------------------------------------------------------------------------------------
+function setGraph(msg)
+{
+   console.log("in function setGraph");
+   console.log(msg.payload);
+   graph = JSON.parse(msg.payload);
+   console.log("setGraph calling createCytoscapeWindow");
+   cy = createCytoscapeWindow(graph)
+   console.log("setGraph calling createCytoscapeWindow");
+   //cy.load(graph.elements)
+   //cy.add(graph)
+
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
+
+} // setWindowTitle
+//----------------------------------------------------------------------------------------------------
+function getNodes(msg)
+{
+   var status = "success";  // be optimistic
+
+   if (typeof (cy) == "undefined"){
+      payload = JSON.stringify([]);
+      status = "error";
+      }
+   else if (cy.nodes().length == 0){
+      payload = JSON.stringify([]);
+      }
+   else {
+      payload =  JSON.stringify(cy.nodes().map(function(node) {
+                                return {id: node.data().id, name: node.data().name}}));
+      }
+
+   console.log("getNodes returning payload: " + payload);
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
+
+} // getNodes
+//---------------------------------------------------------------------------------------------------
+function getSelectedNodes(msg)
+{
+   var status = "success";  // be optimistic
+
+   if (typeof (cy) == "undefined"){
+      payload = JSON.stringify([]);
+      status = "error";
+      }
+   else if (cy.nodes().length == 0){
+      payload = JSON.stringify([]);
+      }
+   else {
+      payload =  JSON.stringify(cy.filter("node:selected").map(function(node) {
+                                return {id: node.data().id, name: node.data().name}}));
+      }
+
+   console.log("getNodes returning payload: " + payload);
+   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
+
+} // getNodes
+//---------------------------------------------------------------------------------------------------
+function layout(strategy)
+{
+   switch(strategy) {
+      case "random":
+         var options = {name: 'random',
+                        fit: true, // whether to fit to viewport
+                        padding: 30, // fit padding
+                        boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+                        animate: false, // whether to transition the node positions
+                        animationDuration: 500, // duration of animation in ms if enabled
+                        ready: undefined, // callback on layoutready
+                        stop: undefined // callback on layoutstop
+                        };
+         cy.layout(options);
+         break;
+      default:
+         console.log("unrecognized layout strategy: " + strategy);
+      } // switch
+
+} // layout
+//----------------------------------------------------------------------------------------------------
+function addNode(propsJSON)
+{
+  props = JSON.parse(propsJSON)
+  console.log("--- addNode, these props");
+  console.log(props)
+
+  obj = cy.add({group: "nodes", data: props, position: { x: 200, y: 200 }});
+  return(obj.id());
+
+} // addNode
+//----------------------------------------------------------------------------------------------------
+function addEdge(nodeA_id, nodeB_id)
+{
+  console.log("--- addEdge betwee %s and %s", nodeA_id, nodeB_id);
+
+  obj = cy.add({group: "edges", data: {source: nodeA_id, target: nodeB_id}});
+
+  return(obj.id());
+
+} // addEdge
+//----------------------------------------------------------------------------------------------------
+function getVizmapNames()
+{
+   var names = []; 
+ 
+   if(typeof(vizmaps) == "object") {
+      for(var i=0; i < vizmaps.length; i++){
+        names.push(vizmaps[i].title);
+        } // for i
+      } // if defined
+
+   return (names);
+
+} // getVizmapNames
+//----------------------------------------------------------------------------------------------------
+function ws_getVizmapNames(msg)
+{
+   var names = getVizmapNames();
+   var statusMessage = "success";
+
+   if(names.length == 0)
+      statusMessage = "failure";
+
+   return_msg = {cmd: msg.callback, status: statusMessage, callback: "", payload: names};
+
+   bvHub.send(return_msg);
+
+} // ws_getVizmapNames
+//----------------------------------------------------------------------------------------------------
+function setVizmapByName(requestedName)
+{
+  for(var i=0; i < vizmaps.length; i++){
+    if(vizmaps[i].title == requestedName) {
+       cy.style(vizmaps[i].style);
+       return(true);
+       } // if matched
+   } // for i
+
+   return(false);
+
+} // setVizmapByName
+//----------------------------------------------------------------------------------------------------
+function ws_setVizmapByName(msg)
+{
+  var requestedName = msg.payload;
+  var callback = msg.callback;
+
+  var success = setVizmapByName(requestedName);
+
+  if(success)
+      statusMessage = "success"
+   else
+      statusMessage = "error"
+
+   msg = {cmd: callback, status: statusMessage, callback:"", payload:statusMessage};
+   // bvHub.send(msg);
+
+
+} // ws_setVizmapByName
+//----------------------------------------------------------------------------------------------------
+// these are likely to become programmable options
+function setupDefaultStyles(cy)
+{
+     // disable gray rectangle indicating active-selection-taking-place
+   cy.style().selector('node:active').css({"overlay-opacity": 0});
+   cy.style().selector('edge:active').css({"overlay-opacity": 0});
+
+     // make this visual clue more persistent
+   cy.style().selector('node:selected').css({'overlay-color': 'grey', 'overlay-opacity': 0.3})
+   cy.style().selector('edge:selected').css({'overlay-color': 'grey', 'overlay-opacity': 0.3})
+
+   // cy.style().selector('node:selected').css('background-color', 'red')
+
+}  // setupDefaultStyles
+//----------------------------------------------------------------------------------------------------
+function createCytoscapeWindow(graph) {
+
+   console.log("--- createCytoscapeWindow")
+   cy = $("#cyDiv");
+   console.log("--- graph");
+   console.log(graph);
+
+   cy.cytoscape({
+       elements: graph.elements,
+       showOverlay: false,
+       minZoom: 0.01,
+       maxZoom: 8.0,
+       boxSelectionEnabled: true,
+       layout: {
+         name: "preset",
+         fit: true
+         },
+    ready: function() {
+        console.log("cy ready");
+        cy = this;
+        setupDefaultStyles(cy);
+        cy.on('mouseover', 'node', function(evt){
+           var node = evt.cyTarget;
+           });
+        cy.on('mouseover', 'edge', function(evt){
+           var edge = evt.cyTarget;
+           //console.log(edge.data().canonicalName);
+           })
+        cy.edges().selectify();
+        cy.layout({name: "random"});
+        cy.reset();
+        cy.fit(50);
+        } // cy.ready
+       })
+
+    return (cy);
+
+} // createCytoscapeWindow
+//----------------------------------------------------------------------------------------------------
+function setEdgeRenderingMethod(newMethod)
+{
+  cy.edges().css({"curve-style": newMethod});
+
+} // setEdgeRenderingMethod
+//----------------------------------------------------------------------------------------------------
+demoSimpleNetwork = function(cy)
+{
+  node0 = cy.add({group: "nodes", data: { weight: 75, name: "A"}, position: { x: 200, y: 200 }});
+  node1 = cy.add({group: "nodes", data: { weight: 75, name: "B"}, position: { x: 300, y: 300 }});
+  cy.add({group: "edges", data: { id: "e0", source: node0.data("id"), target: node1.data("id")}});
+  setVizmapByName("Nested Network Style");
+
+} // demoSimpleNetwork
+//----------------------------------------------------------------------------------------------------
+return{
+   init: initialize,
+   initUI: initializeUI,
+   setEdgeRenderingMethod: setEdgeRenderingMethod
+   };
+
+//----------------------------------------------------------------------------------------------------
+}); // RCyjsModule
+
+bvHub = BrowserViz();
+rcy = RCyjsModule();
+rcy.init(bvHub);
+
+bvHub.addOnDocumentReadyFunction(rcy.initUI);
+bvHub.init();
+bvHub.start();
+
+</script>
+</script>
+</head>
+<body>
+<div id="cyDiv"></div>
+</body>
+</html>
+

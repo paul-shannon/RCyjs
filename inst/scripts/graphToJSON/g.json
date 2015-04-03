@@ -1,0 +1,66 @@
+{
+ "data": {},
+"elements": {
+ "nodes": [
+ {
+ "data": {
+ "name": "A",
+"type": "kinase",
+"lfc":     -3,
+"label": "Gene A",
+"count":      2,
+"id": "A" 
+} 
+},
+{
+ "data": {
+ "name": "B",
+"type": "transcription factor",
+"lfc":      0,
+"label": "Gene B",
+"count":     30,
+"id": "B" 
+} 
+},
+{
+ "data": {
+ "name": "C",
+"type": "glycoprotein",
+"lfc":      3,
+"label": "Gene C",
+"count":    100,
+"id": "C" 
+} 
+} 
+],
+"edges": [
+ {
+ "data": {
+ "source": "A",
+"target": "B",
+"edgeType": "phosphorylates",
+"score":     35,
+"misc": "default misc" 
+} 
+},
+{
+ "data": {
+ "source": "B",
+"target": "C",
+"edgeType": "synthetic lethal",
+"score":    -12,
+"misc": "default misc" 
+} 
+},
+{
+ "data": {
+ "source": "C",
+"target": "A",
+"edgeType": "undefined",
+"score":      0,
+"misc": "default misc" 
+} 
+} 
+] 
+} 
+}

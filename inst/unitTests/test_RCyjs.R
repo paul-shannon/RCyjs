@@ -734,6 +734,9 @@ test.getSetPosition <- function()
 #----------------------------------------------------------------------------------------------------
 test.saveRestoreLayout <- function()
 {
+   if(!interactive())
+       return(TRUE);
+   
    print("--- test.saveRestoreLayout");
 
    g <- simpleDemoGraph()

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-   <title>Rcyjs Demo</title>
+   <title>RCyjs</title>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-2.1.1.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-ui-1.11.2.min.js"></script>
    <link   rel="stylesheet" href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery-ui-1.11.2.css">
@@ -31,27 +31,28 @@
 <script>
 //----------------------------------------------------------------------------------------------------
 var cy;  // keep this outside of module scope so it can be manipulated in the console
-var zzz;
 
 var RCyjsModule = (function(){
 
-  //var webSocketURL = window.location.href.replace("http://", "ws://");
-  //var websocket = new WebSocket(webSocketURL);
-  //var dispatchOptions = {};
-  //var onReadyFunctions = [];
   var cyDiv;
   var vizmaps = [];
   var graph;
 
-  var bvHub;
+  var hub;
 
 //----------------------------------------------------------------------------------------------------
-function initialize(bvHubX)
+//function initialize(bvHubX)
+//{
+//   bvHub = bvHubX;
+//   addMessageHandlers();
+//
+//} // initialize
+//----------------------------------------------------------------------------------------------------
+function setHub(newHub)
 {
-   bvHub = bvHubX;
-   addMessageHandlers();
+   hub = newHub;
 
-} // initialize
+} // setHub
 //----------------------------------------------------------------------------------------------------
 function initializeUI()
 {
@@ -63,91 +64,88 @@ function initializeUI()
 //----------------------------------------------------------------------------------------------------
 function handleWindowResize ()
 {
-   //console.log("cy resize: " + $(window).width() + ", " + $(window).height());
    cyDiv.width(0.95 * $(window).width());
    cyDiv.height(0.90 * $(window).height());
-   //cy.resize();
-   //cy.fit(50);
 
 } // handleWindowResize
 //--------------------------------------------------------------------------------
 function addMessageHandlers()
 {
-   bvHub.addMessageHandler("setGraph",             setGraph);
-   bvHub.addMessageHandler("getNodes",             getNodes);
-   bvHub.addMessageHandler("getSelectedNodes",     getSelectedNodes);
+   hub.addMessageHandler("setGraph",             setGraph);
+   hub.addMessageHandler("getNodes",             getNodes);
+   hub.addMessageHandler("getSelectedNodes",     getSelectedNodes);
 
-   bvHub.addMessageHandler("setNodeLabelRule",      setNodeLabelRule);
-   bvHub.addMessageHandler("setNodeLabelAlignment", setNodeLabelAlignment);
+   hub.addMessageHandler("setNodeLabelRule",      setNodeLabelRule);
+   hub.addMessageHandler("setNodeLabelAlignment", setNodeLabelAlignment);
 
-   bvHub.addMessageHandler("setNodeSizeRule",      setNodeSizeRule);
-   bvHub.addMessageHandler("setNodeColorRule",     setNodeColorRule);
-   bvHub.addMessageHandler("setNodeShapeRule",     setNodeShapeRule);
+   hub.addMessageHandler("setNodeSizeRule",      setNodeSizeRule);
+   hub.addMessageHandler("setNodeColorRule",     setNodeColorRule);
+   hub.addMessageHandler("setNodeShapeRule",     setNodeShapeRule);
 
-   bvHub.addMessageHandler("setEdgeColorRule",             setEdgeColorRule);
-   bvHub.addMessageHandler("setEdgeWidthRule",             setEdgeWidthRule);
-   bvHub.addMessageHandler("setEdgeTargetArrowShapeRule",  setEdgeTargetArrowShapeRule);
-   bvHub.addMessageHandler("setEdgeTargetArrowColorRule",  setEdgeTargetArrowColorRule);
-   bvHub.addMessageHandler("setEdgeSourceArrowShapeRule",  setEdgeSourceArrowShapeRule);
-   bvHub.addMessageHandler("setEdgeSourceArrowColorRule",  setEdgeSourceArrowColorRule);
+   hub.addMessageHandler("setEdgeColorRule",             setEdgeColorRule);
+   hub.addMessageHandler("setEdgeWidthRule",             setEdgeWidthRule);
+   hub.addMessageHandler("setEdgeTargetArrowShapeRule",  setEdgeTargetArrowShapeRule);
+   hub.addMessageHandler("setEdgeTargetArrowColorRule",  setEdgeTargetArrowColorRule);
+   hub.addMessageHandler("setEdgeSourceArrowShapeRule",  setEdgeSourceArrowShapeRule);
+   hub.addMessageHandler("setEdgeSourceArrowColorRule",  setEdgeSourceArrowColorRule);
 
-   bvHub.addMessageHandler("redraw",               redraw);
-   bvHub.addMessageHandler("fit",                  fit);
-   bvHub.addMessageHandler("getZoom",              getZoom);
-   bvHub.addMessageHandler("setZoom",              setZoom);
-   bvHub.addMessageHandler("setBackgroundColor",   setBackgroundColor);
-   bvHub.addMessageHandler("layoutStrategies",     layoutStrategies);
-   bvHub.addMessageHandler("doLayout",             doLayout);
-   bvHub.addMessageHandler("getNodeSize",          getNodeSize);
-   bvHub.addMessageHandler("getPosition",          getPosition);
-   bvHub.addMessageHandler("setPosition",          setPosition);
+   hub.addMessageHandler("redraw",               redraw);
+   hub.addMessageHandler("fit",                  fit);
+   hub.addMessageHandler("getZoom",              getZoom);
+   hub.addMessageHandler("setZoom",              setZoom);
+   hub.addMessageHandler("setBackgroundColor",   setBackgroundColor);
+   hub.addMessageHandler("layoutStrategies",     layoutStrategies);
+   hub.addMessageHandler("doLayout",             doLayout);
+   hub.addMessageHandler("getNodeSize",          getNodeSize);
+   hub.addMessageHandler("getPosition",          getPosition);
+   hub.addMessageHandler("setPosition",          setPosition);
 
-   bvHub.addMessageHandler("getLayout",            getLayout);
-   bvHub.addMessageHandler("setLayout",            setLayout);
-   bvHub.addMessageHandler("selectNodes",          selectNodes);
-   bvHub.addMessageHandler("clearSelection",       clearSelection);
+   hub.addMessageHandler("getLayout",            getLayout);
+   hub.addMessageHandler("setLayout",            setLayout);
+   hub.addMessageHandler("selectNodes",          selectNodes);
+   hub.addMessageHandler("clearSelection",       clearSelection);
 
-   bvHub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor);
-   bvHub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape);
+   hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor);
+   hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape);
 
-   bvHub.addMessageHandler("setDefaultNodeSize",   setDefaultNodeSize);
-   bvHub.addMessageHandler("setDefaultNodeWidth",  setDefaultNodeWidth);
-   bvHub.addMessageHandler("setDefaultNodeHeight", setDefaultNodeHeight);
-   bvHub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor);
-   bvHub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape);
-   bvHub.addMessageHandler("setDefaultNodeFontColor", setDefaultNodeFontColor);
-   bvHub.addMessageHandler("setDefaultNodeFontSize", setDefaultNodeFontSize);
-   bvHub.addMessageHandler("setDefaultNodeBorderWidth", setDefaultNodeBorderWidth);
-   bvHub.addMessageHandler("setDefaultNodeBorderColor", setDefaultNodeBorderColor);
+   hub.addMessageHandler("setDefaultNodeSize",   setDefaultNodeSize);
+   hub.addMessageHandler("setDefaultNodeWidth",  setDefaultNodeWidth);
+   hub.addMessageHandler("setDefaultNodeHeight", setDefaultNodeHeight);
+   hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor);
+   hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape);
+   hub.addMessageHandler("setDefaultNodeFontColor", setDefaultNodeFontColor);
+   hub.addMessageHandler("setDefaultNodeFontSize", setDefaultNodeFontSize);
+   hub.addMessageHandler("setDefaultNodeBorderWidth", setDefaultNodeBorderWidth);
+   hub.addMessageHandler("setDefaultNodeBorderColor", setDefaultNodeBorderColor);
 
-   bvHub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize);
-   bvHub.addMessageHandler("setDefaultEdgeTargetArrowShape", setDefaultEdgeTargetArrowShape);
-   bvHub.addMessageHandler("setDefaultEdgeColor", setDefaultEdgeColor);
-   bvHub.addMessageHandler("setDefaultEdgeTargetArrowColor", setDefaultEdgeTargetArrowColor);
-   bvHub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize);
-   bvHub.addMessageHandler("setDefaultEdgeWidth", setDefaultEdgeWidth);
-   bvHub.addMessageHandler("setDefaultEdgeLineColor", setDefaultEdgeLineColor);
-   bvHub.addMessageHandler("setDefaultEdgeFont", setDefaultEdgeFont);
-   bvHub.addMessageHandler("setDefaultEdgeFontWeight", setDefaultEdgeFontWeight);
-   bvHub.addMessageHandler("setDefaultEdgeTextOpacity", setDefaultEdgeTextOpacity);
-   bvHub.addMessageHandler("setDefaultEdgeLineStyle", setDefaultEdgeLineStyle);
-   bvHub.addMessageHandler("setDefaultEdgeOpacity", setDefaultEdgeOpacity);
-   bvHub.addMessageHandler("setDefaultEdgeSourceArrowColor", setDefaultEdgeSourceArrowColor);
-   bvHub.addMessageHandler("setDefaultEdgeSourceArrowShape", setDefaultEdgeSourceArrowShape);
+   hub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize);
+   hub.addMessageHandler("setDefaultEdgeTargetArrowShape", setDefaultEdgeTargetArrowShape);
+   hub.addMessageHandler("setDefaultEdgeColor", setDefaultEdgeColor);
+   hub.addMessageHandler("setDefaultEdgeTargetArrowColor", setDefaultEdgeTargetArrowColor);
+   hub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize);
+   hub.addMessageHandler("setDefaultEdgeWidth", setDefaultEdgeWidth);
+   hub.addMessageHandler("setDefaultEdgeLineColor", setDefaultEdgeLineColor);
+   hub.addMessageHandler("setDefaultEdgeFont", setDefaultEdgeFont);
+   hub.addMessageHandler("setDefaultEdgeFontWeight", setDefaultEdgeFontWeight);
+   hub.addMessageHandler("setDefaultEdgeTextOpacity", setDefaultEdgeTextOpacity);
+   hub.addMessageHandler("setDefaultEdgeLineStyle", setDefaultEdgeLineStyle);
+   hub.addMessageHandler("setDefaultEdgeOpacity", setDefaultEdgeOpacity);
+   hub.addMessageHandler("setDefaultEdgeSourceArrowColor", setDefaultEdgeSourceArrowColor);
+   hub.addMessageHandler("setDefaultEdgeSourceArrowShape", setDefaultEdgeSourceArrowShape);
 
 } // addMessageHandlers
 //----------------------------------------------------------------------------------------------------
 function redraw(msg)
 {
    update();
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // redraw
 //----------------------------------------------------------------------------------------------------
 function fit(msg)
 {
    cy.fit()
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // fit
 //----------------------------------------------------------------------------------------------------
@@ -157,7 +155,7 @@ function setZoom(msg)
    var box = cy.extent();
    var center = {x: box.x1 + (box.w/2), y: box.y1 + (box.h/2)};
    cy.zoom({level: newFactor, position: center});
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setZoom
 //----------------------------------------------------------------------------------------------------
@@ -166,7 +164,7 @@ function getZoom(msg)
    result = cy.zoom();
    returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
    console.log(returnMsg);
-   bvHub.send(returnMsg);
+   hub.send(returnMsg);
 
 } // getZoom
 //----------------------------------------------------------------------------------------------------
@@ -174,7 +172,7 @@ function setBackgroundColor(msg)
 {
    var newValue = msg.payload   
    cyDiv.css({"background-color": newValue});
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setZoom
 //----------------------------------------------------------------------------------------------------
@@ -189,7 +187,7 @@ function setNodeLabelRule(msg)
    var controllingAttribute = msg.payload;
    var valueString = "data(" + controllingAttribute + ")";
    cy.style().selector('node').css({content: valueString});
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeLabelRule
 //----------------------------------------------------------------------------------------------------
@@ -200,7 +198,7 @@ function setNodeLabelAlignment(msg)
    cy.style().selector('node').css({"text-halign": horizontalPosition});
    cy.style().selector('node').css({"text-valign": verticalPosition});
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeLabelAlignment
 //----------------------------------------------------------------------------------------------------
@@ -257,7 +255,7 @@ function setNodeSizeRule(msg)
 
    //cy.style().selector('node').css(width: "mapData(count,0,100, 20, 200)");
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeSizeRule
 //----------------------------------------------------------------------------------------------------
@@ -269,7 +267,7 @@ function setNodeColorRule(msg)
    else if (mode == "lookup")
       setNodeColorLookupRule(msg)
    else
-      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+      hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
 
 } // setNodeColorRule
 //----------------------------------------------------------------------------------------------------
@@ -288,7 +286,7 @@ function setNodeColorLookupRule(msg)
      cy.style().selector(selectorString).css({"background-color": color});
      } // for seg
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeColorLookupRule
 //----------------------------------------------------------------------------------------------------
@@ -340,7 +338,7 @@ function setNodeColorInterpolatingRule(msg)
      } // for seg
 
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeColorInterpolatingRule
 //----------------------------------------------------------------------------------------------------
@@ -359,7 +357,7 @@ function setNodeShapeRule(msg)
      cy.style().selector(selectorString).css({"shape": shape});
      } // for seg
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeShapeRule
 //----------------------------------------------------------------------------------------------------
@@ -371,7 +369,7 @@ function setEdgeColorRule(msg)
    else if (mode == "lookup")
       setEdgeColorLookupRule(msg)
    else
-      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+      hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
 
 } // setEdgeColorRule
 //----------------------------------------------------------------------------------------------------
@@ -390,7 +388,7 @@ function setEdgeColorLookupRule(msg)
      cy.style().selector(selectorString).css({"line-color": color});
      } // for seg
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeColorLookupRule
 //----------------------------------------------------------------------------------------------------
@@ -442,7 +440,7 @@ function setEdgeColorInterpolatingRule(msg)
      } // for seg
 
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeColorInterpolatingRule
 //----------------------------------------------------------------------------------------------------
@@ -455,19 +453,19 @@ function setEdgeWidthRule(msg)
    else if (mode == "lookup")
       setEdgeWidthLookupRule(msg)
    else
-      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+      hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
 
 } // setEdgeWidthRule
 //----------------------------------------------------------------------------------------------------
 function setEdgeWidthInterpolatingRule(msg)
 {
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeWidthInterpolatingRule
 //----------------------------------------------------------------------------------------------------
 function setEdgeWidthLookupRule(msg)
 {
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeWidthLookupRule
 //----------------------------------------------------------------------------------------------------
@@ -487,7 +485,7 @@ function setEdgeTargetArrowShapeRule(msg)
 
      } // for seg
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeTargetArrowShapeRule
 //----------------------------------------------------------------------------------------------------
@@ -500,13 +498,13 @@ function setEdgeTargetArrowColorRule(msg)
    else if (mode == "lookup")
       setEdgeTargetArrowColorLookupRule(msg)
    else
-      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+      hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
 
 } // setEdgeTargetArrowColorRule
 //----------------------------------------------------------------------------------------------------
 function setEdgeTargetArrowColorInterpolatingRule(msg)
 {
-   bvHub.send({cmd: msg.callback, status: "not yet implemented", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "not yet implemented", callback: "", payload: ""});
 
 } // setEdgeTargetArrowColorInterpolatingRule
 //----------------------------------------------------------------------------------------------------
@@ -525,13 +523,13 @@ function setEdgeTargetArrowColorLookupRule(msg)
      cy.style().selector(selectorString).css({"target-arrow-color": color});
      } // for seg
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeTargetArrowColorLookupRule
 //----------------------------------------------------------------------------------------------------
 function setEdgeSourceArrowColorInterpolatingRule(msg)
 {
-   bvHub.send({cmd: msg.callback, status: "not yet implemented", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "not yet implemented", callback: "", payload: ""});
 
 } // setEdgeSourceArrowColorInterpolatingRule
 //----------------------------------------------------------------------------------------------------
@@ -550,7 +548,7 @@ function setEdgeSourceArrowShapeRule(msg)
      cy.style().selector(selectorString).css({"source-arrow-shape": shape});
      } // for seg
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeSourceArrowShapeRule
 //----------------------------------------------------------------------------------------------------
@@ -563,9 +561,9 @@ function setEdgeSourceArrowColorRule(msg)
    else if (mode == "lookup")
       setEdgeSourceArrowColorLookupRule(msg)
    else
-      bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+      hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeSourceArrowColorRule
 //----------------------------------------------------------------------------------------------------
@@ -584,13 +582,13 @@ function setEdgeSourceArrowColorLookupRule(msg)
      cy.style().selector(selectorString).css({"source-arrow-color": color});
      } // for seg
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeSourceArrowColorLookupRule
 //----------------------------------------------------------------------------------------------------
 function setEdgeSourceArrowColorInterpolatingRule(msg)
 {
-   bvHub.send({cmd: msg.callback, status: "error", callback: "", payload: "not implemented yet"});
+   hub.send({cmd: msg.callback, status: "error", callback: "", payload: "not implemented yet"});
 
 } // setEdgeSourceArrowColorInterpolatingRule
 //----------------------------------------------------------------------------------------------------
@@ -600,7 +598,7 @@ function getNodeSize(msg)
    var nodeID = msg.payload;
    var filterString = "node[id='" + nodeID + "']";
    var width = cy.filter(filterString).css("width");
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: width});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: width});
 
 } // getNodeSize
 //----------------------------------------------------------------------------------------------------
@@ -609,7 +607,7 @@ function fit(msg)
    console.log("=== fit");
    cy.fit()
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // fit
 //----------------------------------------------------------------------------------------------------
@@ -619,8 +617,8 @@ function layoutStrategies(msg)
    var strategies = ["random", "grid", "circle", "concentric", "breadthfirst", "cose"];
      // not yet working:   "dagre", "cola", "springy";
 
-   console.log("== layoutStrategies bvHub.sending " + strategies.length + " strategies");
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: strategies});
+   console.log("== layoutStrategies hub.sending " + strategies.length + " strategies");
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: strategies});
 
 } // layoutStragegies
 //----------------------------------------------------------------------------------------------------
@@ -630,7 +628,7 @@ function doLayout(msg)
    var strategy = msg.payload;
    cy.layout({name: strategy});
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // doLayout
 //----------------------------------------------------------------------------------------------------
@@ -642,7 +640,7 @@ function getLayout(msg)
                                                               x: n.position().x,
                                                               y: n.position().y}}));
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
 
 } // getLayout
 //----------------------------------------------------------------------------------------------------
@@ -681,7 +679,7 @@ function getPosition(msg)
                                                                 y: n.position().y}}));
       } // else: subset of nodes specified
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
 
 } // getPosition
 //----------------------------------------------------------------------------------------------------
@@ -702,7 +700,7 @@ function setPosition(msg)
    console.log("basic.html, setting position on nodes, count: " + nodeSubset.length);
 
    nodeSubset.positions(function(i, node){return{x: positionObjects[i].x, y: positionObjects[i].y}})
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setPosition
 //----------------------------------------------------------------------------------------------------
@@ -721,7 +719,7 @@ function setLayout(msg)
 
    layout.map(setPosition)
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setLayout
 //----------------------------------------------------------------------------------------------------
@@ -731,7 +729,7 @@ function setDefaultNodeSize(msg)
   cy.style().selector('node').css({"height": newSize});
   cy.style().selector('node').css({"width": newSize});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeSize
 //----------------------------------------------------------------------------------------------------
@@ -740,7 +738,7 @@ function setDefaultNodeWidth(msg)
   var newSize = msg.payload;
   cy.style().selector('node').css({"width": newSize});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeWidth
 //----------------------------------------------------------------------------------------------------
@@ -749,7 +747,7 @@ function setDefaultNodeHeight(msg)
   var newSize = msg.payload;
   cy.style().selector('node').css({"height": newSize});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeHeight
 //----------------------------------------------------------------------------------------------------
@@ -758,7 +756,7 @@ function setDefaultNodeColor(msg)
   var newColor = msg.payload;
   cy.style().selector("node").css({"background-color": newColor});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeColor
 //----------------------------------------------------------------------------------------------------
@@ -767,7 +765,7 @@ function setDefaultNodeShape(msg)
   var newShape = msg.payload;
   cy.style().selector("node").css({"shape": newShape});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeColor
 //----------------------------------------------------------------------------------------------------
@@ -776,7 +774,7 @@ function setDefaultNodeFontColor(msg)
   var color = msg.payload;
   cy.style().selector("node").css({"color": color});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeFontColor
 //----------------------------------------------------------------------------------------------------
@@ -785,7 +783,7 @@ function setDefaultNodeFontSize(msg)
   var newValue = msg.payload;
   cy.style().selector("node").css({"font-size": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeFontSize
 //----------------------------------------------------------------------------------------------------
@@ -794,7 +792,7 @@ function setDefaultNodeBorderWidth(msg)
   var newValue = msg.payload;
   cy.style().selector("node").css({"border-width": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeBorderWidth
 //----------------------------------------------------------------------------------------------------
@@ -803,7 +801,7 @@ function setDefaultNodeBorderColor(msg)
   var newValue = msg.payload;
   cy.style().selector("node").css({"border-color": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeBorderColor
 //----------------------------------------------------------------------------------------------------
@@ -812,7 +810,7 @@ function setDefaultEdgeFontSize(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"font-size": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdge
 //----------------------------------------------------------------------------------------------------
@@ -821,7 +819,7 @@ function setDefaultEdgeTargetArrowShape(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"target-arrow-shape": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeTargetArrowShape
 //----------------------------------------------------------------------------------------------------
@@ -830,7 +828,7 @@ function setDefaultEdgeColor(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"line-color": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdge
 //----------------------------------------------------------------------------------------------------
@@ -839,7 +837,7 @@ function setDefaultEdgeTargetArrowColor(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"target-arrow-color": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdge
 //----------------------------------------------------------------------------------------------------
@@ -848,7 +846,7 @@ function setDefaultEdgeFontSize(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"font-size": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeFontSize
 //----------------------------------------------------------------------------------------------------
@@ -857,7 +855,7 @@ function setDefaultEdgeWidth(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"width": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeWidth
 //----------------------------------------------------------------------------------------------------
@@ -866,7 +864,7 @@ function setDefaultEdgeLineColor(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"line-color": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeLineColor
 //----------------------------------------------------------------------------------------------------
@@ -875,7 +873,7 @@ function setDefaultEdgeFont(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"font-family": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeFont
 //----------------------------------------------------------------------------------------------------
@@ -884,7 +882,7 @@ function setDefaultEdgeFontWeight(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"font-weight": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeFontWeight
 //----------------------------------------------------------------------------------------------------
@@ -893,7 +891,7 @@ function setDefaultEdgeTextOpacity(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"text-opacity": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeTextOpacity
 //----------------------------------------------------------------------------------------------------
@@ -902,7 +900,7 @@ function setDefaultEdgeLineStyle(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"line-style": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeLineStyle
 //----------------------------------------------------------------------------------------------------
@@ -911,7 +909,7 @@ function setDefaultEdgeOpacity(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"opacity": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeOpacity
 //----------------------------------------------------------------------------------------------------
@@ -920,7 +918,7 @@ function setDefaultEdgeSourceArrowColor(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"source-arrow-color": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeSourceArrowColor
 //----------------------------------------------------------------------------------------------------
@@ -929,7 +927,7 @@ function setDefaultEdgeSourceArrowShape(msg)
   var newValue = msg.payload;
   cy.style().selector("edge").css({"source-arrow-shape": newValue});
 
-  bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultEdgeSourceArrayShape
 //----------------------------------------------------------------------------------------------------
@@ -948,7 +946,7 @@ function selectNodes(msg)
    var nodesToSelect = cy.nodes(filterStrings.join());
    nodesToSelect.select()
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // selectedNodes
 //----------------------------------------------------------------------------------------------------
@@ -957,7 +955,7 @@ function clearSelection(msg)
    console.log("==== clearSelection");
    cy.filter("node:selected").unselect()
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // clearSelection
 //----------------------------------------------------------------------------------------------------
@@ -979,7 +977,7 @@ function setGraph(msg)
    //cy.load(graph.elements)
    //cy.add(graph)
 
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
 
 } // setWindowTitle
 //----------------------------------------------------------------------------------------------------
@@ -1000,7 +998,7 @@ function getNodes(msg)
       }
 
    console.log("getNodes returning payload: " + payload);
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
 
 } // getNodes
 //---------------------------------------------------------------------------------------------------
@@ -1021,7 +1019,7 @@ function getSelectedNodes(msg)
       }
 
    console.log("getNodes returning payload: " + payload);
-   bvHub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
 
 } // getNodes
 //---------------------------------------------------------------------------------------------------
@@ -1091,7 +1089,7 @@ function ws_getVizmapNames(msg)
 
    return_msg = {cmd: msg.callback, status: statusMessage, callback: "", payload: names};
 
-   bvHub.send(return_msg);
+   hub.send(return_msg);
 
 } // ws_getVizmapNames
 //----------------------------------------------------------------------------------------------------
@@ -1121,7 +1119,7 @@ function ws_setVizmapByName(msg)
       statusMessage = "error"
 
    msg = {cmd: callback, status: statusMessage, callback:"", payload:statusMessage};
-   // bvHub.send(msg);
+   // hub.send(msg);
 
 
 } // ws_setVizmapByName
@@ -1196,7 +1194,8 @@ demoSimpleNetwork = function(cy)
 } // demoSimpleNetwork
 //----------------------------------------------------------------------------------------------------
 return{
-   init: initialize,
+   setHub: setHub,
+   addMessageHandlers: addMessageHandlers,
    initUI: initializeUI,
    setEdgeRenderingMethod: setEdgeRenderingMethod
    };
@@ -1204,13 +1203,13 @@ return{
 //----------------------------------------------------------------------------------------------------
 }); // RCyjsModule
 
-bvHub = BrowserViz();
+hub = BrowserViz();
 rcy = RCyjsModule();
-rcy.init(bvHub);
+rcy.setHub(hub);
+rcy.addMessageHandlers()
 
-bvHub.addOnDocumentReadyFunction(rcy.initUI);
-bvHub.init();
-bvHub.start();
+hub.addOnDocumentReadyFunction(rcy.initUI);
+hub.start();
 
 </script>
 </script>

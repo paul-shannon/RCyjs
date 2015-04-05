@@ -219,7 +219,6 @@ edgeColors <- list(activates = darkerGreen,
 setEdgeColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors), mode="lookup")
 setEdgeTargetArrowColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors),
                             mode="lookup")
-@ 
 
 edgeTargetShapes <- list(activates = "triangle",
                          inhibits = "tee",
@@ -235,6 +234,8 @@ edgeTargetShapes <- list(activates = "triangle",
 setEdgeTargetArrowShapeRule(rcy, "edgeType", names(edgeTargetShapes), as.character(edgeTargetShapes))
 
 redraw(rcy)
+
+
 @ 
   
 \includegraphics[width=0.8\textwidth]{hypoxiaNetwork.png}

@@ -1,8 +1,8 @@
 Package: RCyjs
 Type: Package
 Title: Display and manipulate graphs in Cytoscape.js
-Version: 0.99.14
-Date: 2015-04-03
+Version: 0.99.17
+Date: 2015-04-05
 Author: Paul Shannon
 Maintainer: Paul Shannon <pshannon@fredhutch.org>
 Depends: R (>= 3.1.1), graph (>= 1.45.0), BrowserViz, BiocGenerics

@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------------------------------------
-cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "basic.html")
+cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
 #----------------------------------------------------------------------------------------------------
 .RCyjs <- setClass ("RCyjsClass", 
                     representation = representation(graph="graph"),

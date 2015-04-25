@@ -5,7 +5,7 @@
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-2.1.1.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-ui-1.11.2.min.js"></script>
    <link   rel="stylesheet" href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery-ui-1.11.2.css">
-   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.3.11.min.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.3.15.min.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery.cytoscape.js-panzoom.js"></script>
    <link   href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery.cytoscape.js-panzoom.css" 
            rel="stylesheet" 
@@ -13,7 +13,7 @@
    <link   href="http://oncoscape.sttrcancer.org/oncoscape/fonts/font-awesome-4.0.3/css/font-awesome.css" 
            rel="stylesheet" 
            type="text/css" />
-   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/BrowserViz.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/BrowserViz-1.1.2.js"></script>
 
 <style>
 
@@ -41,13 +41,6 @@ var RCyjsModule = (function(){
   var hub;
 
 //----------------------------------------------------------------------------------------------------
-//function initialize(bvHubX)
-//{
-//   bvHub = bvHubX;
-//   addMessageHandlers();
-//
-//} // initialize
-//----------------------------------------------------------------------------------------------------
 function setHub(newHub)
 {
    hub = newHub;
@@ -72,6 +65,7 @@ function handleWindowResize ()
 function addMessageHandlers()
 {
    hub.addMessageHandler("setGraph",             setGraph);
+   hub.addMessageHandler("addGraph",             addGraph);
    hub.addMessageHandler("getNodes",             getNodes);
    hub.addMessageHandler("getSelectedNodes",     getSelectedNodes);
 
@@ -99,6 +93,8 @@ function addMessageHandlers()
    hub.addMessageHandler("getNodeSize",          getNodeSize);
    hub.addMessageHandler("getPosition",          getPosition);
    hub.addMessageHandler("setPosition",          setPosition);
+   hub.addMessageHandler("hideAllEdges",         hideAllEdges);
+
 
    hub.addMessageHandler("getLayout",            getLayout);
    hub.addMessageHandler("setLayout",            setLayout);
@@ -208,8 +204,8 @@ function setNodeSizeRule(msg)
    console.log("--- setNodeSizeRule: " + controllingAttribute);
    var controlPoints = msg.payload.controlPoints;
    var nodeSizes = msg.payload.nodeSizes;
-   console.log(controlPoints);
-   console.log(nodeSizes);
+   //console.log(controlPoints);
+   //console.log(nodeSizes);
 
       // the controlPoints describe 1 or more segments, each defined by successive overlapping
       // pairs.  thus, control points of 0,1,2,3 define 3 segments >=0 <1, >= 1 <2, >= 2 <=3
@@ -245,15 +241,10 @@ function setNodeSizeRule(msg)
                               "[" + controllingAttribute + upperBoundOperator  + maxVal + "]";
      var mappingString = "mapData(" + controllingAttribute + "," + minVal + "," + maxVal + 
                                                            "," + minSize + "," + maxSize + ")";
-     console.log("selectorString: " + selectorString);
-     console.log("mapping string: " + mappingString);
 
-     //selectorString = 'node';
      cy.style().selector(selectorString).css({width: mappingString});
      cy.style().selector(selectorString).css({height: mappingString});
      } // for seg
-
-   //cy.style().selector('node').css(width: "mapData(count,0,100, 20, 200)");
 
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -465,6 +456,19 @@ function setEdgeWidthInterpolatingRule(msg)
 //----------------------------------------------------------------------------------------------------
 function setEdgeWidthLookupRule(msg)
 {
+   var controllingAttribute = msg.payload.attribute;
+   console.log("--- setEdgeWidthLookupRule: " + controllingAttribute);
+   var states = msg.payload.controlPoints;
+   var widths = msg.payload.widths;
+
+   for(var i=0; i < states.length; i++){
+     var width = widths[i];
+     var state = states[i];
+     var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
+     console.log("selectorString: " + selectorString);
+     cy.style().selector(selectorString).css({"width": width});
+     } // for seg
+
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeWidthLookupRule
@@ -704,6 +708,15 @@ function setPosition(msg)
 
 } // setPosition
 //----------------------------------------------------------------------------------------------------
+function hideAllEdges(msg)
+{
+   console.log("==== hideAllEdges");
+   cy.edges().hide();
+
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setPosition
+//----------------------------------------------------------------------------------------------------
 function setLayout(msg)
 {
    console.log("==== setLayout");
@@ -936,6 +949,10 @@ function selectNodes(msg)
    console.log("==== selectNodes");
    console.log(msg.payload);
    var nodeIDs = msg.payload;
+
+   if(typeof(nodeIDs) == "string")
+      nodeIDs = [nodeIDs];
+
    var filterStrings = [];
 
    for(var i=0; i < nodeIDs.length; i++){
@@ -969,11 +986,11 @@ function getNodeLabel(msg)
 function setGraph(msg)
 {
    console.log("in function setGraph");
-   console.log(msg.payload);
+   //console.log(msg.payload);
    graph = JSON.parse(msg.payload);
    console.log("setGraph calling createCytoscapeWindow");
    cy = createCytoscapeWindow(graph)
-   console.log("setGraph calling createCytoscapeWindow");
+   console.log("setGraph after createCytoscapeWindow");
    //cy.load(graph.elements)
    //cy.add(graph)
 
@@ -1064,6 +1081,20 @@ function addEdge(nodeA_id, nodeB_id)
   return(obj.id());
 
 } // addEdge
+//----------------------------------------------------------------------------------------------------
+function addGraph(msg)
+{
+  console.log("=== entering addGraph");
+  network = JSON.parse(msg.payload);
+  console.log("adding graph of " + network.elements.nodes.length + " nodes and " 
+                                 + network.elements.edges.length + " edges.");
+  obj = cy.add(network.elements)
+  console.log("after add")
+
+  return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+  hub.send(return_msg);
+
+} // addGraph
 //----------------------------------------------------------------------------------------------------
 function getVizmapNames()
 {

@@ -2,6 +2,7 @@ exportClasses(RCyjsClass)
 
 exportMethods(
    setGraph,
+   addGraph,
    getNodes,
 
    setDefaultNodeSize,
@@ -55,6 +56,7 @@ exportMethods(
    fitContent,
    fitSelectedContent,
    selectNodes,
+   hideAllEdges,
    clearSelection,
    getZoom,
    setZoom,

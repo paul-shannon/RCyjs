@@ -9,6 +9,7 @@ cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
 
 #----------------------------------------------------------------------------------------------------
 setGeneric('setGraph',            signature='obj', function(obj, graph) standardGeneric ('setGraph'))
+setGeneric('addGraph',            signature='obj', function(obj, graph) standardGeneric ('addGraph'))
 
 setGeneric('getNodes',            signature='obj', function(obj) standardGeneric ('getNodes'))
 setGeneric('getSelectedNodes',    signature='obj', function(obj) standardGeneric ('getSelectedNodes'))
@@ -42,6 +43,7 @@ setGeneric('setBackgroundColor',  signature='obj', function(obj, newValue) stand
 setGeneric('fitContent',          signature='obj', function(obj) standardGeneric('fitContent'))
 setGeneric('fitSelectedContent',  signature='obj', function(obj) standardGeneric('fitSelectedContent'))
 setGeneric('selectNodes',         signature='obj', function(obj, nodeIDs) standardGeneric('selectNodes'))
+setGeneric('hideAllEdges',        signature='obj', function(obj) standardGeneric('hideAllEdges'))
 
 setGeneric("setDefaultNodeSize",  signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeSize'))
 setGeneric("setDefaultNodeWidth", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeWidth'))
@@ -102,6 +104,23 @@ setMethod('setGraph', 'RCyjsClass',
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
+     getBrowserResponse(obj);
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('addGraph', 'RCyjsClass',
+
+  function (obj, graph) {
+     printf("RCyjs::addGraph");
+     print(graph)
+     g.json <- as.character(biocGraphToCytoscapeJSON(graph))
+     printf("about to send g.json");
+     send(obj, list(cmd="addGraph", callback="handleResponse", status="request",
+                    payload=g.json))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     printf("browserResponseReady")
      getBrowserResponse(obj);
      })
 
@@ -488,6 +507,18 @@ setMethod('selectNodes', 'RCyjsClass',
   function (obj, nodeIDs) {
      send(obj, list(cmd="selectNodes", callback="handleResponse", status="request",
                     payload=nodeIDs))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('hideAllEdges', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="hideAllEdges", callback="handleResponse", status="request",
+                    payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }

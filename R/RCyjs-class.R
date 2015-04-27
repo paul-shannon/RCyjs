@@ -502,6 +502,18 @@ setMethod('fitContent', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
+setMethod('fitSelectedContent', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="fitSelected", callback="handleResponse", status="request",
+                                  payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
 setMethod('selectNodes', 'RCyjsClass',
 
   function (obj, nodeIDs) {

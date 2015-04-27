@@ -85,6 +85,7 @@ function addMessageHandlers()
 
    hub.addMessageHandler("redraw",               redraw);
    hub.addMessageHandler("fit",                  fit);
+   hub.addMessageHandler("fitSelected",          fitSelected);
    hub.addMessageHandler("getZoom",              getZoom);
    hub.addMessageHandler("setZoom",              setZoom);
    hub.addMessageHandler("setBackgroundColor",   setBackgroundColor);
@@ -142,6 +143,24 @@ function fit(msg)
 {
    cy.fit()
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // fit
+//----------------------------------------------------------------------------------------------------
+function fitSelected(msg)
+{
+   var selection = cy.filter('node:selected');
+   if(selection.length == 0){
+     status = failure;
+     payload = "no nodes currently selected"
+     }
+  else{
+    cy.fit(selection)
+    status = success;
+    payload = "";
+    }
+    
+  hub.send({cmd: msg.callback, status: status, callback: "", payload: payload});
+
 
 } // fit
 //----------------------------------------------------------------------------------------------------
@@ -344,7 +363,7 @@ function setNodeShapeRule(msg)
      var shape = nodeShapes[i];
      var state = states[i];
      var selectorString = "node[" + controllingAttribute + "='"  + state + "']";
-     console.log("selectorString: " + selectorString);
+     console.log("selectorString: " + selectorString + "  shape: " + shape);
      cy.style().selector(selectorString).css({"shape": shape});
      } // for seg
 

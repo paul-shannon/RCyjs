@@ -99,6 +99,7 @@ function addMessageHandlers()
 
    hub.addMessageHandler("getLayout",            getLayout);
    hub.addMessageHandler("setLayout",            setLayout);
+   hub.addMessageHandler("getJSON",              getJSON);
    hub.addMessageHandler("selectNodes",          selectNodes);
    hub.addMessageHandler("clearSelection",       clearSelection);
 
@@ -666,6 +667,14 @@ function getLayout(msg)
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
 
 } // getLayout
+//----------------------------------------------------------------------------------------------------
+function getJSON(msg)
+{
+   console.log("=== getJSON");
+   json = JSON.stringify(cy.json());
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: json});
+
+} // getJSON
 //----------------------------------------------------------------------------------------------------
 function getPosition(msg)
 {
@@ -1268,4 +1277,3 @@ hub.start();
 <div id="cyDiv"></div>
 </body>
 </html>
-

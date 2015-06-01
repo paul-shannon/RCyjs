@@ -36,6 +36,7 @@ setGeneric('getPosition',         signature='obj', function(obj, nodeIDs=NA) sta
 setGeneric('setPosition',         signature='obj', function(obj, tbl.pos) standardGeneric('setPosition'))
 setGeneric('getLayout',           signature='obj', function(obj) standardGeneric('getLayout'))
 setGeneric('saveLayout',          signature='obj', function(obj, filename) standardGeneric('saveLayout'))
+setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
 setGeneric('restoreLayout',       signature='obj', function(obj, filename) standardGeneric('restoreLayout'))
 setGeneric('setZoom',             signature='obj', function(obj, newValue) standardGeneric('setZoom'))
 setGeneric('getZoom',             signature='obj', function(obj) standardGeneric('getZoom'))
@@ -459,6 +460,18 @@ setMethod('restoreLayout', 'RCyjsClass',
      load(filename)
      if(!all(is.na(tbl.layout)))
         x <- setPosition(obj, tbl.layout)
+     })
+          
+#----------------------------------------------------------------------------------------------------
+setMethod('getJSON', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="getJSON", callback="handleResponse", status="request",
+                                  payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     getBrowserResponse(obj)
      })
           
 #----------------------------------------------------------------------------------------------------

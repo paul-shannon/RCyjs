@@ -53,6 +53,7 @@ exportMethods(
    getLayout,
    saveLayout,
    restoreLayout,
+   getJSON,
    fitContent,
    fitSelectedContent,
    selectNodes,

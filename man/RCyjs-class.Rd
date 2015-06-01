@@ -187,6 +187,10 @@
 \alias{restoreLayout,RCyjsClass-method}
 \alias{\S4method{restoreLayout}{RCyjsClass}}
 
+\alias{getJSON}
+\alias{getJSON,RCyjsClass-method}
+\alias{\S4method{getJSON}{RCyjsClass}}
+
 \alias{fitContent}
 \alias{fitContent,RCyjsClass-method}
 \alias{\S4method{fitContent}{RCyjsClass}}
@@ -272,6 +276,7 @@ edaNames(graph)
 \S4method{getLayout}{RCyjsClass}(obj)
 \S4method{saveLayout}{RCyjsClass}(obj, filename)
 \S4method{restoreLayout}{RCyjsClass}(obj, filename)
+\S4method{getJSON}{RCyjsClass}(obj)
 \S4method{setZoom}{RCyjsClass}(obj, newValue)
 \S4method{getZoom}{RCyjsClass}(obj)
 \S4method{setBackgroundColor}{RCyjsClass}(obj, newValue)

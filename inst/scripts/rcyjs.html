@@ -31,6 +31,7 @@
 <script>
 //----------------------------------------------------------------------------------------------------
 var cy;  // keep this outside of module scope so it can be manipulated in the console
+var xxx;
 
 var RCyjsModule = (function(){
 
@@ -149,14 +150,14 @@ function fit(msg)
 //----------------------------------------------------------------------------------------------------
 function fitSelected(msg)
 {
-   var selection = cy.filter('node:selected');
-   if(selection.length == 0){
+   var selectedNodes = cy.filter('node:selected');
+   if(selectedNodes.length == 0){
      status = failure;
      payload = "no nodes currently selected"
      }
   else{
-    cy.fit(selection)
-    status = success;
+    cy.fit(selectedNodes)
+    status = "success";
     payload = "";
     }
     
@@ -1113,9 +1114,15 @@ function addEdge(nodeA_id, nodeB_id)
 function addGraph(msg)
 {
   console.log("=== entering addGraph");
-  network = JSON.parse(msg.payload);
+  var network = JSON.parse(msg.payload);
   console.log("adding graph of " + network.elements.nodes.length + " nodes and " 
                                  + network.elements.edges.length + " edges.");
+
+    // new nodes must have an explicit position
+  for(var n=0; n < network.elements.nodes.length; n++){
+     network.elements.nodes[n].position = {x: 0, y:0};
+     }
+
   obj = cy.add(network.elements)
   console.log("after add")
 

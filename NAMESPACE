@@ -48,6 +48,7 @@ exportMethods(
    redraw,
    layoutStrategies,
    layout,
+   layoutSelectionInGrid,
    getPosition,
    setPosition,
    getLayout,
@@ -58,10 +59,14 @@ exportMethods(
    fitSelectedContent,
    selectNodes,
    hideAllEdges,
+   showAllEdges,
+   hideEdges,
+   showEdges,
    clearSelection,
    getZoom,
    setZoom,
-   setBackgroundColor
+   setBackgroundColor,
+   sfn
    )
 
 export(

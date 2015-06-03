@@ -167,6 +167,18 @@
 \alias{hideAllEdges,RCyjsClass-method}
 \alias{\S4method{hideAllEdges}{RCyjsClass}}
 
+\alias{hideEdges}
+\alias{hideEdges,RCyjsClass-method}
+\alias{\S4method{hideEdges}{RCyjsClass}}
+
+\alias{showAllEdges}
+\alias{showAllEdges,RCyjsClass-method}
+\alias{\S4method{showAllEdges}{RCyjsClass}}
+
+\alias{showEdges}
+\alias{showEdges,RCyjsClass-method}
+\alias{\S4method{showEdges}{RCyjsClass}}
+
 \alias{layoutStrategies}
 \alias{layoutStrategies,RCyjsClass-method}
 \alias{\S4method{layoutStrategies}{RCyjsClass}}
@@ -210,6 +222,10 @@
 \alias{selectNodes}
 \alias{selectNodes,RCyjsClass-method}
 \alias{\S4method{selectNodes}{RCyjsClass}}
+
+\alias{sfn}
+\alias{sfn,RCyjsClass-method}
+\alias{\S4method{sfn}{RCyjsClass}}
 
 \alias{clearSelection}
 \alias{clearSelection,RCyjsClass-method}
@@ -268,6 +284,9 @@ edaNames(graph)
 \S4method{clearSelection}{RCyjsClass}(obj)
 \S4method{redraw}{RCyjsClass}(obj)
 \S4method{hideAllEdges}{RCyjsClass}(obj)
+\S4method{hideEdges}{RCyjsClass}(obj, edgeType)
+\S4method{showAllEdges}{RCyjsClass}(obj)
+\S4method{showEdges}{RCyjsClass}(obj, edgeType)
 \S4method{setNodeLabelRule}{RCyjsClass}(obj, attribute)
 \S4method{setNodeLabelAlignment}{RCyjsClass}(obj, horizontal, vertical)
 \S4method{setNodeSizeRule}{RCyjsClass}(obj, attribute, control.points, node.sizes)
@@ -293,6 +312,7 @@ edaNames(graph)
 \S4method{fitContent}{RCyjsClass}(obj)
 \S4method{fitSelectedContent}{RCyjsClass}(obj)
 \S4method{selectNodes}{RCyjsClass}(obj, nodeIDs)
+\S4method{sfn}{RCyjsClass}(obj)
 \S4method{setDefaultNodeSize}{RCyjsClass}(obj, newValue)
 \S4method{setDefaultNodeHeight}{RCyjsClass}(obj, newValue)
 \S4method{setDefaultNodeShape}{RCyjsClass}(obj, newValue)

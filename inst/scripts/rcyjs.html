@@ -84,24 +84,30 @@ function addMessageHandlers()
    hub.addMessageHandler("setEdgeSourceArrowShapeRule",  setEdgeSourceArrowShapeRule);
    hub.addMessageHandler("setEdgeSourceArrowColorRule",  setEdgeSourceArrowColorRule);
 
-   hub.addMessageHandler("redraw",               redraw);
-   hub.addMessageHandler("fit",                  fit);
-   hub.addMessageHandler("fitSelected",          fitSelected);
-   hub.addMessageHandler("getZoom",              getZoom);
-   hub.addMessageHandler("setZoom",              setZoom);
-   hub.addMessageHandler("setBackgroundColor",   setBackgroundColor);
-   hub.addMessageHandler("layoutStrategies",     layoutStrategies);
-   hub.addMessageHandler("doLayout",             doLayout);
+   hub.addMessageHandler("redraw",                redraw);
+   hub.addMessageHandler("fit",                   fit);
+   hub.addMessageHandler("fitSelected",           fitSelected);
+   hub.addMessageHandler("getZoom",               getZoom);
+   hub.addMessageHandler("setZoom",               setZoom);
+   hub.addMessageHandler("setBackgroundColor",    setBackgroundColor);
+   hub.addMessageHandler("layoutStrategies",      layoutStrategies);
+   hub.addMessageHandler("doLayout",              doLayout);
+   hub.addMessageHandler("layoutSelectionInGrid", layoutSelectionInGrid);
+
    hub.addMessageHandler("getNodeSize",          getNodeSize);
    hub.addMessageHandler("getPosition",          getPosition);
    hub.addMessageHandler("setPosition",          setPosition);
    hub.addMessageHandler("hideAllEdges",         hideAllEdges);
+   hub.addMessageHandler("showAllEdges",         showAllEdges);
+   hub.addMessageHandler("hideEdges",            hideEdges);
+   hub.addMessageHandler("showEdges",            showEdges);
 
 
    hub.addMessageHandler("getLayout",            getLayout);
    hub.addMessageHandler("setLayout",            setLayout);
    hub.addMessageHandler("getJSON",              getJSON);
    hub.addMessageHandler("selectNodes",          selectNodes);
+   hub.addMessageHandler("sfn",                  sfn);
    hub.addMessageHandler("clearSelection",       clearSelection);
 
    hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor);
@@ -152,7 +158,7 @@ function fitSelected(msg)
 {
    var selectedNodes = cy.filter('node:selected');
    if(selectedNodes.length == 0){
-     status = failure;
+     status = "failure";
      payload = "no nodes currently selected"
      }
   else{
@@ -659,8 +665,6 @@ function doLayout(msg)
 //----------------------------------------------------------------------------------------------------
 function getLayout(msg)
 {
-   console.log("=== getLayout");
-   //layout = JSON.stringify(cy.nodes().map(function(n){return{id:n.id(), position:n.position()}}));
    layout = JSON.stringify(cy.nodes().map(function(n){return{id: n.id(), 
                                                               x: n.position().x,
                                                               y: n.position().y}}));
@@ -668,6 +672,21 @@ function getLayout(msg)
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
 
 } // getLayout
+//----------------------------------------------------------------------------------------------------
+function layoutSelectionInGrid(msg)
+{
+  var x = msg.payload.x;
+  var y = msg.payload.y;
+  var w = msg.payload.w
+  var h = msg.payload.h
+
+  var box = {x1: x, y1: y, w: w, h: h }
+
+  cy.filter("node:selected").layout({ name: 'grid', boundingBox: box });
+
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // layoutSelectinInfGrid
 //----------------------------------------------------------------------------------------------------
 function getJSON(msg)
 {
@@ -739,12 +758,43 @@ function setPosition(msg)
 //----------------------------------------------------------------------------------------------------
 function hideAllEdges(msg)
 {
-   console.log("==== hideAllEdges");
    cy.edges().hide();
 
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setPosition
+} // hideAllEdges
+//----------------------------------------------------------------------------------------------------
+function showAllEdges(msg)
+{
+   cy.edges().show();
+
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // showAllEdges
+//----------------------------------------------------------------------------------------------------
+function hideEdges(msg)
+{
+   var edgeType = msg.payload;
+      // emulate this, constructed on the fly:  cy.edges('[edgeType="chromosome"]').hide()
+   filterString = '[edgeType="' + edgeType + '"]';
+   console.log("filterString: " + filterString);
+   cy.edges(filterString).hide();
+
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // hideEdges
+//----------------------------------------------------------------------------------------------------
+function showEdges(msg)
+{
+   var edgeType = msg.payload;
+      // emulate this, constructed on the fly:  cy.edges('[edgeType="chromosome"]').show()
+   filterString = '[edgeType="' + edgeType + '"]';
+   console.log("filterString: " + filterString);
+   cy.edges(filterString).show();
+
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // showEdges
 //----------------------------------------------------------------------------------------------------
 function setLayout(msg)
 {
@@ -996,6 +1046,13 @@ function selectNodes(msg)
 
 } // selectedNodes
 //----------------------------------------------------------------------------------------------------
+function sfn(msg)
+{
+   cy.nodes(':selected').neighborhood().nodes().select()
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // sfn
+//----------------------------------------------------------------------------------------------------
 function clearSelection(msg)
 {
    console.log("==== clearSelection");
@@ -1022,7 +1079,7 @@ function setGraph(msg)
    console.log("setGraph after createCytoscapeWindow");
    //cy.load(graph.elements)
    //cy.add(graph)
-
+ 
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
 
 } // setWindowTitle
@@ -1124,6 +1181,7 @@ function addGraph(msg)
      }
 
   obj = cy.add(network.elements)
+  cy.nodes().map(function(node){node.data({degree: node.degree()})});
   console.log("after add")
 
   return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
@@ -1244,6 +1302,24 @@ function createCytoscapeWindow(graph) {
 
 } // createCytoscapeWindow
 //----------------------------------------------------------------------------------------------------
+// requires an http server at localhost:8000, started in the directory where filename is found
+function loadStyle(filename)
+{
+   s = "http://localhost:8000/" + filename;
+   console.log("=== about to getScript on " + s);
+
+   $.getScript(s)
+     .done(function(script, textStatus) {
+        console.log(textStatus);
+        //console.log("style elements " + layout.length);
+        cy.style(vizmap);
+       })
+    .fail(function( jqxhr, settings, exception ) {
+       console.log("getScript error trying to read " + filename);
+      });
+
+} // loadStyle
+//----------------------------------------------------------------------------------------------------
 function setEdgeRenderingMethod(newMethod)
 {
   cy.edges().css({"curve-style": newMethod});
@@ -1263,7 +1339,8 @@ return{
    setHub: setHub,
    addMessageHandlers: addMessageHandlers,
    initUI: initializeUI,
-   setEdgeRenderingMethod: setEdgeRenderingMethod
+   setEdgeRenderingMethod: setEdgeRenderingMethod,
+   loadStyle: loadStyle
    };
 
 //----------------------------------------------------------------------------------------------------

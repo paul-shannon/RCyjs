@@ -32,6 +32,7 @@ setGeneric('setEdgeSourceArrowColorRule',   signature='obj', function(obj, attri
 
 setGeneric('layout',              signature='obj', function(obj, strategy) standardGeneric('layout'))
 setGeneric('layoutStrategies',    signature='obj', function(obj) standardGeneric('layoutStrategies'))
+setGeneric('layoutSelectionInGrid', signature='obj', function(obj, x, y, w, h) standardGeneric('layoutSelectionInGrid'))
 setGeneric('getPosition',         signature='obj', function(obj, nodeIDs=NA) standardGeneric('getPosition'))
 setGeneric('setPosition',         signature='obj', function(obj, tbl.pos) standardGeneric('setPosition'))
 setGeneric('getLayout',           signature='obj', function(obj) standardGeneric('getLayout'))
@@ -44,7 +45,12 @@ setGeneric('setBackgroundColor',  signature='obj', function(obj, newValue) stand
 setGeneric('fitContent',          signature='obj', function(obj) standardGeneric('fitContent'))
 setGeneric('fitSelectedContent',  signature='obj', function(obj) standardGeneric('fitSelectedContent'))
 setGeneric('selectNodes',         signature='obj', function(obj, nodeIDs) standardGeneric('selectNodes'))
+setGeneric('sfn',                 signature='obj', function(obj) standardGeneric('sfn'))
+
 setGeneric('hideAllEdges',        signature='obj', function(obj) standardGeneric('hideAllEdges'))
+setGeneric('showAllEdges',        signature='obj', function(obj) standardGeneric('showAllEdges'))
+setGeneric('hideEdges',           signature='obj', function(obj, edgeType) standardGeneric('hideEdges'))
+setGeneric('showEdges',           signature='obj', function(obj, edgeType) standardGeneric('showEdges'))
 
 setGeneric("setDefaultNodeSize",  signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeSize'))
 setGeneric("setDefaultNodeWidth", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeWidth'))
@@ -408,6 +414,20 @@ setMethod('layout', 'RCyjsClass',
      })
           
 #----------------------------------------------------------------------------------------------------
+setMethod('layoutSelectionInGrid', 'RCyjsClass',
+
+   function(obj, x, y, w, h){
+     payload <- list(x=x, y=y, w=w, h=h)
+     send(obj, list(cmd="layoutSelectionInGrid", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     getBrowserResponse(obj)     
+     
+     })
+
+#----------------------------------------------------------------------------------------------------
 setMethod('getPosition', 'RCyjsClass',
 
   function (obj, nodeIDs=NA) {
@@ -539,11 +559,58 @@ setMethod('selectNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
+setMethod('sfn', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="sfn", callback="handleResponse", status="request", payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
 setMethod('hideAllEdges', 'RCyjsClass',
 
   function (obj) {
      send(obj, list(cmd="hideAllEdges", callback="handleResponse", status="request",
                     payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('showAllEdges', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="showAllEdges", callback="handleResponse", status="request",
+                    payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('hideEdges', 'RCyjsClass',
+
+  function (obj, edgeType) {
+     send(obj, list(cmd="hideEdges", callback="handleResponse", status="request",
+                    payload=edgeType))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('showEdges', 'RCyjsClass',
+
+  function (obj, edgeType) {
+     send(obj, list(cmd="showEdges", callback="handleResponse", status="request",
+                    payload=edgeType))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }

@@ -3,8 +3,13 @@ exportClasses(RCyjsClass)
 exportMethods(
    setGraph,
    addGraph,
+   httpAddGraph,
+   httpSetStyle,
    getNodes,
 
+   setNodeAttributes,
+   setEdgeAttributes,
+    
    setDefaultNodeSize,
    setDefaultNodeWidth,
    setDefaultNodeHeight,
@@ -38,6 +43,7 @@ exportMethods(
    setNodeColorRule,
    setNodeShapeRule,
     
+   setEdgeStyle,
    setEdgeColorRule,
    setEdgeWidthRule,
    setEdgeTargetArrowShapeRule,
@@ -58,6 +64,9 @@ exportMethods(
    fitContent,
    fitSelectedContent,
    selectNodes,
+   invertNodeSelection,
+   hideSelectedNodes,
+   deleteSelectedNodes,
    hideAllEdges,
    showAllEdges,
    hideEdges,

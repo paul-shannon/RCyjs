@@ -51,13 +51,17 @@ runTests = function()
    test.zoom()
    #test.bigGraph()    
 
+   test.setNodeAttributes();
+   test.setEdgeAttributes();
+
 } # run.tests
 #----------------------------------------------------------------------------------------------------
 # a utility: create and return simple instance, for further experimentation
-demo <- function()
+demo <- function(portRange=9047:9057)
 {
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=portRange, quiet=TRUE, graph=g, hideEdges=TRUE);
+   
    checkTrue(ready(rcy))
 
    title <- "demo"
@@ -863,6 +867,19 @@ test.setEdgeDefaults <- function()
    closeWebSocket(rcy)
  
 } # test.setEdgeDefaults
+#----------------------------------------------------------------------------------------------------
+test.setNodeAttributes <- function()
+{
+  rcy <- demo()
+     # originally lfc is c(-3, 0, 3)
+  setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(0, 0, 0)) 
+  
+} # test.setNodeAttributes
+#----------------------------------------------------------------------------------------------------
+test.setEdgeAttributes <- function()
+{
+
+} # test.setEdgeAttributes
 #----------------------------------------------------------------------------------------------------
 demo.hypoxia <- function()
 {

@@ -8,12 +8,20 @@ cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
                     )
 
 #----------------------------------------------------------------------------------------------------
-setGeneric('setGraph',            signature='obj', function(obj, graph) standardGeneric ('setGraph'))
+setGeneric('setGraph',            signature='obj', function(obj, graph, hideEdges=FALSE) standardGeneric ('setGraph'))
 setGeneric('addGraph',            signature='obj', function(obj, graph) standardGeneric ('addGraph'))
+setGeneric('httpAddGraph',        signature='obj', function(obj, graph) standardGeneric ('httpAddGraph'))
+setGeneric('httpSetStyle',        signature='obj', function(obj, filename) standardGeneric ('httpSetStyle'))
 
 setGeneric('getNodes',            signature='obj', function(obj) standardGeneric ('getNodes'))
+setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, nodes, values) standardGeneric('setNodeAttributes'))
+setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, edges, values) standardGeneric('setEdgeAttributes'))
+
 setGeneric('getSelectedNodes',    signature='obj', function(obj) standardGeneric ('getSelectedNodes'))
 setGeneric('clearSelection',      signature='obj', function(obj) standardGeneric ('clearSelection'))
+setGeneric('invertNodeSelection', signature='obj', function(obj) standardGeneric ('invertNodeSelection'))
+setGeneric('hideSelectedNodes',   signature='obj', function(obj) standardGeneric ('hideSelectedNodes'))
+setGeneric('deleteSelectedNodes', signature='obj', function(obj) standardGeneric ('deleteSelectedNodes'))
 setGeneric('redraw',              signature='obj', function(obj) standardGeneric ('redraw'))
 setGeneric('setNodeLabelRule',    signature='obj', function(obj, attribute) standardGeneric ('setNodeLabelRule'))
 setGeneric('setNodeLabelAlignment',  signature='obj', function(obj, horizontal, vertical) standardGeneric ('setNodeLabelAlignment'))
@@ -21,6 +29,7 @@ setGeneric('setNodeSizeRule',     signature='obj', function(obj, attribute, cont
 setGeneric('setNodeColorRule',    signature='obj', function(obj, attribute, control.points, colors, mode) standardGeneric('setNodeColorRule'))
 setGeneric('setNodeShapeRule',    signature='obj', function(obj, attribute, control.points, node.shapes) standardGeneric('setNodeShapeRule'))
 
+setGeneric('setEdgeStyle',        signature='obj', function(obj, mode) standardGeneric('setEdgeStyle'))
 setGeneric('setEdgeColorRule',    signature='obj', function(obj, attribute, control.points, colors, mode) standardGeneric('setEdgeColorRule'))
 setGeneric('setEdgeWidthRule',    signature='obj', function(obj, attribute, control.points, widths, mode) standardGeneric('setEdgeWidthRule'))
 
@@ -80,7 +89,7 @@ setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newV
 
 #----------------------------------------------------------------------------------------------------
 # constructor
-RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), quiet=TRUE)
+RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
 {
   
   obj <- .RCyjs(BrowserViz(portRange, host, title, quiet, browserFile=cyjsBrowserFile), graph=graph)
@@ -89,12 +98,12 @@ RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), q
       Sys.sleep(.1)
       }
    if(!quiet) {
-      message(sprintf("setGraph got browser response"))
+      message(sprintf("BrowserViz ctor called from RCyjs ctor got browser response"))
       print(getBrowserResponse(obj))
       }
 
    if(length(nodes(graph)) > 0)
-       setGraph(obj, graph)
+      setGraph(obj, graph, hideEdges=hideEdges)
       
    obj
 
@@ -102,12 +111,12 @@ RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), q
 #----------------------------------------------------------------------------------------------------
 setMethod('setGraph', 'RCyjsClass',
 
-  function (obj, graph) {
+  function (obj, graph, hideEdges=FALSE) {
      g.json <- as.character(biocGraphToCytoscapeJSON(graph))
      #printf("RCyjs.setGraph sending g.json with %d chars", nchar(g.json))
      
      send(obj, list(cmd="setGraph", callback="handleResponse", status="request",
-                                  payload=g.json))
+                    payload=list(graph=g.json, hideEdges=hideEdges)))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -121,9 +130,41 @@ setMethod('addGraph', 'RCyjsClass',
      printf("RCyjs::addGraph");
      print(graph)
      g.json <- as.character(biocGraphToCytoscapeJSON(graph))
-     printf("about to send g.json");
+     printf("about to send g.json: %d chars", nchar(g.json));
      send(obj, list(cmd="addGraph", callback="handleResponse", status="request",
                     payload=g.json))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     printf("browserResponseReady")
+     getBrowserResponse(obj);
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('httpAddGraph', 'RCyjsClass',
+
+  function (obj, graph) {
+     printf("RCyjs::httpAddGraph");
+     print(graph)
+     g.json <- paste("network = ", as.character(biocGraphToCytoscapeJSON(graph)))
+     filename <- "g.json"
+     write(g.json, file=filename)
+     send(obj, list(cmd="httpAddGraph", callback="handleResponse", status="request",
+                    payload=filename))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     printf("browserResponseReady")
+     getBrowserResponse(obj);
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('httpSetStyle', 'RCyjsClass',
+
+  function (obj, filename) {
+     printf("RCyjs::httpSetStyle");
+     send(obj, list(cmd="httpSetStyle", callback="handleResponse", status="request",
+                    payload=filename))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -176,6 +217,84 @@ setMethod('getSelectedNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
+setMethod('invertNodeSelection', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="invertNodeSelection", callback="handleResponse", status="request",
+                    payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       return("")
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('hideSelectedNodes', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="hideSelectedNodes", callback="handleResponse", status="request",
+                    payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       return("")
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('deleteSelectedNodes', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="deleteSelectedNodes", callback="handleResponse", status="request",
+                    payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       return("")
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('setNodeAttributes', 'RCyjsClass',
+
+   function(obj, attribute, nodes, values){
+
+     if (length (nodes) == 0)
+       return ()
+     
+     if(length(values) == 1)
+        values <- rep(values, length(nodes))
+
+     payload <- list(attribute=attribute, nodes=nodes, values=values)
+     send(obj, list(cmd="setNodeAttributes", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       invisible("")
+     }) # setNodeAttributes
+
+#------------------------------------------------------------------------------------------------------------------------
+setMethod('setEdgeAttributes', 'RCyjsClass',
+
+   function(obj, attribute, edges, values){
+     }) # setEdgeAttributes
+
+#------------------------------------------------------------------------------------------------------------------------
 setMethod('redraw', 'RCyjsClass',
 
   function (obj) {
@@ -262,6 +381,20 @@ setMethod('setNodeShapeRule', 'RCyjsClass',
                      mode=mode)
      send(obj, list(cmd="setNodeShapeRule", callback="handleResponse", status="request",
                                   payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));  # the empty string.
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('setEdgeStyle', 'RCyjsClass',
+
+  function (obj, mode) {
+
+     payload <- mode
+     send(obj, list(cmd="setEdgeStyle", callback="handleResponse", status="request",
+                    payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }

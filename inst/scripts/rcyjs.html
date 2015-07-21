@@ -5,7 +5,9 @@
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-2.1.1.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-ui-1.11.2.min.js"></script>
    <link   rel="stylesheet" href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery-ui-1.11.2.css">
-   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.3.15.min.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.4.4.min.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/arbor.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/springy.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery.cytoscape.js-panzoom.js"></script>
    <link   href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery.cytoscape.js-panzoom.css" 
            rel="stylesheet" 
@@ -66,7 +68,11 @@ function handleWindowResize ()
 function addMessageHandlers()
 {
    hub.addMessageHandler("setGraph",             setGraph);
+   hub.addMessageHandler("setNodeAttributes",    setNodeAttributes);
+   hub.addMessageHandler("setEdgeAttributes",    setEdgeAttributes);
    hub.addMessageHandler("addGraph",             addGraph);
+   hub.addMessageHandler("httpAddGraph",         httpAddGraph);
+   hub.addMessageHandler("httpSetStyle",         httpSetStyle);
    hub.addMessageHandler("getNodes",             getNodes);
    hub.addMessageHandler("getSelectedNodes",     getSelectedNodes);
 
@@ -78,6 +84,7 @@ function addMessageHandlers()
    hub.addMessageHandler("setNodeShapeRule",     setNodeShapeRule);
 
    hub.addMessageHandler("setEdgeColorRule",             setEdgeColorRule);
+   hub.addMessageHandler("setEdgeStyle",                 setEdgeStyle);
    hub.addMessageHandler("setEdgeWidthRule",             setEdgeWidthRule);
    hub.addMessageHandler("setEdgeTargetArrowShapeRule",  setEdgeTargetArrowShapeRule);
    hub.addMessageHandler("setEdgeTargetArrowColorRule",  setEdgeTargetArrowColorRule);
@@ -107,6 +114,9 @@ function addMessageHandlers()
    hub.addMessageHandler("setLayout",            setLayout);
    hub.addMessageHandler("getJSON",              getJSON);
    hub.addMessageHandler("selectNodes",          selectNodes);
+   hub.addMessageHandler("invertNodeSelection",  invertNodeSelection);
+   hub.addMessageHandler("hideSelectedNodes",    hideSelectedNodes);
+   hub.addMessageHandler("deleteSelectedNodes",  deleteSelectedNodes);
    hub.addMessageHandler("sfn",                  sfn);
    hub.addMessageHandler("clearSelection",       clearSelection);
 
@@ -378,6 +388,23 @@ function setNodeShapeRule(msg)
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeShapeRule
+//----------------------------------------------------------------------------------------------------
+// either "haystack" for fast rendering, no arrows, or "bezier" for slow, arrows, better appearance
+function setEdgeStyle(msg)
+{
+   var mode = msg.payload;
+
+   if ($.inArray(mode, ["haystack", "bezier"]) < 0)
+     hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
+
+   if(mode === "haystack")
+      cy.edges().style({"curve-style": "haystack"});
+   else if (mode == "bezier")
+      cy.edges().style({"curve-style": "bezier"});
+
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setEdgeStyle
 //----------------------------------------------------------------------------------------------------
 function setEdgeColorRule(msg)
 {
@@ -1062,6 +1089,32 @@ function clearSelection(msg)
 
 } // clearSelection
 //----------------------------------------------------------------------------------------------------
+function invertNodeSelection(msg)
+{
+   console.log("==== invertNodeSelection");
+   var currentlySelected = cy.filter("node:selected");
+   cy.nodes().select();
+   currentlySelected.unselect();
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // invertNodeSelection
+//----------------------------------------------------------------------------------------------------
+function hideSelectedNodes(msg)
+{
+   console.log("==== hideSelectedNodes");
+   cy.filter("node:selected").hide();
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // hideSelectedNodes
+//----------------------------------------------------------------------------------------------------
+function deleteSelectedNodes(msg)
+{
+   console.log("==== deleteSelectedNodes");
+   cy.filter("node:selected").remove();
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // deleteSelectedNodes
+//----------------------------------------------------------------------------------------------------
 function getNodeLabel(msg)
 {
    //nodesOfInterest = msg.payload;
@@ -1073,16 +1126,46 @@ function setGraph(msg)
 {
    console.log("in function setGraph");
    //console.log(msg.payload);
-   graph = JSON.parse(msg.payload);
+   graph = JSON.parse(msg.payload.graph);
+   hideEdges = msg.payload.hideEdges;
    console.log("setGraph calling createCytoscapeWindow");
-   cy = createCytoscapeWindow(graph)
+   cy = createCytoscapeWindow(graph, hideEdges)
    console.log("setGraph after createCytoscapeWindow");
    //cy.load(graph.elements)
    //cy.add(graph)
  
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
 
-} // setWindowTitle
+} // setGraph
+//----------------------------------------------------------------------------------------------------
+function setNodeAttributes(msg)
+{
+   console.log("=== rcyjs.html: setNodeAttributes")
+   console.log(msg.payload);
+   var nodeIDs = msg.payload.nodes;
+
+   var attributeName = msg.payload.attribute;
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var name = nodeIDs[i];
+      var value = msg.payload.values[i];
+      var filterString = "[name='" + name + "']";
+      console.log("filterString: " + filterString);
+      console.log("nodeID: " + name + "   value: " + value);
+      cy.nodes().filter(filterString).data({attributeName: value});
+      } // for i
+
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeAttributes
+//----------------------------------------------------------------------------------------------------
+function setEdgeAttributes(msg)
+{
+   console.log("=== rcyjs.html: setEdgeAttributes")
+   console.log(msg.payload);
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
+
+} // setEdgeAttributes
 //----------------------------------------------------------------------------------------------------
 function getNodes(msg)
 {
@@ -1189,6 +1272,28 @@ function addGraph(msg)
 
 } // addGraph
 //----------------------------------------------------------------------------------------------------
+function httpAddGraph(msg)
+{
+  console.log("=== entering httpAddGraph");
+  var filename = msg.payload;
+  console.log("httpAdding graph '" + filename + "'");
+  addNetwork(filename);
+  return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+  hub.send(return_msg);
+
+} // httpAddGraph
+//----------------------------------------------------------------------------------------------------
+function httpSetStyle(msg)
+{
+  console.log("=== entering httpSetStyle");
+  var filename = msg.payload;
+  console.log("httpSetStyle: '" + filename + "'");
+  loadStyle(filename);
+  return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+  hub.send(return_msg);
+
+} // httpSetStyle
+//----------------------------------------------------------------------------------------------------
 function getVizmapNames()
 {
    var names = []; 
@@ -1263,12 +1368,12 @@ function setupDefaultStyles(cy)
 
 }  // setupDefaultStyles
 //----------------------------------------------------------------------------------------------------
-function createCytoscapeWindow(graph) {
+function createCytoscapeWindow(graph, hideEdges) {
 
    console.log("--- createCytoscapeWindow")
    cy = $("#cyDiv");
    console.log("--- graph");
-   console.log(graph);
+   //console.log(graph);
 
    cy.cytoscape({
        elements: graph.elements,
@@ -1283,6 +1388,8 @@ function createCytoscapeWindow(graph) {
     ready: function() {
         console.log("cy ready");
         cy = this;
+        if(hideEdges)
+           cy.edges().style({"display": "none"})
         setupDefaultStyles(cy);
         cy.on('mouseover', 'node', function(evt){
            var node = evt.cyTarget;
@@ -1297,6 +1404,7 @@ function createCytoscapeWindow(graph) {
         cy.fit(50);
         } // cy.ready
        })
+
 
     return (cy);
 
@@ -1319,6 +1427,25 @@ function loadStyle(filename)
       });
 
 } // loadStyle
+//----------------------------------------------------------------------------------------------------
+addNetwork = function (filename)
+{
+   s = "http://localhost:8000/" + filename;
+   console.log("=== about to getScript on " + s);
+   $.getScript(s)
+     .done(function(script, textStatus) {
+         console.log("getScript: " + textStatus);
+         console.log("nodes: " + network.elements.nodes.length);
+         if(typeof(network.elements.edges) != "undefined")
+           console.log("edges: " + network.elements.edges.length);
+         cy.add(network.elements);  // no positions yet
+         cy.nodes().map(function(node){node.data({degree: node.degree()})});
+         }) // .done
+    .fail(function( jqxhr, settings, exception ) {
+       console.log("addNetwork getscript error trying to read " + filename);
+      });
+
+} // addNetwork
 //----------------------------------------------------------------------------------------------------
 function setEdgeRenderingMethod(newMethod)
 {

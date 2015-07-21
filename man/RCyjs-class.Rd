@@ -15,6 +15,22 @@
 \alias{addGraph,RCyjsClass-method}
 \alias{\S4method{addGraph}{RCyjsClass}}
 
+\alias{httpAddGraph}
+\alias{httpAddGraph,RCyjsClass-method}
+\alias{\S4method{httpAddGraph}{RCyjsClass}}
+
+\alias{httpSetStyle}
+\alias{httpSetStyle,RCyjsClass-method}
+\alias{\S4method{httpSetStyle}{RCyjsClass}}
+
+\alias{setNodeAttributes}
+\alias{setNodeAttributes,RCyjsClass-method}
+\alias{\S4method{setNodeAttributes}{RCyjsClass}}
+
+\alias{setEdgeAttributes}
+\alias{setEdgeAttributes,RCyjsClass-method}
+\alias{\S4method{setEdgeAttributes}{RCyjsClass}}
+
 \alias{getNodes}
 \alias{getNodes,RCyjsClass-method}
 \alias{\S4method{getNodes}{RCyjsClass}}
@@ -115,6 +131,18 @@
 \alias{getSelectedNodes,RCyjsClass-method}
 \alias{\S4method{getSelectedNodes}{RCyjsClass}}
 
+\alias{invertNodeSelection}
+\alias{invertNodeSelection,RCyjsClass-method}
+\alias{\S4method{invertNodeSelection}{RCyjsClass}}
+
+\alias{hideSelectedNodes}
+\alias{hideSelectedNodes,RCyjsClass-method}
+\alias{\S4method{hideSelectedNodes}{RCyjsClass}}
+
+\alias{deleteSelectedNodes}
+\alias{deleteSelectedNodes,RCyjsClass-method}
+\alias{\S4method{deleteSelectedNodes}{RCyjsClass}}
+
 \alias{setNodeLabelRule}
 \alias{setNodeLabelRule,RCyjsClass-method}
 \alias{\S4method{setNodeLabelRule}{RCyjsClass}}
@@ -134,6 +162,10 @@
 \alias{setNodeShapeRule}
 \alias{setNodeShapeRule,RCyjsClass-method}
 \alias{\S4method{setNodeShapeRule}{RCyjsClass}}
+
+\alias{setEdgeStyle}
+\alias{setEdgeStyle,RCyjsClass-method}
+\alias{\S4method{setEdgeStyle}{RCyjsClass}}
 
 \alias{setEdgeColorRule}
 \alias{setEdgeColorRule,RCyjsClass-method}
@@ -267,7 +299,8 @@
 
 \usage{
 % functions first, starting with the class constructor
-RCyjs(portRange, host="localhost", title="RCyjs", graph=graphNEL(), quiet=TRUE)
+RCyjs(portRange, host="localhost", title="RCyjs", graph=graphNEL(),
+      hideEdges=FALSE, quiet=TRUE)
 simpleDemoGraph()
 createTestGraph(nodeCount, edgeCount)
 biocGraphToCytoscapeJSON(graph)
@@ -279,8 +312,15 @@ edaNames(graph)
 % now class methods
 \S4method{setGraph}{RCyjsClass}(obj, graph)
 \S4method{addGraph}{RCyjsClass}(obj, graph)
+\S4method{httpAddGraph}{RCyjsClass}(obj, graph)
+\S4method{httpSetStyle}{RCyjsClass}(obj, filename)
+\S4method{setNodeAttributes}{RCyjsClass}(obj, graph)
+\S4method{setEdgeAttributes}{RCyjsClass}(obj, graph)
 \S4method{getNodes}{RCyjsClass}(obj)
 \S4method{getSelectedNodes}{RCyjsClass}(obj)
+\S4method{invertNodeSelection}{RCyjsClass}(obj)
+\S4method{hideSelectedNodes}{RCyjsClass}(obj)
+\S4method{deleteSelectedNodes}{RCyjsClass}(obj)
 \S4method{clearSelection}{RCyjsClass}(obj)
 \S4method{redraw}{RCyjsClass}(obj)
 \S4method{hideAllEdges}{RCyjsClass}(obj)
@@ -292,6 +332,7 @@ edaNames(graph)
 \S4method{setNodeSizeRule}{RCyjsClass}(obj, attribute, control.points, node.sizes)
 \S4method{setNodeColorRule}{RCyjsClass}(obj, attribute, control.points, colors, mode)
 \S4method{setNodeShapeRule}{RCyjsClass}(obj, attribute, control.points, node.shapes)
+\S4method{setEdgeStyle}{RCyjsClass}(obj, mode)
 \S4method{setEdgeColorRule}{RCyjsClass}(obj, attribute, control.points, colors, mode)
 \S4method{setEdgeWidthRule}{RCyjsClass}(obj, attribute, control.points, widths, mode)
 \S4method{setEdgeTargetArrowShapeRule}{RCyjsClass}(obj, attribute, control.points, shapes)

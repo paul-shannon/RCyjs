@@ -1389,7 +1389,7 @@ function createCytoscapeWindow(graph, hideEdges) {
         console.log("cy ready");
         cy = this;
         if(hideEdges)
-           cy.edges().style({"display": "none"})
+           cy.edges().style({"display": "none"});
         setupDefaultStyles(cy);
         cy.on('mouseover', 'node', function(evt){
            var node = evt.cyTarget;
@@ -1440,8 +1440,9 @@ addNetwork = function (filename)
            console.log("edges: " + network.elements.edges.length);
          cy.add(network.elements);  // no positions yet
          cy.nodes().map(function(node){node.data({degree: node.degree()})});
+         cy.edges().style({"display": "none"});  // default hide edges for now
          }) // .done
-    .fail(function( jqxhr, settings, exception ) {
+    .fail(function(jqxhr, settings, exception) {
        console.log("addNetwork getscript error trying to read " + filename);
       });
 

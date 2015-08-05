@@ -5,7 +5,13 @@
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-2.1.1.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-ui-1.11.2.min.js"></script>
    <link   rel="stylesheet" href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery-ui-1.11.2.css">
-   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.4.4.min.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.4.5.min.js"></script>
+
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery.qtip.min.js"></script>
+   <link   rel="stylesheet" type="text/css", 
+           href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery.qtip.min.css"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-qtip.js"></script>
+
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/arbor.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/springy.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery.cytoscape.js-panzoom.js"></script>
@@ -1391,17 +1397,52 @@ function createCytoscapeWindow(graph, hideEdges) {
         if(hideEdges)
            cy.edges().style({"display": "none"});
         setupDefaultStyles(cy);
-        cy.on('mouseover', 'node', function(evt){
-           var node = evt.cyTarget;
-           });
-        cy.on('mouseover', 'edge', function(evt){
-           var edge = evt.cyTarget;
+        //cy.on('mouseover', 'node', function(evt){
+        //   var node = evt.cyTarget;
+        //   });
+        //cy.on('mouseover', 'edge', function(evt){
+        //   var edge = evt.cyTarget;
            //console.log(edge.data().canonicalName);
-           })
-        cy.edges().selectify();
+        //  })
+        //cy.edges().selectify();
         cy.layout({name: "random"});
         cy.reset();
         cy.fit(50);
+        cy.elements().qtip({
+           content: function(){
+              console.log(" qitp on " + this.id());
+              var attrs = Object.keys(this.data());
+              if($.inArray("tooltip", attrs) >= 0){
+                console.log("  found tooltip: " + this.data("tooltip"));
+                return(this.data("tooltip"))
+                }
+              if($.inArray("label", attrs) >= 0){
+                console.log("  found lable: " + this.data("label"));
+                return(this.data("label"))
+                }
+              if($.inArray("id", attrs) >= 0){
+                console.log("  found id: " + this.data("id"));
+                return(this.data("id"))
+                }
+              },
+           position: {
+             my: 'top center',
+             at: 'bottom center'
+             },
+           show: {
+             event: 'mouseover'
+             },
+           hide: {
+             event: 'mouseout'
+             },
+           style: {
+             classes: 'qtip-bootstrap',
+             tip: {
+                width: 16,
+                height: 8
+               }
+             }
+            }); // qtip
         } // cy.ready
        })
 
@@ -1411,6 +1452,7 @@ function createCytoscapeWindow(graph, hideEdges) {
 } // createCytoscapeWindow
 //----------------------------------------------------------------------------------------------------
 // requires an http server at localhost:8000, started in the directory where filename is found
+// expected file contents:  vizmap = [{selector:"node",css: {...
 function loadStyle(filename)
 {
    s = "http://localhost:8000/" + filename;

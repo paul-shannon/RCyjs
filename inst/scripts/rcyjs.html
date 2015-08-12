@@ -782,7 +782,7 @@ function setPosition(msg)
      filterStrings.push(s);
      } // for i
    var nodeSubset = cy.nodes(filterStrings.join());
-   console.log("basic.html, setting position on nodes, count: " + nodeSubset.length);
+   //console.log("basic.html, setting position on nodes, count: " + nodeSubset.length);
 
    nodeSubset.positions(function(i, node){return{x: positionObjects[i].x, y: positionObjects[i].y}})
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -1397,37 +1397,39 @@ function createCytoscapeWindow(graph, hideEdges) {
         if(hideEdges)
            cy.edges().style({"display": "none"});
         setupDefaultStyles(cy);
-        //cy.on('mouseover', 'node', function(evt){
-        //   var node = evt.cyTarget;
-        //   });
-        //cy.on('mouseover', 'edge', function(evt){
-        //   var edge = evt.cyTarget;
-           //console.log(edge.data().canonicalName);
-        //  })
-        //cy.edges().selectify();
         cy.layout({name: "random"});
         cy.reset();
         cy.fit(50);
-        cy.elements().qtip({
-           content: function(){
-              console.log(" qitp on " + this.id());
-              var attrs = Object.keys(this.data());
-              if($.inArray("tooltip", attrs) >= 0){
-                console.log("  found tooltip: " + this.data("tooltip"));
-                return(this.data("tooltip"))
-                }
-              if($.inArray("label", attrs) >= 0){
-                console.log("  found lable: " + this.data("label"));
-                return(this.data("label"))
-                }
-              if($.inArray("id", attrs) >= 0){
-                console.log("  found id: " + this.data("id"));
-                return(this.data("id"))
-                }
-              },
+        //cy.elements().qtip(qtipOptions());
+        } // cy.ready
+       })
+
+    return (cy);
+
+} // createCytoscapeWindow
+//----------------------------------------------------------------------------------------------------
+function qtipOptions()
+{
+  options = {content: function(){
+               console.log(" qitp on " + this.id());
+               var attrs = Object.keys(this.data());
+               if($.inArray("tooltip", attrs) >= 0){
+                 console.log("  found tooltip: " + this.data("tooltip"));
+                 return(this.data("tooltip"))
+                 }
+               if($.inArray("label", attrs) >= 0){
+                 console.log("  found lable: " + this.data("label"));
+                 return(this.data("label"))
+                 }
+               if($.inArray("id", attrs) >= 0){
+                 console.log("  found id: " + this.data("id"));
+                 return(this.data("id"))
+                 }
+               },
            position: {
              my: 'top center',
-             at: 'bottom center'
+             //at: 'bottom center'
+             at: 'top center'
              },
            show: {
              event: 'mouseover'
@@ -1442,15 +1444,12 @@ function createCytoscapeWindow(graph, hideEdges) {
                 height: 8
                }
              }
-            }); // qtip
-        } // cy.ready
-       })
+          }; // options
 
+  return(options);
 
-    return (cy);
-
-} // createCytoscapeWindow
-//----------------------------------------------------------------------------------------------------
+} // qtipOptions
+//----------------------------------------------------------------------------------------------------            
 // requires an http server at localhost:8000, started in the directory where filename is found
 // expected file contents:  vizmap = [{selector:"node",css: {...
 function loadStyle(filename)
@@ -1483,6 +1482,7 @@ addNetwork = function (filename)
          cy.add(network.elements);  // no positions yet
          cy.nodes().map(function(node){node.data({degree: node.degree()})});
          cy.edges().style({"display": "none"});  // default hide edges for now
+         //cy.elements().qtip(qtipOptions());
          }) // .done
     .fail(function(jqxhr, settings, exception) {
        console.log("addNetwork getscript error trying to read " + filename);

@@ -17,6 +17,9 @@ colors <- list(green="rgb(0,255,0)",
 
 shapes = c("ellipse", "triangle", "pentagon", "hexagon", "heptagon", "octagon", "star",
            "rectangle", "roundrectangle")
+
+
+PORTS=9047:9097
 #----------------------------------------------------------------------------------------------------
 runTests = function()
 {
@@ -54,10 +57,12 @@ runTests = function()
    test.setNodeAttributes();
    test.setEdgeAttributes();
 
+   test.compoundNodes();
+
 } # run.tests
 #----------------------------------------------------------------------------------------------------
 # a utility: create and return simple instance, for further experimentation
-demo <- function(portRange=9047:9057)
+demo <- function(portRange=PORTS)
 {
    g <- simpleDemoGraph()
    rcy <- RCyjs(portRange=portRange, quiet=TRUE, graph=g, hideEdges=TRUE);
@@ -85,7 +90,7 @@ demo <- function(portRange=9047:9057)
 test.constructorNoGraph <- function()
 {
    print("--- test.constructor")
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE);
    checkTrue(ready(rcy))
 
    title <- "no graph ctor"
@@ -102,7 +107,7 @@ test.constructorWithGraph <- function()
    print("--- test.constructorWithGraph");
    
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
 
    title <- "graph ctor"
@@ -205,7 +210,7 @@ test.constructorWithGraph <- function()
 test.setGraph <- function()
 {
    print("--- test.setGraph")
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE);
    checkTrue(ready(rcy))
 
    title <- "setGraph"
@@ -227,7 +232,7 @@ test.setNodeLabelRule <- function()
 {
    print("--- test.setNodeLabelRule")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
 
    title <- "setNodeLabelRule"
@@ -252,7 +257,7 @@ test.setNodeLabelAlignment <- function()
 {
    print("--- test.setNodeLabelRule")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "label");
    title <- "setNodeSizeRule"
@@ -299,7 +304,7 @@ test.setNodeSizeRule <- function()
 {
    print("--- test.setNodeLabelRule")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "label");
 
@@ -318,7 +323,7 @@ test.setNodeColorRule <- function()
 {
    print("--- test.setNodeLabelRule")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "label");
 
@@ -349,7 +354,7 @@ test.setNodeShapeRule <- function()
 {
    print("--- test.setNodeLabelRule")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "type");
 
@@ -392,7 +397,7 @@ test.layoutStrategies <- function()
 {
    print("--- test.layoutStrategies")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
@@ -412,7 +417,7 @@ test.layouts <- function()
    print("--- test.layouts")
 
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
@@ -471,7 +476,7 @@ test.bigGraph <- function()
    edgeCount = 1000
    
    g <- createTestGraph(nodeCount=nodeCount, edgeCount=edgeCount)
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    title <- "bigGraph"
    setBrowserWindowTitle(rcy, title)
@@ -496,7 +501,7 @@ test.setEdgeColorRule <- function()
                                      "B|C"="synthetic lethal",
                                      "C|A"="undefined"))
    
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
@@ -532,7 +537,7 @@ test.setEdgeWidthRule <- function()
 {
    print("--- test.setEdgeWidthRule")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "setEdgeWidthRule");
    setNodeLabelRule(rcy, "label");
@@ -557,7 +562,7 @@ test.setEdgeArrowLookupRules <- function()
 {
    print("--- test.setEdgeArrowLookupRules")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "setEdgeTargetArrowhRule");
    setNodeLabelRule(rcy, "label");
@@ -601,7 +606,7 @@ test.setEdgeTargetArrowColorRule <- function()
                                      "B|C"="synthetic lethal",
                                      "C|A"="undefined"))
    
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
@@ -637,7 +642,7 @@ test.setEdgeSourceArrowShapeRule <- function()
 {
    print("--- test.setEdgeSourceArrowShapeRule")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "setEdgeSourceArrowhRule");
    setNodeLabelRule(rcy, "label");
@@ -660,7 +665,7 @@ test.setEdgeSourceArrowColorRule <- function()
                                      "B|C"="synthetic lethal",
                                      "C|A"="undefined"))
    
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
@@ -696,7 +701,7 @@ test.getSetPosition <- function()
    print("--- test.getSetPosition");
 
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "getSetPosition");
    setNodeLabelRule(rcy, "label");
@@ -744,7 +749,7 @@ test.saveRestoreLayout <- function()
    print("--- test.saveRestoreLayout");
 
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "getSetPosition");
    setNodeLabelRule(rcy, "label");
@@ -776,7 +781,7 @@ test.setBackgroundColor <- function()
 {
    print("--- test.setBackgroundColor");
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "setBackgroundColor");
    setNodeLabelRule(rcy, "label");
@@ -796,7 +801,7 @@ test.setNodeDefaults <- function()
    print("--- test.setNodeDefaults");
 
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "getSetPosition");
    setNodeLabelRule(rcy, "label");
@@ -832,7 +837,7 @@ test.setEdgeDefaults <- function()
 {
    print("--- test.setEdgeDefaults")
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "setEdgeDefaults");
    setNodeLabelRule(rcy, "label");
@@ -881,6 +886,26 @@ test.setEdgeAttributes <- function()
 
 } # test.setEdgeAttributes
 #----------------------------------------------------------------------------------------------------
+test.compoundNodes <- function()
+{
+   print("--- test.compoundNodes")
+   
+   nodes <- c("parent", "kid.1", "kid.2");
+   
+   g = graphNEL(nodes, edgemode="directed");
+   nodeDataDefaults(g, attr = "label") <- "default node label"
+   nodeDataDefaults(g, attr = "parent") <- "";
+   edgeDataDefaults(g, attr = "edgeType") <- "undefined"
+
+   nodeData(g, nodes, "label") = nodes
+   nodeData(g, c("kid.1", "kid.2"), "parent") <- rep("parent", 2);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
+   setNodeLabelRule(rcy, "label"); redraw(rcy)
+   setNodeLabelAlignment(rcy, "center", "center")
+   redraw(rcy)
+    
+} # test.compoundNodes
+#----------------------------------------------------------------------------------------------------
 demo.hypoxia <- function()
 {
    require(org.Hs.eg.db)
@@ -898,7 +923,7 @@ demo.hypoxia <- function()
    nodeData(g.hypoxia, gene.nodes, attr="type") <- "gene"
    nodeData(g.hypoxia, process.nodes, attr="type") <- "process"
    
-   rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g.hypoxia);
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g.hypoxia);
    setBackgroundColor(rcy, colors$lightGray)
    setDefaultNodeSize(rcy, 60)
    setDefaultNodeColor(rcy, "white")

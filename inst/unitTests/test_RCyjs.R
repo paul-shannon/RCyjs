@@ -751,7 +751,7 @@ test.saveRestoreLayout <- function()
    g <- simpleDemoGraph()
    rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "getSetPosition");
+   setBrowserWindowTitle(rcy, "restoreLayout");
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
 
@@ -938,7 +938,7 @@ demo.hypoxia <- function()
    saved.layout.file <- system.file(package="RCyjs", "extdata", "hypoxiaLayout.RData")
    restoreLayout(rcy, saved.layout.file)
    fitContent(rcy)
-   setZoom(rcy, 0.9 *getZoom(rcy))
+   setZoom(rcy, 0.9 * getZoom(rcy))
 
 
    edgeColors <- list(activates = colors$darkerGreen,
@@ -970,7 +970,9 @@ demo.hypoxia <- function()
 
    redraw(rcy)
 
-   closeWebSocket(rcy)
+   # closeWebSocket(rcy)
+
+   rcy
 
 } # demo.hypoxia
 #----------------------------------------------------------------------------------------------------
@@ -1040,6 +1042,6 @@ getExpression <- function()
   tbl.m <- cgdsrRequest(cgdsr.server, goi, profile, case, genesPerQuery = 50)   # 574 x 1582
   
   
-} #  get Expression
+} #  getExpression
 #----------------------------------------------------------------------------------------------------
 

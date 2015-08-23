@@ -1,4 +1,4 @@
-### R code from vignette source '/Users/pshannon/s/bioc/trunk/RpacksTesting/RCyjs/vignettes/RCyjs.Rnw'
+### R code from vignette source '/Users/pshannon/s/bioc/trunk/Rpacks/RCyjs/vignettes/RCyjs.Rnw'
 
 ###################################################
 ### code chunk number 1: style
@@ -23,7 +23,7 @@ eda(g, "score")
 ### code chunk number 3: simpleRender
 ###################################################
 g <- simpleDemoGraph()
-rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+rcy <- RCyjs(portRange=9047:9067, quiet=TRUE, graph=g);
 title <- "simple graph"
 setBrowserWindowTitle(rcy, title)
 
@@ -103,21 +103,29 @@ refnetToGraphNEL <- function(tbl)
 
 
 ###################################################
-### code chunk number 8: hypozia
+### code chunk number 8: hypozia0
 ###################################################
 library(org.Hs.eg.db)
 library(RefNet)
 refnet <- RefNet();
 tbl.hypoxia <- interactions(refnet,provider="hypoxiaSignaling-2006")
-
 g.hypoxia <- refnetToGraphNEL(tbl.hypoxia)
+
+
+###################################################
+### code chunk number 9: hypoxia1
+###################################################
 all.nodes <- nodes(g.hypoxia)
 gene.nodes <- intersect(all.nodes, keys(org.Hs.egSYMBOL2EG))
 process.nodes <- setdiff(all.nodes, gene.nodes)
 nodeData(g.hypoxia, gene.nodes, attr="type") <- "gene"
 nodeData(g.hypoxia, process.nodes, attr="type") <- "process"
 
-rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g.hypoxia);
+
+###################################################
+### code chunk number 10: hypoxia2
+###################################################
+rcy <- RCyjs(portRange=9047:9067, quiet=TRUE, graph=g.hypoxia);
 setBackgroundColor(rcy, lightGray)
 setDefaultNodeSize(rcy, 60)
 setDefaultNodeColor(rcy, white)
@@ -128,6 +136,11 @@ setNodeShapeRule(rcy, "type", c("gene", "process"), c("ellipse", "roundrectangle
 redraw(rcy)
 title <- "Hypoxia Signaling: Pouyssegur 2006"
 setBrowserWindowTitle(rcy, title)
+
+
+###################################################
+### code chunk number 11: hypoxia3
+###################################################
 saved.layout.file <- system.file(package="RCyjs", "extdata", "hypoxiaLayout.RData")
 stopifnot(file.exists(saved.layout.file))
 restoreLayout(rcy, saved.layout.file)
@@ -135,6 +148,9 @@ fitContent(rcy)
 setZoom(rcy, 0.9 *getZoom(rcy))
 
 
+###################################################
+### code chunk number 12: hypoxia4
+###################################################
 edgeColors <- list(activates = darkerGreen,
                    inhibits = darkRed,
                    inactivates = darkRed,
@@ -149,6 +165,7 @@ edgeColors <- list(activates = darkerGreen,
 setEdgeColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors), mode="lookup")
 setEdgeTargetArrowColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors),
                             mode="lookup")
+
 edgeTargetShapes <- list(activates = "triangle",
                          inhibits = "tee",
                          inactivates = "tee",
@@ -163,7 +180,6 @@ edgeTargetShapes <- list(activates = "triangle",
 setEdgeTargetArrowShapeRule(rcy, "edgeType", names(edgeTargetShapes), as.character(edgeTargetShapes))
 
 redraw(rcy)
-
 
 
 

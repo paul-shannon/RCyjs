@@ -80,7 +80,7 @@ Send this graph to your browser and render it with all default settings (includi
 \begin{Schunk}
 \begin{Sinput}
 > g <- simpleDemoGraph()
-> rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
+> rcy <- RCyjs(portRange=9047:9067, quiet=TRUE, graph=g);
 > title <- "simple graph"
 > setBrowserWindowTitle(rcy, title)
 \end{Sinput}
@@ -214,6 +214,7 @@ In this section, we load a \Biocpkg{RefNet} data.frame describing the interactio
 \end{Sinput}
 \end{Schunk}
 
+Load \Biocpkg{RefNet}, request the interactions described in the paper, convert them to a graphNEL:
 \begin{Schunk}
 \begin{Sinput}
 > library(org.Hs.eg.db)
@@ -228,12 +229,29 @@ In this section, we load a \Biocpkg{RefNet} data.frame describing the interactio
 \begin{Sinput}
 > tbl.hypoxia <- interactions(refnet,provider="hypoxiaSignaling-2006")
 > g.hypoxia <- refnetToGraphNEL(tbl.hypoxia)
+\end{Sinput}
+\end{Schunk}
+Most of the the nodes in the graph are genes, and some are biological processes.  The network display will
+be easier to grasp if these two categories are rendered differently.   Use the \Biocpkg{org.Hs.eg.db}:
+any node name mentioned there will be a gene, all others will be processes.
+
+\begin{Schunk}
+\begin{Sinput}
 > all.nodes <- nodes(g.hypoxia)
 > gene.nodes <- intersect(all.nodes, keys(org.Hs.egSYMBOL2EG))
 > process.nodes <- setdiff(all.nodes, gene.nodes)
 > nodeData(g.hypoxia, gene.nodes, attr="type") <- "gene"
 > nodeData(g.hypoxia, process.nodes, attr="type") <- "process"
-> rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g.hypoxia);
+\end{Sinput}
+\end{Schunk}
+
+Create and display the network, using the first open port between 9047 and 9067 to connect to your
+default browser.  Set some default rendering rules, and the browser window title.  The nodes
+will be arranged randomly on the browser canvas.
+
+\begin{Schunk}
+\begin{Sinput}
+> rcy <- RCyjs(portRange=9047:9067, quiet=TRUE, graph=g.hypoxia);
 > setBackgroundColor(rcy, lightGray)
 > setDefaultNodeSize(rcy, 60)
 > setDefaultNodeColor(rcy, white)
@@ -258,12 +276,31 @@ In this section, we load a \Biocpkg{RefNet} data.frame describing the interactio
 \begin{Soutput}
 [1] "Hypoxia Signaling: Pouyssegur 2006"
 \end{Soutput}
+\end{Schunk}
+
+Cytoscape.js provides several automated layout algorithms, but optimal layout nearly always involves 
+at least some manual placement of nodes as well.  One such layout is included in the package. 
+Recreate it by loading the file into which it was saved, and applying it.  Then size the
+full network to occupy most of the browser canvas.
+
+\begin{Schunk}
 \begin{Sinput}
 > saved.layout.file <- system.file(package="RCyjs", "extdata", "hypoxiaLayout.RData")
 > stopifnot(file.exists(saved.layout.file))
 > restoreLayout(rcy, saved.layout.file)
 > fitContent(rcy)
 > setZoom(rcy, 0.9 *getZoom(rcy))
+\end{Sinput}
+\end{Schunk}
+Use the interaction type, specified in the \Biocpkg{RefNet} data.frame, and copied into the graphNEL as the 
+edge attribute ``edgeType'' to control the color of the displayed edges.  Use this same information to
+control what shape, if any, is displayed to ``decorate'' the edge:  a triangle indicates a positive 
+effect of the upstream node on the downstream node; a ``tee'' indicates a negative effect.   Finally,
+after specifying these rules, redraw the network and the rules are applied
+
+
+\begin{Schunk}
+\begin{Sinput}
 > edgeColors <- list(activates = darkerGreen,
 +                    inhibits = darkRed,
 +                    inactivates = darkRed,
@@ -277,20 +314,26 @@ In this section, we load a \Biocpkg{RefNet} data.frame describing the interactio
 > setEdgeColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors), mode="lookup")
 > setEdgeTargetArrowColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors),
 +                             mode="lookup")
-> edgeTargetShapes <- list(activates = "triangle",
-+                          inhibits = "tee",
-+                          inactivates = "tee",
-+                          hydroxylates = "triangle",
-+                          "TF cofactor" = "none",
-+                          "TF binding" = "triangle",
-+                          hydroxylated = "none",
-+                          stabilizes.mrna = "triangle",
-+                          preserves = "triangle",
-+                          proteolyzes = "triangle")
-> setEdgeTargetArrowShapeRule(rcy, "edgeType", names(edgeTargetShapes), as.character(edgeTargetShapes))
-> redraw(rcy)
 \end{Sinput}
 \end{Schunk}
+
+edgeTargetShapes <- list(activates = "triangle",
+                         inhibits = "tee",
+                         inactivates = "tee",
+                         hydroxylates = "triangle",
+                         "TF cofactor" = "none",
+                         "TF binding" = "triangle",
+                         hydroxylated = "none",
+                         stabilizes.mrna = "triangle",
+                         preserves = "triangle",
+                         proteolyzes = "triangle")
+
+setEdgeTargetArrowShapeRule(rcy, "edgeType", names(edgeTargetShapes), as.character(edgeTargetShapes))
+
+redraw(rcy)
+Sys.sleep(3)   # allow the redraw to complete before ending
+
+
   
 \includegraphics[width=0.8\textwidth]{hypoxiaNetwork.png}
 

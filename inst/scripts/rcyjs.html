@@ -115,9 +115,6 @@ function addMessageHandlers()
    hub.addMessageHandler("hideEdges",            hideEdges);
    hub.addMessageHandler("showEdges",            showEdges);
 
-
-   hub.addMessageHandler("getLayout",            getLayout);
-   hub.addMessageHandler("setLayout",            setLayout);
    hub.addMessageHandler("getJSON",              getJSON);
    hub.addMessageHandler("selectNodes",          selectNodes);
    hub.addMessageHandler("invertNodeSelection",  invertNodeSelection);
@@ -696,16 +693,6 @@ function doLayout(msg)
 
 } // doLayout
 //----------------------------------------------------------------------------------------------------
-function getLayout(msg)
-{
-   layout = JSON.stringify(cy.nodes().map(function(n){return{id: n.id(), 
-                                                              x: n.position().x,
-                                                              y: n.position().y}}));
-
-   hub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
-
-} // getLayout
-//----------------------------------------------------------------------------------------------------
 function layoutSelectionInGrid(msg)
 {
   var x = msg.payload.x;
@@ -775,16 +762,31 @@ function setPosition(msg)
      // there will be 1 or more position objects, each with id, x, and y values
    var positionObjects = msg.payload;
 
-     // create a subset of all nodes, including only those in positionObjects
-   var filterStrings = [];
    for(var i=0; i < positionObjects.length; i++){
-     var s = '[id="' + positionObjects[i].id + '"]';
-     filterStrings.push(s);
-     } // for i
-   var nodeSubset = cy.nodes(filterStrings.join());
-   //console.log("basic.html, setting position on nodes, count: " + nodeSubset.length);
+      var obj = positionObjects[i];
+      var id = obj.id;
+      var xPos = obj.x;
+      var yPos = obj.y;
+      var filterString = "[id='" + id + "']";
+      console.log(" setPosition " + id + ": " + xPos + ", " + yPos);
+      cy.nodes(filterString).position({x: xPos, y: yPos});
+      } // for i
 
-   nodeSubset.positions(function(i, node){return{x: positionObjects[i].x, y: positionObjects[i].y}})
+     // create a subset of all nodes, including only those in positionObjects
+   //var filterStrings = [];
+   //for(var i=0; i < positionObjects.length; i++){
+   //  var s = '[id="' + positionObjects[i].id + '"]';
+   //  filterStrings.push(s);
+   //  } // for i
+   //var nodeSubset = cy.nodes(filterStrings.join());
+   //console.log("rcyjs.html, setPosition(msg) setting position on nodes, count: " + nodeSubset.length);
+   //console.log(JSON.stringify(nodeSubset))
+
+   //--------------------------------------------------------------------------------
+   // bug: in some cases the order of nodes in nodeSubset does not match the i indices of the positionObjects
+   //--------------------------------------------------------------------------------
+
+      // nodeSubset.positions(function(i, node){return{x: positionObjects[i].x, y: positionObjects[i].y}})
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setPosition
@@ -828,25 +830,6 @@ function showEdges(msg)
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // showEdges
-//----------------------------------------------------------------------------------------------------
-function setLayout(msg)
-{
-   console.log("==== setLayout");
-   console.log(msg.payload);
-
-   function setPosition(node){
-     var id = node.id; 
-     var xPos=node.position.x; 
-     var yPos=node.position.y; 
-     var filterString = 'node[id="' + id + '"]'
-     ccy.filter(filterString).position(node.position);
-     } // setPosition
-
-   layout.map(setPosition)
-
-   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
-
-} // setLayout
 //----------------------------------------------------------------------------------------------------
 function setDefaultNodeSize(msg)
 {
@@ -1072,6 +1055,7 @@ function selectNodes(msg)
      filterStrings.push(s);
      } // for i
 
+   
    var nodesToSelect = cy.nodes(filterStrings.join());
    nodesToSelect.select()
 

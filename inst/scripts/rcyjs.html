@@ -772,6 +772,8 @@ function setPosition(msg)
       cy.nodes(filterString).position({x: xPos, y: yPos});
       } // for i
 
+   console.log("after setPosition for loop");
+
      // create a subset of all nodes, including only those in positionObjects
    //var filterStrings = [];
    //for(var i=0; i < positionObjects.length; i++){
@@ -1501,9 +1503,9 @@ return{
 }); // RCyjsModule
 
 hub = BrowserViz();
-rcy = RCyjsModule();
+rcy <- RCyjsModule();
 rcy.setHub(hub);
-rcy.addMessageHandlers()
+rcy.addMessageHandlers();
 
 hub.addOnDocumentReadyFunction(rcy.initUI);
 hub.start();

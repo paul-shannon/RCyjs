@@ -758,7 +758,7 @@ function getPosition(msg)
 function setPosition(msg)
 {
    console.log("==== setPosition");
-   console.log(msg.payload);
+   //console.log(msg.payload);
      // there will be 1 or more position objects, each with id, x, and y values
    var positionObjects = msg.payload;
 
@@ -768,7 +768,7 @@ function setPosition(msg)
       var xPos = obj.x;
       var yPos = obj.y;
       var filterString = "[id='" + id + "']";
-      console.log(" setPosition " + id + ": " + xPos + ", " + yPos);
+      //console.log(" setPosition " + id + ": " + xPos + ", " + yPos);
       cy.nodes(filterString).position({x: xPos, y: yPos});
       } // for i
 

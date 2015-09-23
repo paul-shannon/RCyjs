@@ -162,7 +162,9 @@ function redraw(msg)
 //----------------------------------------------------------------------------------------------------
 function fit(msg)
 {
-   cy.fit()
+   var padding = msg.payload;
+   console.log("fit, with padding " + padding);
+   cy.fit(padding)
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // fit
@@ -170,12 +172,15 @@ function fit(msg)
 function fitSelected(msg)
 {
    var selectedNodes = cy.filter('node:selected');
+   var padding = msg.payload;
+
    if(selectedNodes.length == 0){
      status = "failure";
      payload = "no nodes currently selected"
      }
   else{
-    cy.fit(selectedNodes)
+    console.log("fitSelected, with padding " + padding);
+    cy.fit(selectedNodes, padding)
     status = "success";
     payload = "";
     }
@@ -663,15 +668,6 @@ function getNodeSize(msg)
 
 } // getNodeSize
 //----------------------------------------------------------------------------------------------------
-function fit(msg)
-{
-   console.log("=== fit");
-   cy.fit()
-
-   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
-
-} // fit
-//----------------------------------------------------------------------------------------------------
 function layoutStrategies(msg)
 {
    console.log("=== layoutStrategies");
@@ -762,6 +758,13 @@ function setPosition(msg)
      // there will be 1 or more position objects, each with id, x, and y values
    var positionObjects = msg.payload;
 
+   console.log("calling setPosition map");
+   positionObjects.map(function(e){
+       var tag="[id='" + e.id + "']"; 
+       cy.$(tag).position({x: e.x, y:e.y});
+       });
+
+   /************
    for(var i=0; i < positionObjects.length; i++){
       var obj = positionObjects[i];
       var id = obj.id;
@@ -771,8 +774,8 @@ function setPosition(msg)
       //console.log(" setPosition " + id + ": " + xPos + ", " + yPos);
       cy.nodes(filterString).position({x: xPos, y: yPos});
       } // for i
-
-   console.log("after setPosition for loop");
+    ********/
+   console.log("after setPosition map");
 
      // create a subset of all nodes, including only those in positionObjects
    //var filterStrings = [];
@@ -1370,8 +1373,8 @@ function createCytoscapeWindow(graph, hideEdges) {
    cy.cytoscape({
        elements: graph.elements,
        showOverlay: false,
-       minZoom: 0.01,
-       maxZoom: 8.0,
+       minZoom: 0.001,
+       maxZoom: 100.0,
        boxSelectionEnabled: true,
        layout: {
          name: "preset",
@@ -1503,7 +1506,7 @@ return{
 }); // RCyjsModule
 
 hub = BrowserViz();
-rcy <- RCyjsModule();
+rcy = RCyjsModule();
 rcy.setHub(hub);
 rcy.addMessageHandlers();
 

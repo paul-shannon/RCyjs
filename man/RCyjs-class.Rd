@@ -27,10 +27,6 @@
 \alias{setNodeAttributes,RCyjsClass-method}
 \alias{\S4method{setNodeAttributes}{RCyjsClass}}
 
-\alias{setEdgeAttributes}
-\alias{setEdgeAttributes,RCyjsClass-method}
-\alias{\S4method{setEdgeAttributes}{RCyjsClass}}
-
 \alias{getNodes}
 \alias{getNodes,RCyjsClass-method}
 \alias{\S4method{getNodes}{RCyjsClass}}
@@ -219,6 +215,22 @@
 \alias{layout,RCyjsClass-method}
 \alias{\S4method{layout}{RCyjsClass}}
 
+\alias{hAlign}
+\alias{hAlign,RCyjsClass-method}
+\alias{\S4method{hAlign}{RCyjsClass}}
+
+\alias{vAlign}
+\alias{vAlign,RCyjsClass-method}
+\alias{\S4method{vAlign}{RCyjsClass}}
+
+\alias{layoutSelectionInGrid}
+\alias{layoutSelectionInGrid,RCyjsClass-method}
+\alias{\S4method{layoutSelectionInGrid}{RCyjsClass}}
+
+\alias{layoutSelectionInGridInferAnchor}
+\alias{layoutSelectionInGridInferAnchor,RCyjsClass-method}
+\alias{\S4method{layoutSelectionInGridInferAnchor}{RCyjsClass}}
+
 \alias{getPosition}
 \alias{getPosition,RCyjsClass-method}
 \alias{\S4method{getPosition}{RCyjsClass}}
@@ -242,6 +254,10 @@
 \alias{getJSON}
 \alias{getJSON,RCyjsClass-method}
 \alias{\S4method{getJSON}{RCyjsClass}}
+
+\alias{fit}
+\alias{fit,RCyjsClass-method}
+\alias{\S4method{fit}{RCyjsClass}}
 
 \alias{fitContent}
 \alias{fitContent,RCyjsClass-method}
@@ -310,12 +326,11 @@ noaNames(graph)
 edaNames(graph)
 
 % now class methods
-\S4method{setGraph}{RCyjsClass}(obj, graph)
+\S4method{setGraph}{RCyjsClass}(obj, graph, hideEdges)
 \S4method{addGraph}{RCyjsClass}(obj, graph)
 \S4method{httpAddGraph}{RCyjsClass}(obj, graph)
 \S4method{httpSetStyle}{RCyjsClass}(obj, filename)
-\S4method{setNodeAttributes}{RCyjsClass}(obj, graph)
-\S4method{setEdgeAttributes}{RCyjsClass}(obj, graph)
+\S4method{setNodeAttributes}{RCyjsClass}(obj, attribute, nodes, values)
 \S4method{getNodes}{RCyjsClass}(obj)
 \S4method{getSelectedNodes}{RCyjsClass}(obj)
 \S4method{invertNodeSelection}{RCyjsClass}(obj)
@@ -350,8 +365,13 @@ edaNames(graph)
 \S4method{setZoom}{RCyjsClass}(obj, newValue)
 \S4method{getZoom}{RCyjsClass}(obj)
 \S4method{setBackgroundColor}{RCyjsClass}(obj, newValue)
-\S4method{fitContent}{RCyjsClass}(obj)
-\S4method{fitSelectedContent}{RCyjsClass}(obj)
+\S4method{fit}{RCyjsClass}(obj, padding)
+\S4method{fitContent}{RCyjsClass}(obj, padding)
+\S4method{fitSelectedContent}{RCyjsClass}(obj, padding)
+\S4method{hAlign}{RCyjsClass}(obj)
+\S4method{vAlign}{RCyjsClass}(obj)
+\S4method{layoutSelectionInGrid}{RCyjsClass}(obj, x, y, w, h)
+\S4method{layoutSelectionInGridInferAnchor}{RCyjsClass}(obj, w, h)
 \S4method{selectNodes}{RCyjsClass}(obj, nodeIDs)
 \S4method{sfn}{RCyjsClass}(obj)
 \S4method{setDefaultNodeSize}{RCyjsClass}(obj, newValue)
@@ -446,8 +466,16 @@ edaNames(graph)
   \item{edgeCount}{An integer value for the requested graph.}
   \item{node.attribute.name}{a character string.}
   \item{edge.attribute.name}{a character string.}
-
-
+  \item{hideEdges}{A logical value. If the graph has many edges, you may
+  wish to hide them initially.}
+  \item{nodes}{Character list, node ids.}
+  \item{values}{Any type.}
+  \item{edgeType}{Character value.}
+  \item{padding}{Integer value, pixels.}
+  \item{x}{Integer value, pixels.}
+  \item{y}{Integer value, pixels.}
+  \item{w}{Integer value, pixels.}
+  \item{h}{Integer value, pixels.}
 }
 
 

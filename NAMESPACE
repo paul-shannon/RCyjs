@@ -8,7 +8,6 @@ exportMethods(
    getNodes,
 
    setNodeAttributes,
-   setEdgeAttributes,
     
    setDefaultNodeSize,
    setDefaultNodeWidth,
@@ -51,18 +50,33 @@ exportMethods(
    setEdgeSourceArrowShapeRule,
    setEdgeSourceArrowColorRule,
     
+   setEdgeSourceArrowColorRule,
+   setEdgeTargetArrowColorRule,
+   setGraph,
+   setNodeAttributes,
+   setNodeColorRule,
+   setNodeLabelRule,
+   setNodeShapeRule,
+   setNodeSizeRule,
+   setZoom,
+
+    
    redraw,
    layoutStrategies,
    layout,
    layoutSelectionInGrid,
+   layoutSelectionInGridInferAnchor,
    getPosition,
    setPosition,
    getLayout,
    saveLayout,
    restoreLayout,
    getJSON,
+   fit,
    fitContent,
    fitSelectedContent,
+   vAlign,
+   hAlign,
    selectNodes,
    invertNodeSelection,
    hideSelectedNodes,
@@ -98,6 +112,7 @@ importFrom(jsonlite,fromJSON)
 importFrom(methods, new)
 import(BrowserViz)
 import(httpuv)
+import(Rcpp)
 importFrom(igraph,graph.attributes)
 importFrom(igraph,V)
 importFrom(igraph,"V<-")

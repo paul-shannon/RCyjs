@@ -58,6 +58,8 @@ runTests = function()
    test.setEdgeAttributes();
 
    test.compoundNodes();
+   test.httpSetStyle();
+   test.httpAddGraph()
 
 } # run.tests
 #----------------------------------------------------------------------------------------------------
@@ -65,7 +67,7 @@ runTests = function()
 demo <- function(portRange=PORTS)
 {
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=portRange, quiet=TRUE, graph=g, hideEdges=TRUE);
+   rcy <- RCyjs(portRange=portRange, quiet=TRUE, graph=g, hideEdges=FALSE);
    
    checkTrue(ready(rcy))
 
@@ -1044,4 +1046,33 @@ getExpression <- function()
   
 } #  getExpression
 #----------------------------------------------------------------------------------------------------
+test.httpSetStyle <- function(count=3)
+{
+   print("--- test.httpSetStyle")
+   rcy <- demo()
+   selectNodes(rcy, c("A", "B"))
+   styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+   styleFile.2 <- system.file(package="RCyjs", "extdata", "sampleStyle2.js");
+               
+   for(i in 1:count){
+      httpSetStyle(rcy, styleFile.1)
+      Sys.sleep(1)
+      httpSetStyle(rcy, styleFile.2)
+      Sys.sleep(1)
+      } # for i
 
+} # test.httpSetStyle
+#----------------------------------------------------------------------------------------------------
+test.httpAddGraph <- function()
+{
+   print("--- test.httpAddGraph")
+   rcy <- demo()
+   setBackgroundColor(rcy, "#FAFAFA")
+   setDefaultEdgeColor(rcy, "blue")
+   redraw(rcy)
+   g2 <- createTestGraph(100, 100)
+   httpAddGraph(rcy, g2)
+   layout(rcy, "grid")
+ 
+} # test.httpAddGraph
+#----------------------------------------------------------------------------------------------------

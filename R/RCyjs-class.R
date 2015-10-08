@@ -1,5 +1,6 @@
 #----------------------------------------------------------------------------------------------------
 cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
+printf <- function(...) print(noquote(sprintf(...)))
 #----------------------------------------------------------------------------------------------------
 .RCyjs <- setClass ("RCyjsClass", 
                     representation = representation(graph="graph"),
@@ -15,7 +16,7 @@ setGeneric('httpSetStyle',        signature='obj', function(obj, filename) stand
 
 setGeneric('getNodes',            signature='obj', function(obj) standardGeneric ('getNodes'))
 setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, nodes, values) standardGeneric('setNodeAttributes'))
-setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, edges, values) standardGeneric('setEdgeAttributes'))
+#setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, edges, values) standardGeneric('setEdgeAttributes'))
 
 setGeneric('getSelectedNodes',    signature='obj', function(obj) standardGeneric ('getSelectedNodes'))
 setGeneric('clearSelection',      signature='obj', function(obj) standardGeneric ('clearSelection'))
@@ -42,6 +43,7 @@ setGeneric('setEdgeSourceArrowColorRule',   signature='obj', function(obj, attri
 setGeneric('layout',              signature='obj', function(obj, strategy) standardGeneric('layout'))
 setGeneric('layoutStrategies',    signature='obj', function(obj) standardGeneric('layoutStrategies'))
 setGeneric('layoutSelectionInGrid', signature='obj', function(obj, x, y, w, h) standardGeneric('layoutSelectionInGrid'))
+setGeneric('layoutSelectionInGridInferAnchor', signature='obj', function(obj, w, h) standardGeneric('layoutSelectionInGridInferAnchor'))
 setGeneric('getPosition',         signature='obj', function(obj, nodeIDs=NA) standardGeneric('getPosition'))
 setGeneric('setPosition',         signature='obj', function(obj, tbl.pos) standardGeneric('setPosition'))
 setGeneric('getLayout',           signature='obj', function(obj) standardGeneric('getLayout'))
@@ -51,8 +53,9 @@ setGeneric('restoreLayout',       signature='obj', function(obj, filename) stand
 setGeneric('setZoom',             signature='obj', function(obj, newValue) standardGeneric('setZoom'))
 setGeneric('getZoom',             signature='obj', function(obj) standardGeneric('getZoom'))
 setGeneric('setBackgroundColor',  signature='obj', function(obj, newValue) standardGeneric ('setBackgroundColor'))
-setGeneric('fitContent',          signature='obj', function(obj) standardGeneric('fitContent'))
-setGeneric('fitSelectedContent',  signature='obj', function(obj) standardGeneric('fitSelectedContent'))
+setGeneric('fit',                 signature='obj', function(obj, padding=30) standardGeneric('fit'))
+setGeneric('fitContent',          signature='obj', function(obj, padding=30) standardGeneric('fitContent'))
+setGeneric('fitSelectedContent',  signature='obj', function(obj, padding=30) standardGeneric('fitSelectedContent'))
 setGeneric('selectNodes',         signature='obj', function(obj, nodeIDs) standardGeneric('selectNodes'))
 setGeneric('sfn',                 signature='obj', function(obj) standardGeneric('sfn'))
 
@@ -60,6 +63,8 @@ setGeneric('hideAllEdges',        signature='obj', function(obj) standardGeneric
 setGeneric('showAllEdges',        signature='obj', function(obj) standardGeneric('showAllEdges'))
 setGeneric('hideEdges',           signature='obj', function(obj, edgeType) standardGeneric('hideEdges'))
 setGeneric('showEdges',           signature='obj', function(obj, edgeType) standardGeneric('showEdges'))
+setGeneric('vAlign',              signature='obj', function(obj) standardGeneric('vAlign'))
+setGeneric('hAlign',              signature='obj', function(obj) standardGeneric('hAlign'))
 
 setGeneric("setDefaultNodeSize",  signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeSize'))
 setGeneric("setDefaultNodeWidth", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeWidth'))
@@ -92,7 +97,9 @@ setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newV
 RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
 {
   
-  obj <- .RCyjs(BrowserViz(portRange, host, title, quiet, browserFile=cyjsBrowserFile), graph=graph)
+  obj <- .RCyjs(BrowserViz(portRange, host, title, quiet, browserFile=cyjsBrowserFile,
+                           httpQueryProcessingFunction=myQP),
+                graph=graph)
 
   while (!browserResponseReady(obj)){
       Sys.sleep(.1)
@@ -289,11 +296,11 @@ setMethod('setNodeAttributes', 'RCyjsClass',
      }) # setNodeAttributes
 
 #------------------------------------------------------------------------------------------------------------------------
-setMethod('setEdgeAttributes', 'RCyjsClass',
-
-   function(obj, attribute, edges, values){
-     }) # setEdgeAttributes
-
+#setMethod('setEdgeAttributes', 'RCyjsClass',
+#
+#   function(obj, attribute, edges, values){
+#     }) # setEdgeAttributes
+#
 #------------------------------------------------------------------------------------------------------------------------
 setMethod('redraw', 'RCyjsClass',
 
@@ -561,6 +568,21 @@ setMethod('layoutSelectionInGrid', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
+# anchor (the top left) of the grid is the location of the topmost/leftmost node
+setMethod('layoutSelectionInGridInferAnchor', 'RCyjsClass',
+
+   function(obj, w, h){
+     payload <- list(w=w, h=h)
+     send(obj, list(cmd="layoutSelectionInGridInferAnchor", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     getBrowserResponse(obj)     
+     
+     })
+
+#----------------------------------------------------------------------------------------------------
 setMethod('getPosition', 'RCyjsClass',
 
   function (obj, nodeIDs=NA) {
@@ -656,11 +678,17 @@ eda = function (graph, edge.attribute.name)
 
 } # eda
 #------------------------------------------------------------------------------------------------------------------------
+setMethod('fit', 'RCyjsClass',
+
+  function (obj, padding=30) {
+     fitContent(obj, padding);
+     })
+
+#----------------------------------------------------------------------------------------------------
 setMethod('fitContent', 'RCyjsClass',
 
-  function (obj) {
-     send(obj, list(cmd="fit", callback="handleResponse", status="request",
-                                  payload=""))
+  function (obj, padding=30) {
+     send(obj, list(cmd="fit", callback="handleResponse", status="request", payload=padding))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -670,9 +698,8 @@ setMethod('fitContent', 'RCyjsClass',
 #----------------------------------------------------------------------------------------------------
 setMethod('fitSelectedContent', 'RCyjsClass',
 
-  function (obj) {
-     send(obj, list(cmd="fitSelected", callback="handleResponse", status="request",
-                                  payload=""))
+  function (obj, padding=30) {
+     send(obj, list(cmd="fitSelected", callback="handleResponse", status="request", payload=padding))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -1027,4 +1054,84 @@ setMethod("setDefaultEdgeSourceArrowShape", "RCyjsClass",
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
+#----------------------------------------------------------------------------------------------------
+setMethod("vAlign", "RCyjsClass",
+   function(obj) {
+     .alignSelectedNodes(obj, "vertical")
+     }) 
+#------------------------------------------------------------------------------------------------------------------------
+setMethod("hAlign", "RCyjsClass",
+   function(obj) {
+     .alignSelectedNodes(obj, "horizontal")
+     }) 
+#------------------------------------------------------------------------------------------------------------------------
+.alignSelectedNodes <- function(rcy, axis) {
+  
+   selectedNodes <- getSelectedNodes(rcy)$id
+   if(length(selectedNodes) < 2){
+      printf("select 2 or more nodes");
+      return;
+      }
+    tbl.pos <- getPosition(rcy, selectedNodes)
+   if(axis == "vertical"){
+      x.mean <- sum(tbl.pos$x)/nrow(tbl.pos)
+      tbl.pos$x <- x.mean
+      }
+   else{
+     y.mean <- sum(tbl.pos$y)/nrow(tbl.pos)
+     tbl.pos$y <- y.mean
+     }
+    setPosition(rcy, tbl.pos)
+
+} # .alignSelectedNodes
+#------------------------------------------------------------------------------------------------------------------------
+myQP <- function(queryString)
+{
+   printf("=== RCYjs-class::myQP");
+   print(queryString)
+     # for reasons not quite clear, the query string comes in with extra characters
+     # following the expected filename:
+     #
+     #  "?sampleStyle.js&_=1443650062946"
+     #
+     # check for that, cleanup the string, then see if the file can be found
+
+   ampersand.loc <- as.integer(regexpr("&", queryString, fixed=TRUE))
+   printf("ampersand.loc: %d", ampersand.loc)
+   
+   if(ampersand.loc > 0){
+      queryString <- substring(queryString, 1, ampersand.loc - 1);
+      }
+       
+   questionMark.loc <- as.integer(regexpr("?", queryString, fixed=TRUE));
+   printf("questionMark.loc: %d", questionMark.loc)
+   
+   if(questionMark.loc == 1)
+      queryString <- substring(queryString, 2, nchar(queryString))
+
+   filename <- queryString;
+   printf("myQP filename: '%s'", filename)
+   printf("       exists?  %s", file.exists(filename));
+
+   stopifnot(file.exists(filename))
+   
+   text <- paste(scan(filename, what=character(0), sep="\n"), collapse=" ")
+   print(text)
+
+   
+  # text <- paste(c('vizmap = [',
+  #                 '   {selector:"node:selected", css: {',
+  #                 '       "text-valign":"center",',
+  #                 '       "text-halign":"center",',
+  #                 '       "border-color": "black",',
+  #                 '       "content": "data(id)",',
+  #                 '       "border-width": "3px",',
+  #                 '       "overlay-opacity": 0.2,',
+  #                 '       "overlay-color": "green"',
+  #                 '        }}',
+  #                 '   ];'), collapse=" ");
+
+   return(text);
+
+} # myQP
 #----------------------------------------------------------------------------------------------------

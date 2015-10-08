@@ -106,6 +106,7 @@ function addMessageHandlers()
    hub.addMessageHandler("layoutStrategies",      layoutStrategies);
    hub.addMessageHandler("doLayout",              doLayout);
    hub.addMessageHandler("layoutSelectionInGrid", layoutSelectionInGrid);
+   hub.addMessageHandler("layoutSelectionInGridInferAnchor", layoutSelectionInGridInferAnchor);
 
    hub.addMessageHandler("getNodeSize",          getNodeSize);
    hub.addMessageHandler("getPosition",          getPosition);
@@ -703,6 +704,29 @@ function layoutSelectionInGrid(msg)
   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // layoutSelectinInfGrid
+//----------------------------------------------------------------------------------------------------
+function layoutSelectionInGridInferAnchor(msg)
+{
+  var currentPan = cy.pan();
+  var currentZoom = cy.zoom();
+
+  var w = msg.payload.w
+  var h = msg.payload.h
+
+  var yCoordinates = cy.nodes("node:selected").map(function(node) {return node.position().y});
+  var xCoordinates = cy.nodes("node:selected").map(function(node) {return node.position().x});
+
+  var y = Math.min.apply(null, yCoordinates)
+  var x = Math.min.apply(null, xCoordinates)
+
+  var box = {x1: x, y1: y, w: w, h: h }
+
+  cy.filter("node:selected").layout({ name: 'grid', boundingBox: box });
+  cy.viewport({zoom: currentZoom, pan: currentPan});
+
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // layoutSelectionInGridInferAnchor
 //----------------------------------------------------------------------------------------------------
 function getJSON(msg)
 {
@@ -1443,7 +1467,11 @@ function qtipOptions()
 // expected file contents:  vizmap = [{selector:"node",css: {...
 function loadStyle(filename)
 {
-   s = "http://localhost:8000/" + filename;
+   // s = "http://localhost:8000/" + filename;
+   console.log("rcyjs.loadStyle, filename: " + filename);
+
+   var s = window.location.href + "?" + filename;
+
    console.log("=== about to getScript on " + s);
 
    $.getScript(s)
@@ -1460,7 +1488,7 @@ function loadStyle(filename)
 //----------------------------------------------------------------------------------------------------
 addNetwork = function (filename)
 {
-   s = "http://localhost:8000/" + filename;
+   var s =    s = window.location.href + "?" + filename;
    console.log("=== about to getScript on " + s);
    $.getScript(s)
      .done(function(script, textStatus) {
@@ -1470,7 +1498,7 @@ addNetwork = function (filename)
            console.log("edges: " + network.elements.edges.length);
          cy.add(network.elements);  // no positions yet
          cy.nodes().map(function(node){node.data({degree: node.degree()})});
-         cy.edges().style({"display": "none"});  // default hide edges for now
+         //cy.edges().style({"display": "none"});  // default hide edges for now
          //cy.elements().qtip(qtipOptions());
          }) // .done
     .fail(function(jqxhr, settings, exception) {

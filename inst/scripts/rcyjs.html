@@ -5,7 +5,7 @@
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-2.1.1.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-ui-1.11.2.min.js"></script>
    <link   rel="stylesheet" href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery-ui-1.11.2.css">
-   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.4.5.min.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.5.0.min.js"></script>
 
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery.qtip.min.js"></script>
    <link   rel="stylesheet" type="text/css", 
@@ -79,6 +79,8 @@ function addMessageHandlers()
    hub.addMessageHandler("addGraph",             addGraph);
    hub.addMessageHandler("httpAddGraph",         httpAddGraph);
    hub.addMessageHandler("httpSetStyle",         httpSetStyle);
+   hub.addMessageHandler("getNodeCount",         getNodeCount);
+   hub.addMessageHandler("getEdgeCount",         getEdgeCount);
    hub.addMessageHandler("getNodes",             getNodes);
    hub.addMessageHandler("getSelectedNodes",     getSelectedNodes);
 
@@ -1186,6 +1188,31 @@ function setEdgeAttributes(msg)
 
 } // setEdgeAttributes
 //----------------------------------------------------------------------------------------------------
+function getNodeCount(msg)
+{
+   var status = "success";  // be optimistic
+
+   result = JSON.stringify(cy.nodes().length);
+   returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
+   console.log("getNodeCount returning payload: " + result);
+
+   console.log(returnMsg);
+   hub.send(returnMsg);
+
+} // getNodeCount
+//---------------------------------------------------------------------------------------------------
+function getEdgeCount(msg)
+{
+   result = JSON.stringify(cy.edges().length);
+   returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
+   console.log("getEdgeount returning payload: " + result);
+
+   console.log(returnMsg);
+   hub.send(returnMsg);
+
+
+} // getEdgeCount
+//---------------------------------------------------------------------------------------------------
 function getNodes(msg)
 {
    var status = "success";  // be optimistic
@@ -1202,7 +1229,6 @@ function getNodes(msg)
                                 return {id: node.data().id, name: node.data().name}}));
       }
 
-   console.log("getNodes returning payload: " + payload);
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
 
 } // getNodes
@@ -1467,11 +1493,10 @@ function qtipOptions()
 // expected file contents:  vizmap = [{selector:"node",css: {...
 function loadStyle(filename)
 {
-   // s = "http://localhost:8000/" + filename;
+   //var s = "http://localhost:8000/" + filename;
    console.log("rcyjs.loadStyle, filename: " + filename);
 
    var s = window.location.href + "?" + filename;
-
    console.log("=== about to getScript on " + s);
 
    $.getScript(s)
@@ -1482,7 +1507,9 @@ function loadStyle(filename)
        })
     .fail(function( jqxhr, settings, exception ) {
        console.log("getScript error trying to read " + filename);
-      });
+       console.log("exception: ");
+       console.log(exception);
+       });
 
 } // loadStyle
 //----------------------------------------------------------------------------------------------------

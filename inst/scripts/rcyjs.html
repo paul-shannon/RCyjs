@@ -5,7 +5,7 @@
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-2.1.1.js"></script>
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery-ui-1.11.2.min.js"></script>
    <link   rel="stylesheet" href="http://oncoscape.sttrcancer.org/oncoscape/css/jquery-ui-1.11.2.css">
-   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.5.0.min.js"></script>
+   <script src="http://oncoscape.sttrcancer.org/oncoscape/js/cytoscape-2.5.1.min.js"></script>
 
    <script src="http://oncoscape.sttrcancer.org/oncoscape/js/jquery.qtip.min.js"></script>
    <link   rel="stylesheet" type="text/css", 
@@ -1439,6 +1439,7 @@ function createCytoscapeWindow(graph, hideEdges) {
         cy.layout({name: "random"});
         cy.reset();
         cy.fit(50);
+        cy.edges().selectify();
         //cy.elements().qtip(qtipOptions());
         } // cy.ready
        })

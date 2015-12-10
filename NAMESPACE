@@ -5,6 +5,10 @@ exportMethods(
    addGraph,
    httpAddGraph,
    httpSetStyle,
+
+   getNodeCount,
+   getEdgeCount,
+    
    getNodes,
 
    setNodeAttributes,

@@ -27,6 +27,14 @@
 \alias{setNodeAttributes,RCyjsClass-method}
 \alias{\S4method{setNodeAttributes}{RCyjsClass}}
 
+\alias{getNodeCount}
+\alias{getNodeCount,RCyjsClass-method}
+\alias{\S4method{getNodeCount}{RCyjsClass}}
+
+\alias{getEdgeCount}
+\alias{getEdgeCount,RCyjsClass-method}
+\alias{\S4method{getEdgeCount}{RCyjsClass}}
+
 \alias{getNodes}
 \alias{getNodes,RCyjsClass-method}
 \alias{\S4method{getNodes}{RCyjsClass}}
@@ -331,6 +339,8 @@ edaNames(graph)
 \S4method{httpAddGraph}{RCyjsClass}(obj, graph)
 \S4method{httpSetStyle}{RCyjsClass}(obj, filename)
 \S4method{setNodeAttributes}{RCyjsClass}(obj, attribute, nodes, values)
+\S4method{getNodeCount}{RCyjsClass}(obj)
+\S4method{getEdgeCount}{RCyjsClass}(obj)
 \S4method{getNodes}{RCyjsClass}(obj)
 \S4method{getSelectedNodes}{RCyjsClass}(obj)
 \S4method{invertNodeSelection}{RCyjsClass}(obj)

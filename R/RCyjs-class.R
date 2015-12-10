@@ -14,7 +14,10 @@ setGeneric('addGraph',            signature='obj', function(obj, graph) standard
 setGeneric('httpAddGraph',        signature='obj', function(obj, graph) standardGeneric ('httpAddGraph'))
 setGeneric('httpSetStyle',        signature='obj', function(obj, filename) standardGeneric ('httpSetStyle'))
 
+setGeneric('getNodeCount',        signature='obj', function(obj) standardGeneric ('getNodeCount'))
+setGeneric('getEdgeCount',        signature='obj', function(obj) standardGeneric ('getEdgeCount'))
 setGeneric('getNodes',            signature='obj', function(obj) standardGeneric ('getNodes'))
+
 setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, nodes, values) standardGeneric('setNodeAttributes'))
 #setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, edges, values) standardGeneric('setEdgeAttributes'))
 
@@ -183,8 +186,38 @@ setMethod('httpSetStyle', 'RCyjsClass',
 setMethod('getNodes', 'RCyjsClass',
 
   function (obj) {
-     send(obj, list(cmd="getNodes", callback="handleResponse", status="request",
+     send(obj, list(cmd="getNodes", callback="handleResponse", status="request", payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       return("")
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('getNodeCount', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="getNodeCount", callback="handleResponse", status="request",
                                   payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       return("")
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('getEdgeCount', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="getEdgeCount", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -1097,40 +1130,30 @@ myQP <- function(queryString)
      # check for that, cleanup the string, then see if the file can be found
 
    ampersand.loc <- as.integer(regexpr("&", queryString, fixed=TRUE))
-   printf("ampersand.loc: %d", ampersand.loc)
+   #printf("ampersand.loc: %d", ampersand.loc)
    
    if(ampersand.loc > 0){
       queryString <- substring(queryString, 1, ampersand.loc - 1);
       }
        
    questionMark.loc <- as.integer(regexpr("?", queryString, fixed=TRUE));
-   printf("questionMark.loc: %d", questionMark.loc)
+   #printf("questionMark.loc: %d", questionMark.loc)
    
    if(questionMark.loc == 1)
       queryString <- substring(queryString, 2, nchar(queryString))
 
    filename <- queryString;
-   printf("myQP filename: '%s'", filename)
-   printf("       exists?  %s", file.exists(filename));
+   #printf("myQP filename: '%s'", filename)
+   #printf("       exists?  %s", file.exists(filename));
 
    stopifnot(file.exists(filename))
    
-   text <- paste(scan(filename, what=character(0), sep="\n"), collapse=" ")
-   print(text)
-
+   printf("--- about to scan %s", filename);
+      # reconstitute linefeeds though collapsing file into one string, so json
+      # structure is intact, and any "//" comment tokens only affect one line
+   text <- paste(scan(filename, what=character(0), sep="\n", quiet=TRUE), collapse="\n")
+   printf("%d chars read from %s", nchar(text), filename);
    
-  # text <- paste(c('vizmap = [',
-  #                 '   {selector:"node:selected", css: {',
-  #                 '       "text-valign":"center",',
-  #                 '       "text-halign":"center",',
-  #                 '       "border-color": "black",',
-  #                 '       "content": "data(id)",',
-  #                 '       "border-width": "3px",',
-  #                 '       "overlay-opacity": 0.2,',
-  #                 '       "overlay-color": "green"',
-  #                 '        }}',
-  #                 '   ];'), collapse=" ");
-
    return(text);
 
 } # myQP

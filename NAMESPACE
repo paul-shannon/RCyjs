@@ -8,11 +8,11 @@ exportMethods(
 
    getNodeCount,
    getEdgeCount,
-    
+
    getNodes,
 
    setNodeAttributes,
-    
+
    setDefaultNodeSize,
    setDefaultNodeWidth,
    setDefaultNodeHeight,
@@ -45,7 +45,7 @@ exportMethods(
    setNodeSizeRule,
    setNodeColorRule,
    setNodeShapeRule,
-    
+
    setEdgeStyle,
    setEdgeColorRule,
    setEdgeWidthRule,
@@ -53,7 +53,7 @@ exportMethods(
    setEdgeTargetArrowColorRule,
    setEdgeSourceArrowShapeRule,
    setEdgeSourceArrowColorRule,
-    
+
    setEdgeSourceArrowColorRule,
    setEdgeTargetArrowColorRule,
    setGraph,
@@ -64,7 +64,7 @@ exportMethods(
    setNodeSizeRule,
    setZoom,
 
-    
+
    redraw,
    layoutStrategies,
    layout,
@@ -87,6 +87,7 @@ exportMethods(
    deleteSelectedNodes,
    hideAllEdges,
    showAllEdges,
+   showAll,
    hideEdges,
    showEdges,
    clearSelection,

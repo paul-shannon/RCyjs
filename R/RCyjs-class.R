@@ -2,7 +2,7 @@
 cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
 printf <- function(...) print(noquote(sprintf(...)))
 #----------------------------------------------------------------------------------------------------
-.RCyjs <- setClass ("RCyjsClass", 
+.RCyjs <- setClass ("RCyjsClass",
                     representation = representation(graph="graph"),
                     contains = "BrowserVizClass",
                     prototype = prototype (uri="http://localhost", 9000)
@@ -64,6 +64,7 @@ setGeneric('sfn',                 signature='obj', function(obj) standardGeneric
 
 setGeneric('hideAllEdges',        signature='obj', function(obj) standardGeneric('hideAllEdges'))
 setGeneric('showAllEdges',        signature='obj', function(obj) standardGeneric('showAllEdges'))
+setGeneric('showAll',             signature='obj', function(obj) standardGeneric('showAll'))
 setGeneric('hideEdges',           signature='obj', function(obj, edgeType) standardGeneric('hideEdges'))
 setGeneric('showEdges',           signature='obj', function(obj, edgeType) standardGeneric('showEdges'))
 setGeneric('vAlign',              signature='obj', function(obj) standardGeneric('vAlign'))
@@ -99,7 +100,7 @@ setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newV
 # constructor
 RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
 {
-  
+
   obj <- .RCyjs(BrowserViz(portRange, host, title, quiet, browserFile=cyjsBrowserFile,
                            httpQueryProcessingFunction=myQP),
                 graph=graph)
@@ -114,7 +115,7 @@ RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), h
 
    if(length(nodes(graph)) > 0)
       setGraph(obj, graph, hideEdges=hideEdges)
-      
+
    obj
 
 } # RCyjs: constructor
@@ -124,7 +125,7 @@ setMethod('setGraph', 'RCyjsClass',
   function (obj, graph, hideEdges=FALSE) {
      g.json <- as.character(biocGraphToCytoscapeJSON(graph))
      #printf("RCyjs.setGraph sending g.json with %d chars", nchar(g.json))
-     
+
      send(obj, list(cmd="setGraph", callback="handleResponse", status="request",
                     payload=list(graph=g.json, hideEdges=hideEdges)))
      while (!browserResponseReady(obj)){
@@ -311,7 +312,7 @@ setMethod('setNodeAttributes', 'RCyjsClass',
 
      if (length (nodes) == 0)
        return ()
-     
+
      if(length(values) == 1)
         values <- rep(values, length(nodes))
 
@@ -571,9 +572,9 @@ setMethod('layoutStrategies', 'RCyjsClass',
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     getBrowserResponse(obj)     
+     getBrowserResponse(obj)
      })
-          
+
 #----------------------------------------------------------------------------------------------------
 setMethod('layout', 'RCyjsClass',
 
@@ -583,9 +584,9 @@ setMethod('layout', 'RCyjsClass',
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     getBrowserResponse(obj)     
+     getBrowserResponse(obj)
      })
-          
+
 #----------------------------------------------------------------------------------------------------
 setMethod('layoutSelectionInGrid', 'RCyjsClass',
 
@@ -596,8 +597,8 @@ setMethod('layoutSelectionInGrid', 'RCyjsClass',
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     getBrowserResponse(obj)     
-     
+     getBrowserResponse(obj)
+
      })
 
 #----------------------------------------------------------------------------------------------------
@@ -611,8 +612,8 @@ setMethod('layoutSelectionInGridInferAnchor', 'RCyjsClass',
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     getBrowserResponse(obj)     
-     
+     getBrowserResponse(obj)
+
      })
 
 #----------------------------------------------------------------------------------------------------
@@ -628,7 +629,7 @@ setMethod('getPosition', 'RCyjsClass',
         }
      fromJSON(getBrowserResponse(obj))
      })
-          
+
 #----------------------------------------------------------------------------------------------------
 setMethod('setPosition', 'RCyjsClass',
 
@@ -639,7 +640,7 @@ setMethod('setPosition', 'RCyjsClass',
         }
      getBrowserResponse(obj)
      })
-          
+
 #----------------------------------------------------------------------------------------------------
 setMethod('getLayout', 'RCyjsClass',
 
@@ -651,7 +652,7 @@ setMethod('getLayout', 'RCyjsClass',
         }
      fromJSON(getBrowserResponse(obj))
      })
-          
+
 #----------------------------------------------------------------------------------------------------
 setMethod('saveLayout', 'RCyjsClass',
 
@@ -659,7 +660,7 @@ setMethod('saveLayout', 'RCyjsClass',
      tbl.layout <- getPosition(obj)
      save(tbl.layout, file=filename)
      })
-          
+
 #----------------------------------------------------------------------------------------------------
 setMethod('restoreLayout', 'RCyjsClass',
 
@@ -669,7 +670,7 @@ setMethod('restoreLayout', 'RCyjsClass',
      if(!all(is.na(tbl.layout)))
         x <- setPosition(obj, tbl.layout)
      })
-          
+
 #----------------------------------------------------------------------------------------------------
 setMethod('getJSON', 'RCyjsClass',
 
@@ -681,7 +682,7 @@ setMethod('getJSON', 'RCyjsClass',
         }
      getBrowserResponse(obj)
      })
-          
+
 #----------------------------------------------------------------------------------------------------
 noaNames = function (graph)
 {
@@ -780,6 +781,17 @@ setMethod('showAllEdges', 'RCyjsClass',
   function (obj) {
      send(obj, list(cmd="showAllEdges", callback="handleResponse", status="request",
                     payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('showAll', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="showAll", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -1091,15 +1103,15 @@ setMethod("setDefaultEdgeSourceArrowShape", "RCyjsClass",
 setMethod("vAlign", "RCyjsClass",
    function(obj) {
      .alignSelectedNodes(obj, "vertical")
-     }) 
+     })
 #------------------------------------------------------------------------------------------------------------------------
 setMethod("hAlign", "RCyjsClass",
    function(obj) {
      .alignSelectedNodes(obj, "horizontal")
-     }) 
+     })
 #------------------------------------------------------------------------------------------------------------------------
 .alignSelectedNodes <- function(rcy, axis) {
-  
+
    selectedNodes <- getSelectedNodes(rcy)$id
    if(length(selectedNodes) < 2){
       printf("select 2 or more nodes");
@@ -1131,14 +1143,14 @@ myQP <- function(queryString)
 
    ampersand.loc <- as.integer(regexpr("&", queryString, fixed=TRUE))
    #printf("ampersand.loc: %d", ampersand.loc)
-   
+
    if(ampersand.loc > 0){
       queryString <- substring(queryString, 1, ampersand.loc - 1);
       }
-       
+
    questionMark.loc <- as.integer(regexpr("?", queryString, fixed=TRUE));
    #printf("questionMark.loc: %d", questionMark.loc)
-   
+
    if(questionMark.loc == 1)
       queryString <- substring(queryString, 2, nchar(queryString))
 
@@ -1147,13 +1159,13 @@ myQP <- function(queryString)
    #printf("       exists?  %s", file.exists(filename));
 
    stopifnot(file.exists(filename))
-   
+
    printf("--- about to scan %s", filename);
       # reconstitute linefeeds though collapsing file into one string, so json
       # structure is intact, and any "//" comment tokens only affect one line
    text <- paste(scan(filename, what=character(0), sep="\n", quiet=TRUE), collapse="\n")
    printf("%d chars read from %s", nchar(text), filename);
-   
+
    return(text);
 
 } # myQP

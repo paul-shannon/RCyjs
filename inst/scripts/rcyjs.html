@@ -1161,11 +1161,14 @@ function setNodeAttributes(msg)
 
    for(var i=0; i < nodeIDs.length; i++){
       var name = nodeIDs[i];
-      var value = msg.payload.values[i];
+      var newValue = msg.payload.values[i];
       var filterString = "[name='" + name + "']";
       console.log("filterString: " + filterString);
-      console.log("nodeID: " + name + "   value: " + value);
-      cy.nodes().filter(filterString).data({attributeName: value});
+      console.log("nodeID: " + name + "   value: " + newValue);
+      var dataObj = cy.nodes().filter(filterString).data();
+      Object.defineProperty(dataObj, attributeName, {value: newValue});
+      //cy.nodes().filter(filterString).data({attributeName: value});
+      //cy.nodes().filter(filterString).data[attributeName] = value;
       } // for i
 
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});

@@ -49,6 +49,7 @@ setGeneric('layoutSelectionInGrid', signature='obj', function(obj, x, y, w, h) s
 setGeneric('layoutSelectionInGridInferAnchor', signature='obj', function(obj, w, h) standardGeneric('layoutSelectionInGridInferAnchor'))
 setGeneric('getPosition',         signature='obj', function(obj, nodeIDs=NA) standardGeneric('getPosition'))
 setGeneric('setPosition',         signature='obj', function(obj, tbl.pos) standardGeneric('setPosition'))
+setGeneric('getSize',             signature='obj', function(obj, nodeIDs=NA) standardGeneric('getSize'))
 setGeneric('getLayout',           signature='obj', function(obj) standardGeneric('getLayout'))
 setGeneric('saveLayout',          signature='obj', function(obj, filename) standardGeneric('saveLayout'))
 setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
@@ -639,6 +640,19 @@ setMethod('setPosition', 'RCyjsClass',
         Sys.sleep(.1)
         }
      getBrowserResponse(obj)
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('getSize', 'RCyjsClass',
+
+  function (obj, nodeIDs=NA) {
+     if(all(is.na(nodeIDs)))
+        nodeIDs <- ""
+     send(obj, list(cmd="getSize", callback="handleResponse", status="request", payload=nodeIDs))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     fromJSON(getBrowserResponse(obj))
      })
 
 #----------------------------------------------------------------------------------------------------

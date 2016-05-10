@@ -211,6 +211,10 @@
 \alias{showAllEdges,RCyjsClass-method}
 \alias{\S4method{showAllEdges}{RCyjsClass}}
 
+\alias{showAll}
+\alias{showAll,RCyjsClass-method}
+\alias{\S4method{showAll}{RCyjsClass}}
+
 \alias{showEdges}
 \alias{showEdges,RCyjsClass-method}
 \alias{\S4method{showEdges}{RCyjsClass}}
@@ -355,6 +359,7 @@ edaNames(graph)
 \S4method{hideAllEdges}{RCyjsClass}(obj)
 \S4method{hideEdges}{RCyjsClass}(obj, edgeType)
 \S4method{showAllEdges}{RCyjsClass}(obj)
+\S4method{showAll}{RCyjsClass}(obj)
 \S4method{showEdges}{RCyjsClass}(obj, edgeType)
 \S4method{setNodeLabelRule}{RCyjsClass}(obj, attribute)
 \S4method{setNodeLabelAlignment}{RCyjsClass}(obj, horizontal, vertical)

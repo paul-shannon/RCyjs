@@ -95,6 +95,7 @@ function addMessageHandlers()
    hub.addMessageHandler("getNodeSize",          getNodeSize);
    hub.addMessageHandler("getPosition",          getPosition);
    hub.addMessageHandler("setPosition",          setPosition);
+   hub.addMessageHandler("getSize",              getSize);
    hub.addMessageHandler("hideAllEdges",         hideAllEdges);
    hub.addMessageHandler("showAllEdges",         showAllEdges);
    hub.addMessageHandler("hideEdges",            hideEdges);
@@ -804,6 +805,45 @@ function setPosition(msg)
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setPosition
+//----------------------------------------------------------------------------------------------------
+function getSize(msg)
+{
+   console.log("=== getSize");
+     // if payload is empty, we interpret that as "get all nodes"
+   var nodeNames = msg.payload;
+   var allNodes = false;
+   var targetIDs = [];
+
+   if(nodeNames.length == 0){ // either an empty string or an empty array
+      allNodes = true;
+      }
+   else if(typeof(nodeNames) == "string")
+     targetIDs = [nodeNames];
+   else
+     targetIDs = nodeNames;
+
+   var filterStrings = [];
+
+   for(var i=0; i < targetIDs.length; i++){
+     var s = '[id="' + targetIDs[i] + '"]';
+     filterStrings.push(s);
+     } // for i
+
+   var nodesToSelect = cy.nodes(filterStrings.join());
+
+   if(allNodes)
+      layout = JSON.stringify(cy.nodes().map(function(n){return{id: n.id(),
+                                                                width: n.style().width,
+                                                                height: n.style().height}}));
+   else{
+      layout = JSON.stringify(nodesToSelect.map(function(n){return{id: n.id(),
+                                                                width: n.style().width,
+                                                                height: n.style().height}}));
+      } // else: subset of nodes specified
+
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
+
+} // getSize
 //----------------------------------------------------------------------------------------------------
 function hideAllEdges(msg)
 {

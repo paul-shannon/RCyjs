@@ -247,6 +247,10 @@
 \alias{setPosition,RCyjsClass-method}
 \alias{\S4method{setPosition}{RCyjsClass}}
 
+\alias{getSize}
+\alias{getSize,RCyjsClass-method}
+\alias{\S4method{getSize}{RCyjsClass}}
+
 \alias{getLayout}
 \alias{getLayout,RCyjsClass-method}
 \alias{\S4method{getLayout}{RCyjsClass}}
@@ -368,6 +372,7 @@ edaNames(graph)
 \S4method{layoutStrategies}{RCyjsClass}(obj)
 \S4method{getPosition}{RCyjsClass}(obj, nodeIDs=NA)
 \S4method{setPosition}{RCyjsClass}(obj, tbl.pos)
+\S4method{getSize}{RCyjsClass}(obj, nodeIDs=NA)
 \S4method{getLayout}{RCyjsClass}(obj)
 \S4method{saveLayout}{RCyjsClass}(obj, filename)
 \S4method{restoreLayout}{RCyjsClass}(obj, filename)
@@ -494,11 +499,11 @@ edaNames(graph)
 
 \examples{
    library(RCyjs)
-    
+
    g <- simpleDemoGraph()  # a 3-node, 3-edge graph with some node and edge attributes
    noaNames(g)
    edaNames(g)
-   
+
    rcy <- RCyjs(portRange=9047:9057, quiet=TRUE, graph=g);
 
    title <- "demo"

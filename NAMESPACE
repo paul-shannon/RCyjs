@@ -72,7 +72,7 @@ exportMethods(
    layoutSelectionInGridInferAnchor,
    getPosition,
    setPosition,
-   getSize,
+   getNodeSize,
    getLayout,
    saveLayout,
    restoreLayout,

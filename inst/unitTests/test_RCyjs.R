@@ -48,6 +48,7 @@ runTests = function()
    test.layouts()
 
    test.getSetPosition()
+   test.getNodeSize()
    test.saveRestoreLayout()
 
    test.setGraph();
@@ -743,24 +744,28 @@ test.getSetPosition <- function()
 
 } # test.getSetPosition
 #----------------------------------------------------------------------------------------------------
-test.getSize <- function()
+test.getNodeSize <- function()
 {
-   print("--- test.getSize");
+   print("--- test.getNodeSize");
 
    g <- simpleDemoGraph()
    rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
    checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "getSize");
+   setBrowserWindowTitle(rcy, "getNodeSize");
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
-   tbl.size <- getSize(rcy)
+   tbl.size <- getNodeSize(rcy)
    checkEquals(dim(tbl.size), c(3, 3))
    checkEquals(colnames(tbl.size), c("id", "width", "height"))
    checkEquals(tbl.size$id, c("A", "B", "C"))
      # all dimeneions are 30px
    checkEquals(unique(as.character(as.matrix(tbl.size[, c("width", "height")]))), "30px")
 
-} # test.getSize
+   tbl.sizeA <- getNodeSize(rcy, "A")
+   checkEquals(dim(tbl.sizeA), c(1,3))
+   checkEquals(as.list(tbl.sizeA[1,]), list(id="A", width="30px", height="30px"))
+
+} # test.getNodeSize
 #----------------------------------------------------------------------------------------------------
 test.saveRestoreLayout <- function()
 {
@@ -1095,3 +1100,5 @@ test.httpAddGraph <- function()
 
 } # test.httpAddGraph
 #----------------------------------------------------------------------------------------------------
+if(!interactive())
+    runTests()

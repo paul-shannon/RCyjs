@@ -95,7 +95,7 @@ function addMessageHandlers()
    hub.addMessageHandler("getNodeSize",          getNodeSize);
    hub.addMessageHandler("getPosition",          getPosition);
    hub.addMessageHandler("setPosition",          setPosition);
-   hub.addMessageHandler("getSize",              getSize);
+   hub.addMessageHandler("getNodeSize",          getNodeSize);
    hub.addMessageHandler("hideAllEdges",         hideAllEdges);
    hub.addMessageHandler("showAllEdges",         showAllEdges);
    hub.addMessageHandler("hideEdges",            hideEdges);
@@ -806,9 +806,9 @@ function setPosition(msg)
 
 } // setPosition
 //----------------------------------------------------------------------------------------------------
-function getSize(msg)
+function getNodeSize(msg)
 {
-   console.log("=== getSize");
+   console.log("=== getNodeSize");
      // if payload is empty, we interpret that as "get all nodes"
    var nodeNames = msg.payload;
    var allNodes = false;
@@ -843,7 +843,7 @@ function getSize(msg)
 
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: layout});
 
-} // getSize
+} // getNodeSize
 //----------------------------------------------------------------------------------------------------
 function hideAllEdges(msg)
 {

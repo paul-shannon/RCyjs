@@ -83,7 +83,8 @@ biocGraphToCytoscapeJSON <- function (graph) {
   v_attr = vertex.attributes(igraphobj)
   v_names = list.vertex.attributes(igraphobj)
   
-  for(i in 1:node_count) {
+
+  for(i in seq_len(node_count)){   #   1:node_count) {
     nds[[i]] = list(data = mapAttributes(v_names, v_attr, i))
     }
   
@@ -97,7 +98,7 @@ biocGraphToCytoscapeJSON <- function (graph) {
   if(identical(e_names, character(0)) == FALSE) {
     attr_exists = TRUE
     e_names_len = length(e_names)
-  }
+    }
   e_names_len <- length(e_names)
   
   eds = list()

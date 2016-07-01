@@ -114,8 +114,11 @@ RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), h
       print(getBrowserResponse(obj))
       }
 
-   if(length(nodes(graph)) > 0)
-      setGraph(obj, graph, hideEdges=hideEdges)
+   #if(length(nodes(graph)) > 0)
+   if(!quiet)
+      printf("calling setGraph on graph with %d nodes", length(nodes(graph)))
+        
+   setGraph(obj, graph, hideEdges=hideEdges)
 
    obj
 

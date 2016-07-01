@@ -60,7 +60,8 @@ runTests = function()
 
    test.compoundNodes();
    test.httpSetStyle();
-   test.httpAddGraph()
+   test.httpAddGraphToExistingGraph()
+   test.httpAddGraphToEmptyGraph
 
 } # run.tests
 #----------------------------------------------------------------------------------------------------
@@ -1087,18 +1088,35 @@ test.httpSetStyle <- function(count=3)
 
 } # test.httpSetStyle
 #----------------------------------------------------------------------------------------------------
-test.httpAddGraph <- function()
+test.httpAddGraphToExistingGraph <- function()
 {
-   print("--- test.httpAddGraph")
+   print("--- test.httpAddGraphToExistingGraph")
    rcy <- demo()
    setBackgroundColor(rcy, "#FAFAFA")
    setDefaultEdgeColor(rcy, "blue")
    redraw(rcy)
+   checkEquals(nrow(getNodes(rcy)), 3)
    g2 <- createTestGraph(100, 100)
    httpAddGraph(rcy, g2)
    layout(rcy, "grid")
+   checkEquals(nrow(getNodes(rcy)), 103)
 
-} # test.httpAddGraph
+} # test.httpAddGraphToExistingGraph
+#----------------------------------------------------------------------------------------------------
+test.httpAddGraphToEmptyGraph <- function()
+{
+   print("--- test.httpAddGraphToEmptyGraph")
+   rcy <- RCyjs(PORTS, graph=graphNEL())
+   setBackgroundColor(rcy, "#FAFAFA")
+   setDefaultEdgeColor(rcy, "blue")
+   redraw(rcy)
+   checkEquals(nrow(getNodes(rcy)), 0)
+   g2 <- createTestGraph(100, 100)
+   httpAddGraph(rcy, g2)
+   layout(rcy, "grid")
+   checkEquals(nrow(getNodes(rcy)), 100)
+
+} # test.httpAddGraphToEmptyGraph
 #----------------------------------------------------------------------------------------------------
 if(!interactive())
     runTests()

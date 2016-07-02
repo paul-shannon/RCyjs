@@ -92,7 +92,6 @@ function addMessageHandlers()
    hub.addMessageHandler("layoutSelectionInGrid", layoutSelectionInGrid);
    hub.addMessageHandler("layoutSelectionInGridInferAnchor", layoutSelectionInGridInferAnchor);
 
-   hub.addMessageHandler("getNodeSize",          getNodeSize);
    hub.addMessageHandler("getPosition",          getPosition);
    hub.addMessageHandler("setPosition",          setPosition);
    hub.addMessageHandler("getNodeSize",          getNodeSize);
@@ -1181,9 +1180,10 @@ function setGraph(msg)
    //console.log(msg.payload);
    graph = JSON.parse(msg.payload.graph);
    hideEdges = msg.payload.hideEdges;
-   console.log("setGraph calling createCytoscapeWindow");
+   console.log("setGraph calling createCytoscapeWindow, assiging cy");
    cy = createCytoscapeWindow(graph, hideEdges)
-   console.log("setGraph after createCytoscapeWindow");
+   console.log("setGraph after createCytoscapeWindow, cy assigned");
+   console.log(cy)
    //cy.load(graph.elements)
    //cy.add(graph)
 
@@ -1450,12 +1450,14 @@ function setupDefaultStyles(cy)
 //----------------------------------------------------------------------------------------------------
 function createCytoscapeWindow(graph, hideEdges) {
 
+   var localCy;
+                   
    console.log("--- createCytoscapeWindow")
-   cy = $("#cyDiv");
+   cyElement = $("#cyDiv");
    console.log("--- graph");
    //console.log(graph);
 
-   cy.cytoscape({
+   cyElement.cytoscape({
        elements: graph.elements,
        showOverlay: false,
        minZoom: 0.001,
@@ -1467,19 +1469,19 @@ function createCytoscapeWindow(graph, hideEdges) {
          },
     ready: function() {
         console.log("cy ready");
-        cy = this;
+        localCy = this;
         if(hideEdges)
-           cy.edges().style({"display": "none"});
-        setupDefaultStyles(cy);
-        cy.layout({name: "random"});
-        cy.reset();
-        cy.fit(50);
-        cy.edges().selectify();
-        //cy.elements().qtip(qtipOptions());
-        } // cy.ready
+           localCy.edges().style({"display": "none"});
+        setupDefaultStyles(localCy);
+        localCy.layout({name: "random"});
+        localCy.reset();
+        localCy.fit(50);
+        localCy.edges().selectify();
+        //localCy.elements().qtip(qtipOptions());
+        } // localCy.ready
        })
 
-    return (cy);
+    return (localCy);
 
 } // createCytoscapeWindow
 //----------------------------------------------------------------------------------------------------

@@ -31,7 +31,7 @@ a description of the websocket and JSON techniques used here to connect your R s
 \Biocpkg{RCyjs} provides a utility function which creates a small 3-node, 3-edge graphNEL (see \Biocpkg{graph})
 with some attributes assigned to the nodes and edges:
 
-<<simpleExample>>=
+<<simpleExample, eval=FALSE>>=
 library(RCyjs)
 g <- simpleDemoGraph()
 noaNames(g)
@@ -43,7 +43,7 @@ eda(g, "score")
 @ 
 
 Send this graph to your browser and render it with all default settings (including faint edges connecting the nodes):
-<<simpleRender>>=
+<<simpleRender, eval=FALSE>>=
 g <- simpleDemoGraph()
 rcy <- RCyjs(portRange=9047:9067, quiet=TRUE, graph=g);
 title <- "simple graph"
@@ -63,7 +63,7 @@ white interior, a thin black border, 50 pixels in diameter, connected by black e
 have no terminal decoration (that is, no arrows at the ends of the edges).  Note that \emph{redraw}
 must be called to \emph{apply} the currently specified rules.  First we define some useful colors:
 
-<<colors>>=
+<<colors, eval=FALSE>>=
 green <- "rgb(0,255,0)"
 white <- "rgb(255,255,255)"
 red <- "rgb(255,0,0)"
@@ -80,7 +80,7 @@ lightGray="rgb(230,230,230)"
 
 @ 
 
-<<defaultRendering>>=
+<<defaultRendering, eval=FALSE>>=
 setDefaultNodeShape(rcy, "ellipse")
 setNodeLabelRule(rcy, "label")  # we DO want a different label on each node.  this rule ensures that
 setDefaultNodeSize(rcy, 70)
@@ -106,7 +106,7 @@ We use the ``interpolate'' mode; intermediate values are interpolated from the c
 associated colors.   We use \emph{edgeType} to control edge color, in ``lookup'' mode.  Note that not all
 rules have both modes.  Node shape, for instance, offers only discrete options (ellipse, rectangle, etc.),
 and no mode need be specified.
-<<firstRules>>=
+<<firstRules, eval=FALSE>>=
 noa(g, "lfc")
 setNodeColorRule(rcy, "lfc", c(-5, 0, 5), c(green, white, red), mode="interpolate")
 setEdgeColorRule(rcy, "edgeType",
@@ -127,7 +127,7 @@ Among the interactions we have collected and offer through \Biocpkg{RefNet} is o
 In this section, we load a \Biocpkg{RefNet} data.frame describing the interactions reported in that paper, and display then using
 \Biocpkg{RCyjs}.  First we define a utility method for createing a \emph{graphNEL} from a RefNet data.frame:
 
-<<>>=
+<<refnet, eval=FALSE>>=
 refnetToGraphNEL <- function(tbl)
 {
   g = new ("graphNEL", edgemode="directed")
@@ -148,7 +148,7 @@ refnetToGraphNEL <- function(tbl)
 @ 
 
 Load \Biocpkg{RefNet}, request the interactions described in the paper, convert them to a graphNEL:
-<<hypozia0>>=
+<<hypoxia0, eval=FALSE>>=
 library(org.Hs.eg.db)
 library(RefNet)
 refnet <- RefNet();
@@ -159,7 +159,7 @@ Most of the the nodes in the graph are genes, and some are biological processes.
 be easier to grasp if these two categories are rendered differently.   Use the \Biocpkg{org.Hs.eg.db}:
 any node name mentioned there will be a gene, all others will be processes.
 
-<<hypoxia1>>=
+<<hypoxia1, eval=FALSE>>=
 all.nodes <- nodes(g.hypoxia)
 gene.nodes <- intersect(all.nodes, keys(org.Hs.egSYMBOL2EG))
 process.nodes <- setdiff(all.nodes, gene.nodes)
@@ -171,7 +171,7 @@ Create and display the network, using the first open port between 9047 and 9067 
 default browser.  Set some default rendering rules, and the browser window title.  The nodes
 will be arranged randomly on the browser canvas.
 
-<<hypoxia2>>=
+<<hypoxia2, eval=FALSE>>=
 rcy <- RCyjs(portRange=9047:9067, quiet=TRUE, graph=g.hypoxia);
 setBackgroundColor(rcy, lightGray)
 setDefaultNodeSize(rcy, 60)
@@ -190,7 +190,7 @@ at least some manual placement of nodes as well.  One such layout is included in
 Recreate it by loading the file into which it was saved, and applying it.  Then size the
 full network to occupy most of the browser canvas.
 
-<<hypoxia3>>=
+<<hypoxia3, eval=FALSE>>=
 saved.layout.file <- system.file(package="RCyjs", "extdata", "hypoxiaLayout.RData")
 stopifnot(file.exists(saved.layout.file))
 restoreLayout(rcy, saved.layout.file)
@@ -204,7 +204,7 @@ effect of the upstream node on the downstream node; a ``tee'' indicates a negati
 after specifying these rules, redraw the network and the rules are applied
 
 
-<<hypoxia4>>=
+<<hypoxia4, eval=FALSE>>=
 edgeColors <- list(activates = darkerGreen,
                    inhibits = darkRed,
                    inactivates = darkRed,

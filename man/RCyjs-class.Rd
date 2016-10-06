@@ -39,6 +39,10 @@
 \alias{getNodes,RCyjsClass-method}
 \alias{\S4method{getNodes}{RCyjsClass}}
 
+\alias{getNodeSize}
+\alias{getNodeSize,RCyjsClass-method}
+\alias{\S4method{getNodeSize}{RCyjsClass}}
+
 \alias{setDefaultNodeSize}
 \alias{setDefaultNodeSize,RCyjsClass-method}
 \alias{\S4method{setDefaultNodeSize}{RCyjsClass}}
@@ -350,6 +354,7 @@ edaNames(graph)
 \S4method{getNodeCount}{RCyjsClass}(obj)
 \S4method{getEdgeCount}{RCyjsClass}(obj)
 \S4method{getNodes}{RCyjsClass}(obj)
+\S4method{getNodeSize}{RCyjsClass}(obj, nodeIDs)
 \S4method{getSelectedNodes}{RCyjsClass}(obj)
 \S4method{invertNodeSelection}{RCyjsClass}(obj)
 \S4method{hideSelectedNodes}{RCyjsClass}(obj)
@@ -503,6 +508,7 @@ edaNames(graph)
 
 
 \examples{
+\dontrun{
    library(RCyjs)
 
    g <- simpleDemoGraph()  # a 3-node, 3-edge graph with some node and edge attributes
@@ -523,7 +529,7 @@ edaNames(graph)
    layout(rcy, "cose")
    closeWebSocket(rcy)
 }
-
+}
 
 
 \keyword{classes}

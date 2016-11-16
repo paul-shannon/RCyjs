@@ -275,6 +275,10 @@
 \alias{getJSON,RCyjsClass-method}
 \alias{\S4method{getJSON}{RCyjsClass}}
 
+\alias{getPNG}
+\alias{getPNG,RCyjsClass-method}
+\alias{\S4method{getPNG}{RCyjsClass}}
+
 \alias{fit}
 \alias{fit,RCyjsClass-method}
 \alias{\S4method{fit}{RCyjsClass}}
@@ -387,6 +391,7 @@ edaNames(graph)
 \S4method{saveLayout}{RCyjsClass}(obj, filename)
 \S4method{restoreLayout}{RCyjsClass}(obj, filename)
 \S4method{getJSON}{RCyjsClass}(obj)
+\S4method{getPNG}{RCyjsClass}(obj)
 \S4method{setZoom}{RCyjsClass}(obj, newValue)
 \S4method{getZoom}{RCyjsClass}(obj)
 \S4method{setBackgroundColor}{RCyjsClass}(obj, newValue)

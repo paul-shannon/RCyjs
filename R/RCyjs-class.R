@@ -19,7 +19,7 @@ setGeneric('getEdgeCount',        signature='obj', function(obj) standardGeneric
 setGeneric('getNodes',            signature='obj', function(obj) standardGeneric ('getNodes'))
 
 setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, nodes, values) standardGeneric('setNodeAttributes'))
-#setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, edges, values) standardGeneric('setEdgeAttributes'))
+setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values) standardGeneric('setEdgeAttributes'))
 
 setGeneric('getSelectedNodes',    signature='obj', function(obj) standardGeneric ('getSelectedNodes'))
 setGeneric('clearSelection',      signature='obj', function(obj) standardGeneric ('clearSelection'))
@@ -53,6 +53,7 @@ setGeneric('getNodeSize',         signature='obj', function(obj, nodeIDs=NA) sta
 setGeneric('getLayout',           signature='obj', function(obj) standardGeneric('getLayout'))
 setGeneric('saveLayout',          signature='obj', function(obj, filename) standardGeneric('saveLayout'))
 setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
+setGeneric('getPNG',              signature='obj', function(obj) standardGeneric('getPNG'))
 setGeneric('restoreLayout',       signature='obj', function(obj, filename) standardGeneric('restoreLayout'))
 setGeneric('setZoom',             signature='obj', function(obj, newValue) standardGeneric('setZoom'))
 setGeneric('getZoom',             signature='obj', function(obj) standardGeneric('getZoom'))
@@ -338,11 +339,33 @@ setMethod('setNodeAttributes', 'RCyjsClass',
      }) # setNodeAttributes
 
 #------------------------------------------------------------------------------------------------------------------------
-#setMethod('setEdgeAttributes', 'RCyjsClass',
-#
-#   function(obj, attribute, edges, values){
-#     }) # setEdgeAttributes
-#
+# when implemented, this will probably resolved to this javascript, for instance
+#cy.edges("edge[source='Crem'][target='Hk2'][edgeType='undefined']").data({"score": 3})
+
+setMethod('setEdgeAttributes', 'RCyjsClass',
+
+   function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values){
+     if (length (sourceNodes) == 0)
+       return ()
+
+     if(length(sourceNodes) == 1)
+        values <- rep(values, length(sourceNodes))
+
+     payload <- list(attribute=attribute, sourceNodes=sourceNodes, targetNodes=targetNodes,
+                     edgeTypes=edgeTypes, values=values)
+     send(obj, list(cmd="setEdgeAttributes", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       invisible("")
+
+     }) # setEdgeAttributes
+
 #------------------------------------------------------------------------------------------------------------------------
 setMethod('redraw', 'RCyjsClass',
 
@@ -697,6 +720,18 @@ setMethod('getJSON', 'RCyjsClass',
 
   function (obj) {
      send(obj, list(cmd="getJSON", callback="handleResponse", status="request",
+                                  payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     getBrowserResponse(obj)
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('getPNG', 'RCyjsClass',
+
+  function (obj) {
+     send(obj, list(cmd="getPNG", callback="handleResponse", status="request",
                                   payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)

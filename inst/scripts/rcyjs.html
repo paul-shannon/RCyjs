@@ -102,6 +102,7 @@ function addMessageHandlers()
    hub.addMessageHandler("showAll",              showAll);
 
    hub.addMessageHandler("getJSON",              getJSON);
+   hub.addMessageHandler("getPNG",               getPNG);
    hub.addMessageHandler("selectNodes",          selectNodes);
    hub.addMessageHandler("invertNodeSelection",  invertNodeSelection);
    hub.addMessageHandler("hideSelectedNodes",    hideSelectedNodes);
@@ -721,6 +722,14 @@ function getJSON(msg)
 
 } // getJSON
 //----------------------------------------------------------------------------------------------------
+function getPNG(msg)
+{
+   console.log("=== getPNG");
+   var png_json = JSON.stringify(cy.png());
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: png_json});
+
+} // getPNG
+//----------------------------------------------------------------------------------------------------
 function getPosition(msg)
 {
    console.log("=== getPosition");
@@ -1218,7 +1227,24 @@ function setNodeAttributes(msg)
 function setEdgeAttributes(msg)
 {
    console.log("=== rcyjs.html: setEdgeAttributes")
-   console.log(msg.payload);
+   var attributeName = msg.payload.attribute;
+   var sourceNodes = msg.payload.sourceNodes;
+   var targetNodes = msg.payload.targetNodes;
+   var edgeTypes = msg.payload.edgeTypes;
+   var values = msg.payload.values                    
+
+   for(var i=0; i < sourceNodes.length; i++){
+      selectorString = "edge[source='" + sourceNodes[i] + "'][target='" + targetNodes[i] +
+                       "'][edgeType='" + edgeTypes[i] + "']";
+
+      console.log(selectorString);
+      var dataObj = cy.edges().filter(selectorString).data();
+      if(dataObj != undefined){
+         Object.defineProperty(dataObj, attributeName, {value: values[i]});
+         }                  
+      //cy.edges("edge[source='Crem'][target='Hk2'][edgeType='undefined']").data({"score": 3})
+      } // for i
+
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
 
 } // setEdgeAttributes

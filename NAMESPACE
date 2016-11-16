@@ -12,6 +12,7 @@ exportMethods(
    getNodes,
 
    setNodeAttributes,
+   setEdgeAttributes,
 
    setDefaultNodeSize,
    setDefaultNodeWidth,
@@ -77,6 +78,7 @@ exportMethods(
    saveLayout,
    restoreLayout,
    getJSON,
+   getPNG,
    fit,
    fitContent,
    fitSelectedContent,

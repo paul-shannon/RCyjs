@@ -736,7 +736,6 @@ setMethod('savePNG', 'RCyjsClass',
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     browser()
      png <- getBrowserResponse(obj)
      png.parsed <- fromJSON(png)
      substr(png.parsed, 1, 30) # [1] "data:image/png;base64,iVBORw0K"

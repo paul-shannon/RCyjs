@@ -53,7 +53,7 @@ setGeneric('getNodeSize',         signature='obj', function(obj, nodeIDs=NA) sta
 setGeneric('getLayout',           signature='obj', function(obj) standardGeneric('getLayout'))
 setGeneric('saveLayout',          signature='obj', function(obj, filename) standardGeneric('saveLayout'))
 setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
-setGeneric('getPNG',              signature='obj', function(obj) standardGeneric('getPNG'))
+setGeneric('savePNG',             signature='obj', function(obj, filename) standardGeneric('savePNG'))
 setGeneric('restoreLayout',       signature='obj', function(obj, filename) standardGeneric('restoreLayout'))
 setGeneric('setZoom',             signature='obj', function(obj, newValue) standardGeneric('setZoom'))
 setGeneric('getZoom',             signature='obj', function(obj) standardGeneric('getZoom'))
@@ -728,15 +728,24 @@ setMethod('getJSON', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getPNG', 'RCyjsClass',
+setMethod('savePNG', 'RCyjsClass',
 
-  function (obj) {
+  function (obj, filename) {
      send(obj, list(cmd="getPNG", callback="handleResponse", status="request",
                                   payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     getBrowserResponse(obj)
+     browser()
+     png <- getBrowserResponse(obj)
+     png.parsed <- fromJSON(png)
+     substr(png.parsed, 1, 30) # [1] "data:image/png;base64,iVBORw0K"
+     nchar(png.parsed)  # [1] 768714
+     png.parsed.headless <- substr(png.parsed, 23, nchar(png.parsed))  # chop off the uri header
+     png.parsed.binary <- base64decode(png.parsed.headless)
+     conn <- file(filename, "wb")
+     writeBin(png.parsed.binary, conn)
+     close(conn)
      })
 
 #----------------------------------------------------------------------------------------------------

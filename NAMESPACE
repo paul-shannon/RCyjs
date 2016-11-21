@@ -78,7 +78,7 @@ exportMethods(
    saveLayout,
    restoreLayout,
    getJSON,
-   getPNG,
+   savePNG,
    fit,
    fitContent,
    fitSelectedContent,
@@ -122,6 +122,7 @@ importFrom(methods, as)
 import(BrowserViz)
 import(httpuv)
 import(Rcpp)
+importFrom(base64enc,base64decode)
 importFrom(igraph,graph.attributes)
 importFrom(igraph,V)
 importFrom(igraph,"V<-")

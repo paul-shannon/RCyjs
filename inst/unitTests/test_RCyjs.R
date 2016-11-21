@@ -62,6 +62,7 @@ runTests = function()
    test.httpSetStyle();
    test.httpAddGraphToExistingGraph()
    test.httpAddGraphToEmptyGraph
+   test.savePNG()
 
 } # run.tests
 #----------------------------------------------------------------------------------------------------
@@ -1117,6 +1118,17 @@ test.httpAddGraphToEmptyGraph <- function()
    checkEquals(nrow(getNodes(rcy)), 100)
 
 } # test.httpAddGraphToEmptyGraph
+#----------------------------------------------------------------------------------------------------
+test.savePNG <- function()
+{
+   print("--- test.savePNG")
+   rcy <- demo()
+   filename <- tempfile(fileext=".png")
+   savePNG(rcy, filename)
+   checkTrue(file.exists(filename))
+   #system(sprintf("open %s", filename))
+
+} # test.savePNG
 #----------------------------------------------------------------------------------------------------
 if(!interactive())
     runTests()

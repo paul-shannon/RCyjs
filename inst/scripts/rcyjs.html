@@ -1498,6 +1498,8 @@ function createCytoscapeWindow(graph, hideEdges) {
         localCy = this;
         if(hideEdges)
            localCy.edges().style({"display": "none"});
+        console.log("createCytoscapeWindow assigning degree to nodes")
+        localCy.nodes().map(function(node){node.data({degree: node.degree()})});
         setupDefaultStyles(localCy);
         localCy.layout({name: "random"});
         localCy.reset();

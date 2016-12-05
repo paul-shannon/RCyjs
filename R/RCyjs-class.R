@@ -12,6 +12,7 @@ printf <- function(...) print(noquote(sprintf(...)))
 setGeneric('setGraph',            signature='obj', function(obj, graph, hideEdges=FALSE) standardGeneric ('setGraph'))
 setGeneric('addGraph',            signature='obj', function(obj, graph) standardGeneric ('addGraph'))
 setGeneric('httpAddGraph',        signature='obj', function(obj, graph) standardGeneric ('httpAddGraph'))
+setGeneric('httpAddJsonGraphFromFile', signature='obj', function(obj, jsonFileName) standardGeneric ('httpAddJsonGraphFromFile'))
 setGeneric('httpSetStyle',        signature='obj', function(obj, filename) standardGeneric ('httpSetStyle'))
 
 setGeneric('getNodeCount',        signature='obj', function(obj) standardGeneric ('getNodeCount'))
@@ -171,6 +172,20 @@ setMethod('httpAddGraph', 'RCyjsClass',
      write(g.json, file=filename)
      send(obj, list(cmd="httpAddGraph", callback="handleResponse", status="request",
                     payload=filename))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     printf("browserResponseReady")
+     getBrowserResponse(obj);
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('httpAddJsonGraphFromFile', 'RCyjsClass',
+
+  function (obj, jsonFileName) {
+     printf("RCyjs::httpAddJsonFileGraph");
+     send(obj, list(cmd="httpAddGraph", callback="handleResponse", status="request",
+                    payload=jsonFileName))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -1197,7 +1212,7 @@ setMethod("hAlign", "RCyjsClass",
 myQP <- function(queryString)
 {
    printf("=== RCYjs-class::myQP");
-   print(queryString)
+   #print(queryString)
      # for reasons not quite clear, the query string comes in with extra characters
      # following the expected filename:
      #

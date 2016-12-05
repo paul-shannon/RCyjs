@@ -4,6 +4,7 @@ exportMethods(
    setGraph,
    addGraph,
    httpAddGraph,
+   httpAddJsonGraphFromFile,
    httpSetStyle,
 
    getNodeCount,

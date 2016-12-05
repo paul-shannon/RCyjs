@@ -19,6 +19,10 @@
 \alias{httpAddGraph,RCyjsClass-method}
 \alias{\S4method{httpAddGraph}{RCyjsClass}}
 
+\alias{httpAddJsonGraphFromFile}
+\alias{httpAddJsonGraphFromFile,RCyjsClass-method}
+\alias{\S4method{httpAddJsonGraphFromFile}{RCyjsClass}}
+
 \alias{httpSetStyle}
 \alias{httpSetStyle,RCyjsClass-method}
 \alias{\S4method{httpSetStyle}{RCyjsClass}}
@@ -353,6 +357,7 @@ edaNames(graph)
 \S4method{setGraph}{RCyjsClass}(obj, graph, hideEdges)
 \S4method{addGraph}{RCyjsClass}(obj, graph)
 \S4method{httpAddGraph}{RCyjsClass}(obj, graph)
+\S4method{httpAddJsonGraphFromFile}{RCyjsClass}(obj, jsonFileName)
 \S4method{httpSetStyle}{RCyjsClass}(obj, filename)
 \S4method{setNodeAttributes}{RCyjsClass}(obj, attribute, nodes, values)
 \S4method{getNodeCount}{RCyjsClass}(obj)

@@ -61,7 +61,8 @@ runTests = function()
    test.compoundNodes();
    test.httpSetStyle();
    test.httpAddGraphToExistingGraph()
-   test.httpAddGraphToEmptyGraph
+   test.httpAddGraphToEmptyGraph()
+   test.httpAddJsonGraphFromFile()
    test.savePNG()
 
 } # run.tests
@@ -1116,6 +1117,25 @@ test.httpAddGraphToEmptyGraph <- function()
    httpAddGraph(rcy, g2)
    layout(rcy, "grid")
    checkEquals(nrow(getNodes(rcy)), 100)
+
+} # test.httpAddGraphToEmptyGraph
+#----------------------------------------------------------------------------------------------------
+test.httpAddJsonGraphFromFile <- function()
+{
+   print("--- test.httpAddJsonGraphFromFile")
+   file <- system.file(package="RCyjs", "extdata", "g.json")
+   checkTrue(file.exists(file))
+
+   rcy <- RCyjs(PORTS, graph=graphNEL())
+   setBackgroundColor(rcy, "#FAFAFA")
+   setDefaultEdgeColor(rcy, "blue")
+   redraw(rcy)
+      
+   httpAddJsonGraphFromFile(rcy, file)
+   fit(rcy)
+   layout(rcy, "grid")
+   dim(getNodes(rcy))
+   checkTrue(nrow(getNodes(rcy)) > 300)
 
 } # test.httpAddGraphToEmptyGraph
 #----------------------------------------------------------------------------------------------------

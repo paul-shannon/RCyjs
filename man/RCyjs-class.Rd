@@ -31,6 +31,10 @@
 \alias{setNodeAttributes,RCyjsClass-method}
 \alias{\S4method{setNodeAttributes}{RCyjsClass}}
 
+\alias{setEdgeAttributes}
+\alias{setEdgeAttributes,RCyjsClass-method}
+\alias{\S4method{setEdgeAttributes}{RCyjsClass}}
+
 \alias{getNodeCount}
 \alias{getNodeCount,RCyjsClass-method}
 \alias{\S4method{getNodeCount}{RCyjsClass}}
@@ -162,6 +166,10 @@
 \alias{setNodeLabelAlignment}
 \alias{setNodeLabelAlignment,RCyjsClass-method}
 \alias{\S4method{setNodeLabelAlignment}{RCyjsClass}}
+
+\alias{setNodeImage}
+\alias{setNodeImage,RCyjsClass-method}
+\alias{\S4method{setNodeImage}{RCyjsClass}}
 
 \alias{setNodeSizeRule}
 \alias{setNodeSizeRule,RCyjsClass-method}
@@ -360,6 +368,7 @@ edaNames(graph)
 \S4method{httpAddJsonGraphFromFile}{RCyjsClass}(obj, jsonFileName)
 \S4method{httpSetStyle}{RCyjsClass}(obj, filename)
 \S4method{setNodeAttributes}{RCyjsClass}(obj, attribute, nodes, values)
+\S4method{setEdgeAttributes}{RCyjsClass}(obj, attribute, sourceNodes, targetNodes, edgeTypes, values)
 \S4method{getNodeCount}{RCyjsClass}(obj)
 \S4method{getEdgeCount}{RCyjsClass}(obj)
 \S4method{getNodes}{RCyjsClass}(obj)
@@ -377,6 +386,7 @@ edaNames(graph)
 \S4method{showEdges}{RCyjsClass}(obj, edgeType)
 \S4method{setNodeLabelRule}{RCyjsClass}(obj, attribute)
 \S4method{setNodeLabelAlignment}{RCyjsClass}(obj, horizontal, vertical)
+\S4method{setNodeImage}{RCyjsClass}(obj, imageURLs)
 \S4method{setNodeSizeRule}{RCyjsClass}(obj, attribute, control.points, node.sizes)
 \S4method{setNodeColorRule}{RCyjsClass}(obj, attribute, control.points, colors, mode)
 \S4method{setNodeShapeRule}{RCyjsClass}(obj, attribute, control.points, node.shapes)
@@ -482,7 +492,9 @@ edaNames(graph)
            "rectangle", "roundrectangle".}
 
   \item{widths}{The width, in pixels, for edges.}
-
+  
+  \item{jsonFileName}{name of a file containing JSON text describing a graph.}
+  \item{imageURLs}{a named list, node names and URL elements.}
   \item{shapes}{For edge "decorations" -- the arrow (and etcetera) that
   decorates the ends of edges, as they connect to nodes.  Currently
   supported values are "arrow", "tee" and "none" (the default).}
@@ -504,8 +516,11 @@ edaNames(graph)
   \item{hideEdges}{A logical value. If the graph has many edges, you may
   wish to hide them initially.}
   \item{nodes}{Character list, node ids.}
+  \item{sourceNodes}{Character list, node ids.}
+  \item{targetNodes}{Character list, node ids.}
   \item{values}{Any type.}
   \item{edgeType}{Character value.}
+  \item{edgeTypes}{Character values.}
   \item{padding}{Integer value, pixels.}
   \item{x}{Integer value, pixels.}
   \item{y}{Integer value, pixels.}

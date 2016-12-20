@@ -59,6 +59,8 @@ runTests = function()
    test.setEdgeAttributes();
 
    test.compoundNodes();
+   test.setNodeImage();
+   
    test.httpSetStyle();
    test.httpAddGraphToExistingGraph()
    test.httpAddGraphToEmptyGraph()
@@ -934,6 +936,22 @@ test.compoundNodes <- function()
    redraw(rcy)
 
 } # test.compoundNodes
+#----------------------------------------------------------------------------------------------------
+test.setNodeImage <- function()
+{
+   rcy <- demo()
+   images <- list(A="https://farm1.staticflickr.com/231/524893064_f49a4d1d10_z.jpg",
+                  B="https://farm4.staticflickr.com/3063/2751740612_af11fb090b_b.jpg",
+                  C="https://farm9.staticflickr.com/8316/8003798443_32d01257c8_b.jpg")
+
+   setNodeImage(rcy, images)
+
+   images <- list(A="https://farm1.staticflickr.com/231/524893064_f49a4d1d10_z.jpg",
+                  baker="https://farm4.staticflickr.com/3063/2751740612_af11fb090b_b.jpg",
+                  charlie="https://farm9.staticflickr.com/8316/8003798443_32d01257c8_b.jpg")
+   setNodeImage(rcy, images)
+
+} # test.setNodeImage
 #----------------------------------------------------------------------------------------------------
 demo.hypoxia <- function()
 {

@@ -73,6 +73,8 @@ setGeneric('showEdges',           signature='obj', function(obj, edgeType) stand
 setGeneric('vAlign',              signature='obj', function(obj) standardGeneric('vAlign'))
 setGeneric('hAlign',              signature='obj', function(obj) standardGeneric('hAlign'))
 
+setGeneric("setNodeImage", signature='obj', function(obj, imageURLs) standardGeneric('setNodeImage'))
+
 setGeneric("setDefaultNodeSize",  signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeSize'))
 setGeneric("setDefaultNodeWidth", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeWidth'))
 setGeneric("setDefaultNodeHeight", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeHeight'))
@@ -414,6 +416,21 @@ setMethod('setNodeLabelAlignment', 'RCyjsClass',
      payload = list(vertical=vertical, horizontal=horizontal)
      send(obj, list(cmd="setNodeLabelAlignment", callback="handleResponse", status="request",
                     payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));  # the empty string.
+     })
+
+#----------------------------------------------------------------------------------------------------
+setMethod('setNodeImage', 'RCyjsClass',
+
+  function (obj, imageURLs) {
+     recognizedNodes <- intersect(names(imageURLs), nodes(obj@graph))
+     printf("setNodeImage: %d/%d node names (ids) recognized", length(recognizedNodes),
+            length(nodes(obj@graph)))
+     send(obj, list(cmd="setNodeImage", callback="handleResponse", status="request",
+                                  payload=imageURLs))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }

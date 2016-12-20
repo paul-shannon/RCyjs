@@ -110,6 +110,8 @@ function addMessageHandlers()
    hub.addMessageHandler("sfn",                  sfn);
    hub.addMessageHandler("clearSelection",       clearSelection);
 
+   hub.addMessageHandler("setNodeImage",         setNodeImage);
+
    hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor);
    hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape);
 
@@ -901,6 +903,23 @@ function showAll(msg)
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // showAll
+//----------------------------------------------------------------------------------------------------
+function setNodeImage(msg)
+{
+  console.log("--- entering setNodeImage");
+  var imageList = msg.payload;
+  console.log(imageList);
+
+  var nodeIDs = Object.keys(imageList);
+  var urls = Object.values(imageList)
+  for(var i=0; i < nodeIDs.length; i++){
+     var filterString = "node[id='" + nodeIDs[i] + "']";                                     
+     cy.nodes(filterString).style({"background-image": urls[i], "background-fit": "cover"});
+     } // var i
+                    
+  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultNodeSize
 //----------------------------------------------------------------------------------------------------
 function setDefaultNodeSize(msg)
 {

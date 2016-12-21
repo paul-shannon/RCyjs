@@ -51,6 +51,8 @@ runTests = function()
    test.getNodeSize()
    test.saveRestoreLayout()
 
+   test.getJSON()
+
    test.setGraph();
    test.zoom()
    #test.bigGraph()
@@ -808,6 +810,16 @@ test.saveRestoreLayout <- function()
 
 } # test.saveRestoreLayout
 #----------------------------------------------------------------------------------------------------
+test.getJSON <- function()
+{
+   printf("--- test.getJSON")
+   rcy <- demo()
+   json <- getJSON(rcy)
+   checkTrue(nchar(json) > 2000)
+     # writeLines(json, "demo.json")
+
+} # test.getJSON
+#----------------------------------------------------------------------------------------------------
 test.setBackgroundColor <- function()
 {
    print("--- test.setBackgroundColor");
@@ -939,6 +951,7 @@ test.compoundNodes <- function()
 #----------------------------------------------------------------------------------------------------
 test.setNodeImage <- function()
 {
+   printf("--- test.setNodeImage")
    rcy <- demo()
    images <- list(A="https://farm1.staticflickr.com/231/524893064_f49a4d1d10_z.jpg",
                   B="https://farm4.staticflickr.com/3063/2751740612_af11fb090b_b.jpg",

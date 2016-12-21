@@ -911,7 +911,7 @@ function setNodeImage(msg)
   console.log(imageList);
 
   var nodeIDs = Object.keys(imageList);
-  var urls = Object.values(imageList)
+  var urls = Object.keys(imageList).map(function(key){return imageList[key]});
   for(var i=0; i < nodeIDs.length; i++){
      var filterString = "node[id='" + nodeIDs[i] + "']";                                     
      cy.nodes(filterString).style({"background-image": urls[i], "background-fit": "cover"});

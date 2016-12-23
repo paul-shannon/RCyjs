@@ -1231,8 +1231,8 @@ function setNodeAttributes(msg)
       var name = nodeIDs[i];
       var newValue = msg.payload.values[i];
       var filterString = "[name='" + name + "']";
-      console.log("filterString: " + filterString);
-      console.log("nodeID: " + name + "   value: " + newValue);
+      //console.log("filterString: " + filterString);
+      //console.log("nodeID: " + name + "   value: " + newValue);
       var dataObj = cy.nodes().filter(filterString).data();
       Object.defineProperty(dataObj, attributeName, {value: newValue});
       //cy.nodes().filter(filterString).data({attributeName: value});
@@ -1256,7 +1256,7 @@ function setEdgeAttributes(msg)
       selectorString = "edge[source='" + sourceNodes[i] + "'][target='" + targetNodes[i] +
                        "'][edgeType='" + edgeTypes[i] + "']";
 
-      console.log(selectorString);
+      //console.log(selectorString);
       var dataObj = cy.edges().filter(selectorString).data();
       if(dataObj != undefined){
          Object.defineProperty(dataObj, attributeName, {value: values[i]});
@@ -1264,7 +1264,7 @@ function setEdgeAttributes(msg)
       //cy.edges("edge[source='Crem'][target='Hk2'][edgeType='undefined']").data({"score": 3})
       } // for i
 
-   hub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
+   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setEdgeAttributes
 //----------------------------------------------------------------------------------------------------

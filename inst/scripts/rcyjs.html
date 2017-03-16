@@ -4,6 +4,7 @@
    <title>RCyjs</title>
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
    <script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+   <!-- script   src="http://pshannon.systemsbiology.net/js/cytoscape-2.7.10.js"></script -->
    <script src="https://cdn.rawgit.com/paul-shannon/CDN/master/js/BrowserViz.js"></script>
 <style>
 
@@ -913,10 +914,10 @@ function setNodeImage(msg)
   var nodeIDs = Object.keys(imageList);
   var urls = Object.keys(imageList).map(function(key){return imageList[key]});
   for(var i=0; i < nodeIDs.length; i++){
-     var filterString = "node[id='" + nodeIDs[i] + "']";                                     
+     var filterString = "node[id='" + nodeIDs[i] + "']";
      cy.nodes(filterString).style({"background-image": urls[i], "background-fit": "cover"});
      } // var i
-                    
+
   hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeSize
@@ -1205,7 +1206,7 @@ function getNodeLabel(msg)
 function setGraph(msg)
 {
    console.log("in function setGraph");
-   //console.log(msg.payload);
+   console.log(msg.payload);
    graph = JSON.parse(msg.payload.graph);
    hideEdges = msg.payload.hideEdges;
    console.log("setGraph calling createCytoscapeWindow, assiging cy");
@@ -1250,7 +1251,7 @@ function setEdgeAttributes(msg)
    var sourceNodes = msg.payload.sourceNodes;
    var targetNodes = msg.payload.targetNodes;
    var edgeTypes = msg.payload.edgeTypes;
-   var values = msg.payload.values                    
+   var values = msg.payload.values
 
    for(var i=0; i < sourceNodes.length; i++){
       selectorString = "edge[source='" + sourceNodes[i] + "'][target='" + targetNodes[i] +
@@ -1260,7 +1261,7 @@ function setEdgeAttributes(msg)
       var dataObj = cy.edges().filter(selectorString).data();
       if(dataObj != undefined){
          Object.defineProperty(dataObj, attributeName, {value: values[i]});
-         }                  
+         }
       //cy.edges("edge[source='Crem'][target='Hk2'][edgeType='undefined']").data({"score": 3})
       } // for i
 
@@ -1496,11 +1497,12 @@ function setupDefaultStyles(cy)
 function createCytoscapeWindow(graph, hideEdges) {
 
    var localCy;
-                   
+
    console.log("--- createCytoscapeWindow")
    cyElement = $("#cyDiv");
    console.log("--- graph");
-   //console.log(graph);
+   console.log(graph);
+   debugger;
 
    cyElement.cytoscape({
        elements: graph.elements,
@@ -1600,7 +1602,7 @@ function loadStyle(filename)
 //----------------------------------------------------------------------------------------------------
 addNetwork = function (filename)
 {
-   var s =    s = window.location.href + "?" + filename;
+   var s = window.location.href + "?" + filename;
    console.log("=== about to getScript on " + s);
    $.getScript(s)
      .done(function(script, textStatus) {

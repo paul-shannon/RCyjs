@@ -62,10 +62,11 @@ runTests = function()
 
    test.compoundNodes();
    test.setNodeImage();
-   
+
    test.httpSetStyle();
    test.httpAddGraphToExistingGraph()
    test.httpAddGraphToEmptyGraph()
+   test.httpAddCompoundEdgeToExistingGraph()
    test.httpAddJsonGraphFromFile()
    test.savePNG()
 
@@ -953,14 +954,14 @@ test.setNodeImage <- function()
 {
    printf("--- test.setNodeImage")
    rcy <- demo()
-   images <- list(A="https://farm1.staticflickr.com/231/524893064_f49a4d1d10_z.jpg",
-                  B="https://farm4.staticflickr.com/3063/2751740612_af11fb090b_b.jpg",
-                  C="https://farm9.staticflickr.com/8316/8003798443_32d01257c8_b.jpg")
+   images <- list(A="http://farm1.staticflickr.com/231/524893064_f49a4d1d10_z.jpg",
+                  B="http://farm9.staticflickr.com/8316/8003798443_32d01257c8_b.jpg",
+                  C="http://localhost:5000/8003798443_32d01257c8_b.jpg")
 
    setNodeImage(rcy, images)
 
    images <- list(A="https://farm1.staticflickr.com/231/524893064_f49a4d1d10_z.jpg",
-                  baker="https://farm4.staticflickr.com/3063/2751740612_af11fb090b_b.jpg",
+                  B="http://localhost:5000/HellsCanyonJune2015.jpg",
                   charlie="https://farm9.staticflickr.com/8316/8003798443_32d01257c8_b.jpg")
    setNodeImage(rcy, images)
 
@@ -1161,7 +1162,7 @@ test.httpAddJsonGraphFromFile <- function()
    setBackgroundColor(rcy, "#FAFAFA")
    setDefaultEdgeColor(rcy, "blue")
    redraw(rcy)
-      
+
    httpAddJsonGraphFromFile(rcy, file)
    fit(rcy)
    layout(rcy, "grid")
@@ -1181,5 +1182,42 @@ test.savePNG <- function()
 
 } # test.savePNG
 #----------------------------------------------------------------------------------------------------
+test.multiGraphSeparatelyVisibleEdges <- function()
+{
+   if(!interactive())
+       return(TRUE);
+
+   print("--- test.multiGraphSeparatelyVisibleEdges")
+   g <- new("graphNEL", edgemode = "directed")
+   g <- graph::addNode(c("A", "B"), g)
+   g <- graph::addEdge("A", "B", g)
+   g <- graph::addEdge("B", "A", g)
+
+   rcy <- RCyjs(PORTS, graph=g)
+   fit(rcy, 200)
+   httpSetStyle(rcy, "style.js")
+
+} # test.multiGraphSeparatelyVisibleEdges
+#----------------------------------------------------------------------------------------------------
+test.httpAddCompoundEdgeToExistingGraph <- function()
+{
+   if(!interactive())
+       return(TRUE);
+
+   print("--- test.httpAddCompoundEdgeToExistingGraph")
+
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
+   layout(rcy, "cose")
+
+   setBrowserWindowTitle(rcy, "compoundEdge");
+   setNodeLabelRule(rcy, "label");
+   redraw(rcy)
+
+
+
+} # test.httpAddCompoundEdgeToExistingGraph
+#----------------------------------------------------------------------------------------------------
+
 if(!interactive())
     runTests()

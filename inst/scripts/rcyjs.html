@@ -1403,8 +1403,14 @@ function httpAddGraph(msg)
   console.log("=== entering httpAddGraph");
   var filename = msg.payload;
   console.log("httpAdding graph '" + filename + "'");
-  addNetwork(filename);
-  return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+  status = addNetwork(filename);
+  if (status=="success") {
+     return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+     }
+  else{
+    return_msg = {cmd: msg.callback, status: "failure", callback: "", payload: status};
+    }
+
   hub.send(return_msg);
 
 } // httpAddGraph
@@ -1606,17 +1612,20 @@ addNetwork = function (filename)
    console.log("=== about to getScript on " + s);
    $.getScript(s)
      .done(function(script, textStatus) {
-         console.log("getScript: " + textStatus);
-         console.log("nodes: " + network.elements.nodes.length);
-         if(typeof(network.elements.edges) != "undefined")
-           console.log("edges: " + network.elements.edges.length);
+         //console.log("getScript: " + textStatus);
+         //console.log("nodes: " + network.elements.nodes.length);
+         //if(typeof(network.elements.edges) != "undefined")
+         //  console.log("edges: " + network.elements.edges.length);
          cy.add(network.elements);  // no positions yet
          cy.nodes().map(function(node){node.data({degree: node.degree()})});
          //cy.edges().style({"display": "none"});  // default hide edges for now
          //cy.elements().qtip(qtipOptions());
+         return("success");
          }) // .done
     .fail(function(jqxhr, settings, exception) {
-       console.log("addNetwork getscript error trying to read " + filename);
+       var msg = "addNetwork getscript error trying to read " + filename;
+       console.log(msg);
+       return(msg);
       });
 
 } // addNetwork

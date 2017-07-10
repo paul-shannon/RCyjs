@@ -3,8 +3,8 @@
 <head>
    <title>RCyjs</title>
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-   <script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
-   <!-- script   src="http://pshannon.systemsbiology.net/js/cytoscape-2.7.10.js"></script -->
+   <!-- script   src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.1.3/cytoscape.min.js"></script -->
+   <script src="https://cdn.rawgit.com/paul-shannon/CDN/master/js/cytoscape-3.0.0.js"></script>
    <script src="https://cdn.rawgit.com/paul-shannon/CDN/master/js/BrowserViz.js"></script>
 <style>
 
@@ -673,7 +673,7 @@ function doLayout(msg)
 {
    console.log("=== doLayout");
    var strategy = msg.payload;
-   cy.layout({name: strategy});
+   cy.layout({name: strategy}).run()
 
    hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1510,7 +1510,8 @@ function createCytoscapeWindow(graph, hideEdges) {
    console.log(graph);
    debugger;
 
-   cyElement.cytoscape({
+   var localCy = cytoscape({
+       container: cyElement,
        elements: graph.elements,
        showOverlay: false,
        minZoom: 0.001,
@@ -1530,9 +1531,9 @@ function createCytoscapeWindow(graph, hideEdges) {
         setupDefaultStyles(localCy);
         localCy.layout({name: "random"});
         localCy.reset();
-        localCy.fit(50);
+        console.log("about to call localCy.fit");
+        setTimeout(function(){localCy.fit(50); console.log("fit complete?");}, 250)
         localCy.edges().selectify();
-        //localCy.elements().qtip(qtipOptions());
         } // localCy.ready
        })
 

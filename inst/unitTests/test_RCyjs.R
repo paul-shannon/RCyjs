@@ -1218,6 +1218,22 @@ test.httpAddCompoundEdgeToExistingGraph <- function()
 
 } # test.httpAddCompoundEdgeToExistingGraph
 #----------------------------------------------------------------------------------------------------
+test.createStaticView <- function()
+{
+  printf("--- test.createStaticView")
+  rcy <- demo()
+  httpSetStyle(rcy, "style.js")
+  fit(rcy)
+  json <- getJSON(rcy)
+  fullAssignmentString <- sprintf("network = %s", json)
+  templateFile <- system.file(package="RCyjs", "extdata", "staticViewTemplate.html")
+  s <- paste(readLines(templateFile), collapse="\n")
+  s.edited <- sub("STATIC_VIEW_NETWORK_ASSIGNMENT_GOES_HERE", fullAssignmentString, s, fixed=TRUE)
+  writeLines(text=s.edited, "test.html")
+  browseURL("test.html")
+
+} # test.createStaticView
+#----------------------------------------------------------------------------------------------------
 
 if(!interactive())
     runTests()

@@ -8,7 +8,7 @@ vizmap = [
       "border-width": "3px",
       "background-color": "#FFFFFF",
       "border-color":"black",
-       "width": "80px",
+      "width": "80px",
       "height": "80px",
       "font-size":"24px"}},
 

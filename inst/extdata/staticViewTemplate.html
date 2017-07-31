@@ -5,7 +5,8 @@
    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-   <script src="https://cdn.rawgit.com/paul-shannon/CDN/master/js/cytoscape-3.0.0.js"></script>
+   <!-- script src="https://cdn.rawgit.com/paul-shannon/CDN/master/js/cytoscape-3.0.0.js"></script-->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.1.4/cytoscape.min.js"></script>
    <script>STATIC_VIEW_NETWORK_ASSIGNMENT_GOES_HERE</script>
 
 
@@ -23,6 +24,10 @@
   margin: 1px;
   width: 100%;
   height: 98%
+  }
+
+.cyMenuButton{
+  font-size: 18px;
   }
 
 </style>
@@ -46,16 +51,13 @@
 //--------------------------------------------------------------------------------
 function handleWindowResize ()
 {
-   console.log("trenaViz.handleWindowResize");
    var newHeight = 0.95 * $(window).height();
    var newWidth = 0.95 * $(window).width();
    var cyMenubarHeight = $("#cyMenubarDiv").height();
    var newCyHeight = newHeight - (cyMenubarHeight + 60);
-   console.log("newCyHeight: " + newCyHeight);
    var cyDiv = $("#cyDiv")
    cyDiv.height(newCyHeight);
    cyDiv.width(newWidth); // #  - 45);
-   console.log("--- setting structureCyjsDiv to height " + newCyHeight);
 
 } // handleWindowResize
 //--------------------------------------------------------------------------------
@@ -71,8 +73,12 @@ $(document).ready(function(){
    cy = cytoscape(options);
    handleWindowResize();
    setTimeout(function(){cy.fit(50);}, 500)
+   $("#cyFitButton").click(function(){cy.fit(50)});
+   $("#cyFitSelectedButton").click(function(){cy.fit(cy.nodes(":selected"), 50)});
+   $("#cySFNButton").click(function(){cy.nodes(':selected').neighborhood().nodes().select()});
+   $("#cyHideUnselectedButton").click(function(){cy.nodes(":unselected").hide()});
+   $("#cyShowAllButton").click(function(){cy.nodes().show(); cy.edges().show()});
    }); // document.ready
-
 </script>
 
 </body>

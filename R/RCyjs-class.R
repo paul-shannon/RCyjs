@@ -119,10 +119,10 @@ RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), h
       }
 
    setGraph(obj, graphNEL(), hideEdges=hideEdges)
-    
+
    if(!quiet)
       printf("loading graph with %d nodes", length(nodes(graph)))
-        
+
    httpAddGraph(obj, graph)
    layout(obj, "random")
 
@@ -228,8 +228,7 @@ setMethod('getNodes', 'RCyjsClass',
 setMethod('getNodeCount', 'RCyjsClass',
 
   function (obj) {
-     send(obj, list(cmd="getNodeCount", callback="handleResponse", status="request",
-                                  payload=""))
+     send(obj, list(cmd="getNodeCount", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }

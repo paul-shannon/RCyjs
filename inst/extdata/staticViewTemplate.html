@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>RCyjs static</title>
+   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+   <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   <!-- script src="https://cdn.rawgit.com/paul-shannon/CDN/master/js/cytoscape-3.0.0.js"></script-->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.1.4/cytoscape.min.js"></script>
+   <script>STATIC_VIEW_NETWORK_ASSIGNMENT_GOES_HERE</script>
+
+
+<style>
+
+#cyOuterDiv{
+  background-color: #F8F8F8;
+  margin-top: 1px;
+  padding: 1px;
+  }
+
+#cyDiv{
+  background-color: #F8F8F8;
+  margin-top: 5px;
+  margin: 1px;
+  width: 100%;
+  height: 98%
+  }
+
+.cyMenuButton{
+  font-size: 18px;
+  }
+
+</style>
+
+</head>
+
+<body>
+
+  <div id="cyOuterDiv">
+     <div id="cyMenubarDiv">
+         <button id='cyFitButton' class="cyMenuButton">Fit</button>
+         <button id='cyFitSelectedButton'class="cyMenuButton">Fit Selected</button>
+         <button id='cySFNButton' class="cyMenuButton">SFN</button>
+         <button id='cyHideUnselectedButton' class="cyMenuButton">Hide Unselected</button>
+         <button id='cyShowAllButton' class="cyMenuButton">Show All</button>
+     </div>
+     <div id="cyDiv"></div>
+  </div>
+
+<script>
+//--------------------------------------------------------------------------------
+function handleWindowResize ()
+{
+   var newHeight = 0.95 * $(window).height();
+   var newWidth = 0.95 * $(window).width();
+   var cyMenubarHeight = $("#cyMenubarDiv").height();
+   var newCyHeight = newHeight - (cyMenubarHeight + 60);
+   var cyDiv = $("#cyDiv")
+   cyDiv.height(newCyHeight);
+   cyDiv.width(newWidth); // #  - 45);
+
+} // handleWindowResize
+//--------------------------------------------------------------------------------
+$(window).resize(handleWindowResize);
+
+$(document).ready(function(){
+  var options = {container: $("#cyDiv"),
+                 elements: network.elements,
+                 style: network.style,
+                 layout: {name: 'preset'},
+                 };
+
+   cy = cytoscape(options);
+   handleWindowResize();
+   setTimeout(function(){cy.fit(50);}, 500)
+   $("#cyFitButton").click(function(){cy.fit(50)});
+   $("#cyFitSelectedButton").click(function(){cy.fit(cy.nodes(":selected"), 50)});
+   $("#cySFNButton").click(function(){cy.nodes(':selected').neighborhood().nodes().select()});
+   $("#cyHideUnselectedButton").click(function(){cy.nodes(":unselected").hide()});
+   $("#cyShowAllButton").click(function(){cy.nodes().show(); cy.edges().show()});
+   }); // document.ready
+</script>
+
+</body>
+</html>

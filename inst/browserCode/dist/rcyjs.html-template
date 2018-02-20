@@ -1,0 +1,42 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
+
+<script>
+m4_changequote()
+m4_include(bundle.js)
+</script>
+</head>
+
+<body>
+<div id="trenaVizDiv">
+  <ul>
+    <li><a href="#igvOuterDiv">IGV</a></li>
+    <li><a href="#cyOuterDiv">TRN</a></li>
+  </ul>
+
+  <div id="cyOuterDiv">
+     <div id="cyMenubarDiv">
+         <button id='cyFitButton' class="cyMenuButton">Fit</button>
+         <button id='cyFitSelectedButton'class="cyMenuButton">Fit Selected</button>
+         <button id='cySFNButton' class="cyMenuButton">SFN</button>
+         <button id='cyHideUnselectedButton' class="cyMenuButton">Hide Unselected</button>
+         <button id='cyShowAllButton' class="cyMenuButton">Show All</button>
+         <button id='cyCycleThroughModelsButton' class="cyMenuButton">Cycle Models</button>
+     </div>
+     <div id="cyDiv"></div>
+  </div>
+
+  <div id="igvOuterDiv">
+     <div id="igvDiv"> </div>
+  </div>
+
+</div>
+</body>
+</html>
+

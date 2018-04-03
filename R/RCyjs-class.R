@@ -110,6 +110,7 @@ RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), h
                            httpQueryProcessingFunction=myQP),
                 graph=graph)
 
+
   print(1)
   #while (!browserResponseReady(obj)){
   #    Sys.sleep(.1)
@@ -128,6 +129,7 @@ RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), h
 
    if(!quiet)
       printf("loading graph with %d nodes", length(nodes(graph)))
+
 
   print(4)
    httpAddGraph(obj, graph)

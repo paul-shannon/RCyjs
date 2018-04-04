@@ -76,13 +76,10 @@ runTests = function()
 demo <- function(portRange=PORTS)
 {
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=portRange, quiet=TRUE, graph=g, hideEdges=FALSE);
+   rcy <- RCyjs(title="demo", graph=g)
 
    checkTrue(ready(rcy))
-
-   title <- "demo"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
+   checkEquals(getBrowserWindowTitle(rcy), "demo")
 
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
@@ -101,7 +98,7 @@ demo <- function(portRange=PORTS)
 test.constructorNoGraph <- function()
 {
    print("--- test.constructor")
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE);
+   rcy <- RCyjs(title="ctorNoGraph")
    checkTrue(ready(rcy))
 
    title <- "no graph ctor"

@@ -105,7 +105,7 @@ setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newV
 
 #----------------------------------------------------------------------------------------------------
 # constructor
-RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
+RCyjs = function(portRange=16000:16100, host="localhost", title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
 {
 
   obj <- .RCyjs(BrowserViz(portRange, title, quiet, browserFile=cyjsBrowserFile,
@@ -140,6 +140,7 @@ RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), h
    if(!quiet)
      message(sprintf("RCyjs ctor about to retrun RCyjs object"))
 
+  setBrowserWindowTitle(obj, title)
    # setGraph(obj, graph, hideEdges=hideEdges)
 
   print(7)

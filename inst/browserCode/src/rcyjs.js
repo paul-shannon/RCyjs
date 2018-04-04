@@ -59,99 +59,100 @@ function handleWindowResize ()
 //--------------------------------------------------------------------------------
 function addMessageHandlers()
 {
-    var self = this;
+   var self = this;
 
-    self.hub.addMessageHandler("setGraph",             setGraph.bind(self));
-    self.hub.addMessageHandler("setNodeAttributes",    setNodeAttributes.bind(self));
-    self.hub.addMessageHandler("setEdgeAttributes",    setEdgeAttributes.bind(self));
-    self.hub.addMessageHandler("addGraph",             addGraph.bind(self));
-    self.hub.addMessageHandler("httpAddGraph",         httpAddGraph.bind(self));
-    self.hub.addMessageHandler("httpSetStyle",         httpSetStyle.bind(self));
-    self.hub.addMessageHandler("getNodeCount",         getNodeCount.bind(self));
-    self.hub.addMessageHandler("getEdgeCount",         getEdgeCount.bind(self));
-    self.hub.addMessageHandler("getNodes",             getNodes.bind(self));
-    self.hub.addMessageHandler("getSelectedNodes",     getSelectedNodes.bind(self));
+   self.hub.addMessageHandler("setGraph",             setGraph.bind(self));
+   self.hub.addMessageHandler("setNodeAttributes",    setNodeAttributes.bind(self));
+   self.hub.addMessageHandler("setEdgeAttributes",    setEdgeAttributes.bind(self));
+   self.hub.addMessageHandler("addGraph",             addGraph.bind(self));
+   self.hub.addMessageHandler("httpAddGraph",         httpAddGraph.bind(self));
+   self.hub.addMessageHandler("httpSetStyle",         httpSetStyle.bind(self));
+   self.hub.addMessageHandler("getNodeCount",         getNodeCount.bind(self));
+   self.hub.addMessageHandler("getEdgeCount",         getEdgeCount.bind(self));
+   self.hub.addMessageHandler("getNodes",             getNodes.bind(self));
+   self.hub.addMessageHandler("getSelectedNodes",     getSelectedNodes.bind(self));
 
-    self.hub.addMessageHandler("setNodeLabelRule",      setNodeLabelRule.bind(self));
-    self.hub.addMessageHandler("setNodeLabelAlignment", setNodeLabelAlignment.bind(self));
+   self.hub.addMessageHandler("setNodeLabelRule",      setNodeLabelRule.bind(self));
+   self.hub.addMessageHandler("setNodeLabelAlignment", setNodeLabelAlignment.bind(self));
 
-    self.hub.addMessageHandler("setNodeSizeRule",      setNodeSizeRule.bind(self));
-    self.hub.addMessageHandler("setNodeColorRule",     setNodeColorRule.bind(self));
-    self.hub.addMessageHandler("setNodeShapeRule",     setNodeShapeRule.bind(self));
+   self.hub.addMessageHandler("setNodeSizeRule",      setNodeSizeRule.bind(self));
+   self.hub.addMessageHandler("setNodeColorRule",     setNodeColorRule.bind(self));
+   self.hub.addMessageHandler("setNodeShapeRule",     setNodeShapeRule.bind(self));
 
-    self.hub.addMessageHandler("setEdgeColorRule",             setEdgeColorRule.bind(self));
-    self.hub.addMessageHandler("setEdgeStyle",                 setEdgeStyle.bind(self));
-    self.hub.addMessageHandler("setEdgeWidthRule",             setEdgeWidthRule.bind(self));
-    self.hub.addMessageHandler("setEdgeTargetArrowShapeRule",  setEdgeTargetArrowShapeRule.bind(self));
-    self.hub.addMessageHandler("setEdgeTargetArrowColorRule",  setEdgeTargetArrowColorRule.bind(self));
-    self.hub.addMessageHandler("setEdgeSourceArrowShapeRule",  setEdgeSourceArrowShapeRule.bind(self));
-    self.hub.addMessageHandler("setEdgeSourceArrowColorRule",  setEdgeSourceArrowColorRule.bind(self));
+   self.hub.addMessageHandler("setEdgeColorRule",             setEdgeColorRule.bind(self));
+   self.hub.addMessageHandler("setEdgeStyle",                 setEdgeStyle.bind(self));
+   self.hub.addMessageHandler("setEdgeWidthRule",             setEdgeWidthRule.bind(self));
+   self.hub.addMessageHandler("setEdgeTargetArrowShapeRule",  setEdgeTargetArrowShapeRule.bind(self));
+   self.hub.addMessageHandler("setEdgeTargetArrowColorRule",  setEdgeTargetArrowColorRule.bind(self));
+   self.hub.addMessageHandler("setEdgeSourceArrowShapeRule",  setEdgeSourceArrowShapeRule.bind(self));
+   self.hub.addMessageHandler("setEdgeSourceArrowColorRule",  setEdgeSourceArrowColorRule.bind(self));
 
-    self.hub.addMessageHandler("redraw",                redraw.bind(self));
-    self.hub.addMessageHandler("fit",                   fit.bind(self));
-    self.hub.addMessageHandler("fitSelected",           fitSelected.bind(self));
-    self.hub.addMessageHandler("getZoom",               getZoom.bind(self));
-    self.hub.addMessageHandler("setZoom",               setZoom.bind(self));
-    self.hub.addMessageHandler("setBackgroundColor",    setBackgroundColor.bind(self));
-    self.hub.addMessageHandler("layoutStrategies",      layoutStrategies.bind(self));
-    self.hub.addMessageHandler("doLayout",              doLayout.bind(self));
-    self.hub.addMessageHandler("layoutSelectionInGrid", layoutSelectionInGrid.bind(self));
-    self.hub.addMessageHandler("layoutSelectionInGridInferAnchor", layoutSelectionInGridInferAnchor.bind(self));
+   self.hub.addMessageHandler("redraw",                redraw.bind(self));
+   self.hub.addMessageHandler("fit",                   fit.bind(self));
+   self.hub.addMessageHandler("fitSelected",           fitSelected.bind(self));
+   self.hub.addMessageHandler("getZoom",               getZoom.bind(self));
+   self.hub.addMessageHandler("setZoom",               setZoom.bind(self));
+   self.hub.addMessageHandler("setBackgroundColor",    setBackgroundColor.bind(self));
+   self.hub.addMessageHandler("layoutStrategies",      layoutStrategies.bind(self));
+   self.hub.addMessageHandler("doLayout",              doLayout.bind(self));
+   self.hub.addMessageHandler("layoutSelectionInGrid", layoutSelectionInGrid.bind(self));
+   self.hub.addMessageHandler("layoutSelectionInGridInferAnchor", layoutSelectionInGridInferAnchor.bind(self));
 
-    self.hub.addMessageHandler("getPosition",          getPosition.bind(self));
-    self.hub.addMessageHandler("setPosition",          setPosition.bind(self));
-    self.hub.addMessageHandler("getNodeSize",          getNodeSize.bind(self));
-    self.hub.addMessageHandler("hideAllEdges",         hideAllEdges.bind(self));
-    self.hub.addMessageHandler("showAllEdges",         showAllEdges.bind(self));
-    self.hub.addMessageHandler("hideEdges",            hideEdges.bind(self));
-    self.hub.addMessageHandler("showEdges",            showEdges.bind(self));
-    self.hub.addMessageHandler("showAll",              showAll.bind(self));
+   self.hub.addMessageHandler("getPosition",          getPosition.bind(self));
+   self.hub.addMessageHandler("setPosition",          setPosition.bind(self));
+   self.hub.addMessageHandler("getNodeSize",          getNodeSize.bind(self));
+   self.hub.addMessageHandler("hideAllEdges",         hideAllEdges.bind(self));
+   self.hub.addMessageHandler("showAllEdges",         showAllEdges.bind(self));
+   self.hub.addMessageHandler("hideEdges",            hideEdges.bind(self));
+   self.hub.addMessageHandler("showEdges",            showEdges.bind(self));
+   self.hub.addMessageHandler("showAll",              showAll.bind(self));
 
-    self.hub.addMessageHandler("getJSON",              getJSON.bind(self));
-    self.hub.addMessageHandler("getPNG",               getPNG.bind(self));
-    self.hub.addMessageHandler("selectNodes",          selectNodes.bind(self));
-    self.hub.addMessageHandler("invertNodeSelection",  invertNodeSelection.bind(self));
-    self.hub.addMessageHandler("hideSelectedNodes",    hideSelectedNodes.bind(self));
-    self.hub.addMessageHandler("deleteSelectedNodes",  deleteSelectedNodes.bind(self));
-    self.hub.addMessageHandler("sfn",                  sfn.bind(self));
-    self.hub.addMessageHandler("clearSelection",       clearSelection.bind(self));
+   self.hub.addMessageHandler("getJSON",              getJSON.bind(self));
+   self.hub.addMessageHandler("getPNG",               getPNG.bind(self));
+   self.hub.addMessageHandler("selectNodes",          selectNodes.bind(self));
+   self.hub.addMessageHandler("invertNodeSelection",  invertNodeSelection.bind(self));
+   self.hub.addMessageHandler("hideSelectedNodes",    hideSelectedNodes.bind(self));
+   self.hub.addMessageHandler("deleteSelectedNodes",  deleteSelectedNodes.bind(self));
+   self.hub.addMessageHandler("sfn",                  sfn.bind(self));
+   self.hub.addMessageHandler("clearSelection",       clearSelection.bind(self));
 
-    self.hub.addMessageHandler("setNodeImage",         setNodeImage.bind(self));
+   self.hub.addMessageHandler("setNodeImage",         setNodeImage.bind(self));
 
-    self.hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape.bind(self));
 
-    self.hub.addMessageHandler("setDefaultNodeSize",   setDefaultNodeSize.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeWidth",  setDefaultNodeWidth.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeHeight", setDefaultNodeHeight.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeFontColor", setDefaultNodeFontColor.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeFontSize", setDefaultNodeFontSize.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeBorderWidth", setDefaultNodeBorderWidth.bind(self));
-    self.hub.addMessageHandler("setDefaultNodeBorderColor", setDefaultNodeBorderColor.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeSize",   setDefaultNodeSize.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeWidth",  setDefaultNodeWidth.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeHeight", setDefaultNodeHeight.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeFontColor", setDefaultNodeFontColor.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeFontSize", setDefaultNodeFontSize.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeBorderWidth", setDefaultNodeBorderWidth.bind(self));
+   self.hub.addMessageHandler("setDefaultNodeBorderColor", setDefaultNodeBorderColor.bind(self));
 
-    self.hub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeTargetArrowShape", setDefaultEdgeTargetArrowShape.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeColor", setDefaultEdgeColor.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeTargetArrowColor", setDefaultEdgeTargetArrowColor.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeWidth", setDefaultEdgeWidth.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeLineColor", setDefaultEdgeLineColor.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeFont", setDefaultEdgeFont.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeFontWeight", setDefaultEdgeFontWeight.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeTextOpacity", setDefaultEdgeTextOpacity.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeLineStyle", setDefaultEdgeLineStyle.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeOpacity", setDefaultEdgeOpacity.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeSourceArrowColor", setDefaultEdgeSourceArrowColor.bind(self));
-    self.hub.addMessageHandler("setDefaultEdgeSourceArrowShape", setDefaultEdgeSourceArrowShape.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeTargetArrowShape", setDefaultEdgeTargetArrowShape.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeColor", setDefaultEdgeColor.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeTargetArrowColor", setDefaultEdgeTargetArrowColor.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeWidth", setDefaultEdgeWidth.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeLineColor", setDefaultEdgeLineColor.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeFont", setDefaultEdgeFont.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeFontWeight", setDefaultEdgeFontWeight.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeTextOpacity", setDefaultEdgeTextOpacity.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeLineStyle", setDefaultEdgeLineStyle.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeOpacity", setDefaultEdgeOpacity.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeSourceArrowColor", setDefaultEdgeSourceArrowColor.bind(self));
+   self.hub.addMessageHandler("setDefaultEdgeSourceArrowShape", setDefaultEdgeSourceArrowShape.bind(self));
 
 } // addMessageHandlers
 //----------------------------------------------------------------------------------------------------
 function redraw(msg)
 {
    var self = this;
-   self.update();
+
+   self.cy.style().update();
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // redraw
@@ -169,7 +170,7 @@ function fit(msg)
 function fitSelected(msg)
 {
    var self = this;
-   var selectedNodes = cy.filter('node:selected');
+   var selectedNodes = self.cy.filter('node:selected');
    var padding = msg.payload;
 
    if(selectedNodes.length == 0){
@@ -191,9 +192,9 @@ function setZoom(msg)
 {
    var self = this;
    var newFactor = msg.payload
-   var box = cy.extent();
+   var box = self.cy.extent();
    var center = {x: box.x1 + (box.w/2), y: box.y1 + (box.h/2)};
-   cy.zoom({level: newFactor, position: center});
+   self.cy.zoom({level: newFactor, position: center});
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setZoom
@@ -201,7 +202,7 @@ function setZoom(msg)
 function getZoom(msg)
 {
    var self = this;
-   result = cy.zoom();
+   result = self.cy.zoom();
    returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
    console.log(returnMsg);
    self.hub.send(returnMsg);
@@ -220,7 +221,7 @@ function setBackgroundColor(msg)
 function update()
 {
    var self = this;
-   cy.style().update()
+   self.cy.style().update()
 
 } // update
 //----------------------------------------------------------------------------------------------------
@@ -229,7 +230,7 @@ function setNodeLabelRule(msg)
    var self = this;
    var controllingAttribute = msg.payload;
    var valueString = "data(" + controllingAttribute + ")";
-   cy.style().selector('node').css({content: valueString});
+   self.cy.style().selector('node').css({content: valueString});
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeLabelRule
@@ -239,8 +240,8 @@ function setNodeLabelAlignment(msg)
    var self = this;
    var horizontalPosition = msg.payload.horizontal;
    var verticalPosition = msg.payload.vertical;
-   cy.style().selector('node').css({"text-halign": horizontalPosition});
-   cy.style().selector('node').css({"text-valign": verticalPosition});
+   self.cy.style().selector('node').css({"text-halign": horizontalPosition});
+   self.cy.style().selector('node').css({"text-valign": verticalPosition});
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -269,7 +270,7 @@ function setNodeSizeRule(msg)
 
 
       // three forms:
-      // cy.style().selector("node[count<=1]").css
+      // self.cy.style().selector("node[count<=1]").css
 
    var segmentCount = controlPoints.length - 1;
 
@@ -291,8 +292,8 @@ function setNodeSizeRule(msg)
      var mappingString = "mapData(" + controllingAttribute + "," + minVal + "," + maxVal +
                                                            "," + minSize + "," + maxSize + ")";
 
-     cy.style().selector(selectorString).css({width: mappingString});
-     cy.style().selector(selectorString).css({height: mappingString});
+     self.cy.style().selector(selectorString).css({width: mappingString});
+     self.cy.style().selector(selectorString).css({height: mappingString});
      } // for seg
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -304,17 +305,16 @@ function setNodeColorRule(msg)
    var self = this;
    var mode = msg.payload.mode;
    if(mode == "interpolate")
-      setNodeColorInterpolatingRule(msg)
+      setNodeColorInterpolatingRule(self, msg)
    else if (mode == "lookup")
-      setNodeColorLookupRule(msg)
+      setNodeColorLookupRule(self, msg)
    else
       self.hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
 
 } // setNodeColorRule
 //----------------------------------------------------------------------------------------------------
-function setNodeColorLookupRule(msg)
+function setNodeColorLookupRule(self, msg)
 {
-   var self = this;
    var controllingAttribute = msg.payload.attribute;
    console.log("--- setNodeColorRule: " + controllingAttribute);
    var states = msg.payload.controlPoints;
@@ -325,16 +325,17 @@ function setNodeColorLookupRule(msg)
      var state = states[i];
      var selectorString = "node[" + controllingAttribute + "='"  + state + "']";
      console.log("selectorString: " + selectorString);
-     cy.style().selector(selectorString).css({"background-color": color});
+     self.cy.style().selector(selectorString).css({"background-color": color});
      } // for seg
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeColorLookupRule
 //----------------------------------------------------------------------------------------------------
-function setNodeColorInterpolatingRule(msg)
+function setNodeColorInterpolatingRule(self, msg)
 {
-   var self = this;
+   console.log(this)
+
    var controllingAttribute = msg.payload.attribute;
    console.log("--- setNodeColorRule: " + controllingAttribute);
    var controlPoints = msg.payload.controlPoints;
@@ -354,7 +355,7 @@ function setNodeColorInterpolatingRule(msg)
 
 
       // three forms:
-      // cy.style().selector("node[count<=1]").css
+      // self.cy.style().selector("node[count<=1]").css
 
    var segmentCount = controlPoints.length - 1;
 
@@ -377,7 +378,7 @@ function setNodeColorInterpolatingRule(msg)
      console.log("selectorString: " + selectorString);
      console.log("mapping string: " + mappingString);
 
-     cy.style().selector(selectorString).css({"background-color": mappingString});
+     self.cy.style().selector(selectorString).css({"background-color": mappingString});
      } // for seg
 
 
@@ -398,7 +399,7 @@ function setNodeShapeRule(msg)
      var state = states[i];
      var selectorString = "node[" + controllingAttribute + "='"  + state + "']";
      console.log("selectorString: " + selectorString + "  shape: " + shape);
-     cy.style().selector(selectorString).css({"shape": shape});
+     self.cy.style().selector(selectorString).css({"shape": shape});
      } // for seg
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -415,9 +416,9 @@ function setEdgeStyle(msg)
      self.hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
 
    if(mode === "haystack")
-      cy.edges().style({"curve-style": "haystack"});
+      self.cy.edges().style({"curve-style": "haystack"});
    else if (mode == "bezier")
-      cy.edges().style({"curve-style": "bezier"});
+      self.cy.edges().style({"curve-style": "bezier"});
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -449,7 +450,7 @@ function setEdgeColorLookupRule(msg)
      var state = states[i];
      var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
      console.log("selectorString: " + selectorString);
-     cy.style().selector(selectorString).css({"line-color": color});
+     self.cy.style().selector(selectorString).css({"line-color": color});
      } // for seg
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -478,7 +479,7 @@ function setEdgeColorInterpolatingRule(msg)
 
 
       // three forms:
-      // cy.style().selector("edge[count<=1]").css
+      // self.cy.style().selector("edge[count<=1]").css
 
    var segmentCount = controlPoints.length - 1;
 
@@ -501,7 +502,7 @@ function setEdgeColorInterpolatingRule(msg)
      console.log("selectorString: " + selectorString);
      console.log("mapping string: " + mappingString);
 
-     cy.style().selector(selectorString).css({"line-color": mappingString});
+     self.cy.style().selector(selectorString).css({"line-color": mappingString});
      } // for seg
 
 
@@ -543,7 +544,7 @@ function setEdgeWidthLookupRule(msg)
      var state = states[i];
      var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
      console.log("selectorString: " + selectorString);
-     cy.style().selector(selectorString).css({"width": width});
+     self.cy.style().selector(selectorString).css({"width": width});
      } // for seg
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -563,7 +564,7 @@ function setEdgeTargetArrowShapeRule(msg)
      var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
      console.log("selectorString: " + selectorString);
      console.log("  newShape: " + shape);
-     cy.style().selector(selectorString).css({"target-arrow-shape": shape});
+     self.cy.style().selector(selectorString).css({"target-arrow-shape": shape});
 
      } // for seg
 
@@ -605,7 +606,7 @@ function setEdgeTargetArrowColorLookupRule(msg)
      var state = states[i];
      var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
      console.log("selectorString: " + selectorString);
-     cy.style().selector(selectorString).css({"target-arrow-color": color});
+     self.cy.style().selector(selectorString).css({"target-arrow-color": color});
      } // for seg
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -632,7 +633,7 @@ function setEdgeSourceArrowShapeRule(msg)
      var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
      console.log("selectorString: " + selectorString);
      console.log("  newShape: " + shape);
-     cy.style().selector(selectorString).css({"source-arrow-shape": shape});
+     self.cy.style().selector(selectorString).css({"source-arrow-shape": shape});
      } // for seg
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -668,7 +669,7 @@ function setEdgeSourceArrowColorLookupRule(msg)
      var state = states[i];
      var selectorString = "edge[" + controllingAttribute + "='"  + state + "']";
      console.log("selectorString: " + selectorString);
-     cy.style().selector(selectorString).css({"source-arrow-color": color});
+     self.cy.style().selector(selectorString).css({"source-arrow-color": color});
      } // for seg
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -688,7 +689,7 @@ function getNodeSize(msg)
    console.log("=== getNodeSize");
    var nodeID = msg.payload;
    var filterString = "node[id='" + nodeID + "']";
-   var width = cy.filter(filterString).css("width");
+   var width = self.cy.filter(filterString).css("width");
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: width});
 
 } // getNodeSize
@@ -726,7 +727,7 @@ function layoutSelectionInGrid(msg)
 
   var box = {x1: x, y1: y, w: w, h: h }
 
-  cy.filter("node:selected").layout({ name: 'grid', boundingBox: box });
+  self.cy.filter("node:selected").layout({ name: 'grid', boundingBox: box });
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -735,22 +736,22 @@ function layoutSelectionInGrid(msg)
 function layoutSelectionInGridInferAnchor(msg)
 {
   var self = this;
-  var currentPan = cy.pan();
-  var currentZoom = cy.zoom();
+  var currentPan = self.cy.pan();
+  var currentZoom = self.cy.zoom();
 
   var w = msg.payload.w
   var h = msg.payload.h
 
-  var yCoordinates = cy.nodes("node:selected").map(function(node) {return node.position().y});
-  var xCoordinates = cy.nodes("node:selected").map(function(node) {return node.position().x});
+  var yCoordinates = self.cy.nodes("node:selected").map(function(node) {return node.position().y});
+  var xCoordinates = self.cy.nodes("node:selected").map(function(node) {return node.position().x});
 
   var y = Math.min.apply(null, yCoordinates)
   var x = Math.min.apply(null, xCoordinates)
 
   var box = {x1: x, y1: y, w: w, h: h }
 
-  cy.filter("node:selected").layout({ name: 'grid', boundingBox: box });
-  cy.viewport({zoom: currentZoom, pan: currentPan});
+  self.cy.filter("node:selected").layout({ name: 'grid', boundingBox: box });
+  self.cy.viewport({zoom: currentZoom, pan: currentPan});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -798,7 +799,7 @@ function getPosition(msg)
      filterStrings.push(s);
      } // for i
 
-   var nodesToSelect = cy.nodes(filterStrings.join());
+   var nodesToSelect = self.cy.nodes(filterStrings.join());
 
    if(allNodes)
       layout = JSON.stringify(cy.nodes().map(function(n){return{id: n.id(),
@@ -825,7 +826,7 @@ function setPosition(msg)
    console.log("calling setPosition map");
    positionObjects.map(function(e){
        var tag="[id='" + e.id + "']";
-       cy.$(tag).position({x: e.x, y:e.y});
+       self.cy.$(tag).position({x: e.x, y:e.y});
        });
 
    /************
@@ -836,7 +837,7 @@ function setPosition(msg)
       var yPos = obj.y;
       var filterString = "[id='" + id + "']";
       //console.log(" setPosition " + id + ": " + xPos + ", " + yPos);
-      cy.nodes(filterString).position({x: xPos, y: yPos});
+      self.cy.nodes(filterString).position({x: xPos, y: yPos});
       } // for i
     ********/
    console.log("after setPosition map");
@@ -847,7 +848,7 @@ function setPosition(msg)
    //  var s = '[id="' + positionObjects[i].id + '"]';
    //  filterStrings.push(s);
    //  } // for i
-   //var nodeSubset = cy.nodes(filterStrings.join());
+   //var nodeSubset = self.cy.nodes(filterStrings.join());
    //console.log("rcyjs.html, setPosition(msg) setting position on nodes, count: " + nodeSubset.length);
    //console.log(JSON.stringify(nodeSubset))
 
@@ -884,7 +885,7 @@ function getNodeSize(msg)
      filterStrings.push(s);
      } // for i
 
-   var nodesToSelect = cy.nodes(filterStrings.join());
+   var nodesToSelect = self.cy.nodes(filterStrings.join());
 
    if(allNodes)
       layout = JSON.stringify(cy.nodes().map(function(n){return{id: n.id(),
@@ -903,7 +904,7 @@ function getNodeSize(msg)
 function hideAllEdges(msg)
 {
    var self = this;
-   cy.edges().hide();
+   self.cy.edges().hide();
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -912,7 +913,7 @@ function hideAllEdges(msg)
 function showAllEdges(msg)
 {
    var self = this;
-   cy.edges().show();
+   self.cy.edges().show();
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -922,10 +923,10 @@ function hideEdges(msg)
 {
    var self = this;
    var edgeType = msg.payload;
-      // emulate this, constructed on the fly:  cy.edges('[edgeType="chromosome"]').hide()
+      // emulate this, constructed on the fly:  self.cy.edges('[edgeType="chromosome"]').hide()
    filterString = '[edgeType="' + edgeType + '"]';
    console.log("filterString: " + filterString);
-   cy.edges(filterString).hide();
+   self.cy.edges(filterString).hide();
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -935,10 +936,10 @@ function showEdges(msg)
 {
    var self = this;
    var edgeType = msg.payload;
-      // emulate this, constructed on the fly:  cy.edges('[edgeType="chromosome"]').show()
+      // emulate this, constructed on the fly:  self.cy.edges('[edgeType="chromosome"]').show()
    filterString = '[edgeType="' + edgeType + '"]';
    console.log("filterString: " + filterString);
-   cy.edges(filterString).show();
+   self.cy.edges(filterString).show();
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -947,8 +948,8 @@ function showEdges(msg)
 function showAll(msg)
 {
    var self = this;
-   cy.nodes().show();
-   cy.edges().show();
+   self.cy.nodes().show();
+   self.cy.edges().show();
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -965,7 +966,7 @@ function setNodeImage(msg)
   var urls = Object.keys(imageList).map(function(key){return imageList[key]});
   for(var i=0; i < nodeIDs.length; i++){
      var filterString = "node[id='" + nodeIDs[i] + "']";
-     cy.nodes(filterString).style({"background-image": urls[i], "background-fit": "cover"});
+     self.cy.nodes(filterString).style({"background-image": urls[i], "background-fit": "cover"});
      } // var i
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -976,8 +977,8 @@ function setDefaultNodeSize(msg)
 {
    var self = this;
   var newSize = msg.payload;
-  cy.style().selector('node').css({"height": newSize});
-  cy.style().selector('node').css({"width": newSize});
+  self.cy.style().selector('node').css({"height": newSize});
+  self.cy.style().selector('node').css({"width": newSize});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -987,7 +988,7 @@ function setDefaultNodeWidth(msg)
 {
    var self = this;
   var newSize = msg.payload;
-  cy.style().selector('node').css({"width": newSize});
+  self.cy.style().selector('node').css({"width": newSize});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -997,7 +998,7 @@ function setDefaultNodeHeight(msg)
 {
    var self = this;
   var newSize = msg.payload;
-  cy.style().selector('node').css({"height": newSize});
+  self.cy.style().selector('node').css({"height": newSize});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1007,7 +1008,7 @@ function setDefaultNodeColor(msg)
 {
    var self = this;
   var newColor = msg.payload;
-  cy.style().selector("node").css({"background-color": newColor});
+  self.cy.style().selector("node").css({"background-color": newColor});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1017,7 +1018,7 @@ function setDefaultNodeShape(msg)
 {
    var self = this;
   var newShape = msg.payload;
-  cy.style().selector("node").css({"shape": newShape});
+  self.cy.style().selector("node").css({"shape": newShape});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1027,7 +1028,7 @@ function setDefaultNodeFontColor(msg)
 {
    var self = this;
   var color = msg.payload;
-  cy.style().selector("node").css({"color": color});
+  self.cy.style().selector("node").css({"color": color});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1037,7 +1038,7 @@ function setDefaultNodeFontSize(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("node").css({"font-size": newValue});
+  self.cy.style().selector("node").css({"font-size": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1047,7 +1048,7 @@ function setDefaultNodeBorderWidth(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("node").css({"border-width": newValue});
+  self.cy.style().selector("node").css({"border-width": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1057,7 +1058,7 @@ function setDefaultNodeBorderColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("node").css({"border-color": newValue});
+  self.cy.style().selector("node").css({"border-color": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1067,7 +1068,7 @@ function setDefaultEdgeFontSize(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"font-size": newValue});
+  self.cy.style().selector("edge").css({"font-size": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1077,7 +1078,7 @@ function setDefaultEdgeTargetArrowShape(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"target-arrow-shape": newValue});
+  self.cy.style().selector("edge").css({"target-arrow-shape": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1087,7 +1088,7 @@ function setDefaultEdgeColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"line-color": newValue});
+  self.cy.style().selector("edge").css({"line-color": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1097,7 +1098,7 @@ function setDefaultEdgeTargetArrowColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"target-arrow-color": newValue});
+  self.cy.style().selector("edge").css({"target-arrow-color": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1107,7 +1108,7 @@ function setDefaultEdgeFontSize(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"font-size": newValue});
+  self.cy.style().selector("edge").css({"font-size": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1117,7 +1118,7 @@ function setDefaultEdgeWidth(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"width": newValue});
+  self.cy.style().selector("edge").css({"width": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1127,7 +1128,7 @@ function setDefaultEdgeLineColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"line-color": newValue});
+  self.cy.style().selector("edge").css({"line-color": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1137,7 +1138,7 @@ function setDefaultEdgeFont(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"font-family": newValue});
+  self.cy.style().selector("edge").css({"font-family": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1147,7 +1148,7 @@ function setDefaultEdgeFontWeight(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"font-weight": newValue});
+  self.cy.style().selector("edge").css({"font-weight": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1157,7 +1158,7 @@ function setDefaultEdgeTextOpacity(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"text-opacity": newValue});
+  self.cy.style().selector("edge").css({"text-opacity": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1167,7 +1168,7 @@ function setDefaultEdgeLineStyle(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"line-style": newValue});
+  self.cy.style().selector("edge").css({"line-style": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1177,7 +1178,7 @@ function setDefaultEdgeOpacity(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"opacity": newValue});
+  self.cy.style().selector("edge").css({"opacity": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1187,7 +1188,7 @@ function setDefaultEdgeSourceArrowColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"source-arrow-color": newValue});
+  self.cy.style().selector("edge").css({"source-arrow-color": newValue});
 
  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1197,7 +1198,7 @@ function setDefaultEdgeSourceArrowShape(msg)
 {
    var self = this;
   var newValue = msg.payload;
-  cy.style().selector("edge").css({"source-arrow-shape": newValue});
+  self.cy.style().selector("edge").css({"source-arrow-shape": newValue});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1221,7 +1222,7 @@ function selectNodes(msg)
      } // for i
 
 
-   var nodesToSelect = cy.nodes(filterStrings.join());
+   var nodesToSelect = self.cy.nodes(filterStrings.join());
    nodesToSelect.select()
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -1231,7 +1232,7 @@ function selectNodes(msg)
 function sfn(msg)
 {
    var self = this;
-   cy.nodes(':selected').neighborhood().nodes().select()
+   self.cy.nodes(':selected').neighborhood().nodes().select()
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // sfn
@@ -1240,7 +1241,7 @@ function clearSelection(msg)
 {
    var self = this;
    console.log("==== clearSelection");
-   cy.filter("node:selected").unselect()
+   self.cy.filter("node:selected").unselect()
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1250,8 +1251,8 @@ function invertNodeSelection(msg)
 {
    var self = this;
    console.log("==== invertNodeSelection");
-   var currentlySelected = cy.filter("node:selected");
-   cy.nodes().select();
+   var currentlySelected = self.cy.filter("node:selected");
+   self.cy.nodes().select();
    currentlySelected.unselect();
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -1261,7 +1262,7 @@ function hideSelectedNodes(msg)
 {
    var self = this;
    console.log("==== hideSelectedNodes");
-   cy.filter("node:selected").hide();
+   self.cy.filter("node:selected").hide();
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // hideSelectedNodes
@@ -1270,7 +1271,7 @@ function deleteSelectedNodes(msg)
 {
    var self = this;
    console.log("==== deleteSelectedNodes");
-   cy.filter("node:selected").remove();
+   self.cy.filter("node:selected").remove();
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // deleteSelectedNodes
@@ -1316,7 +1317,7 @@ function setNodeAttributes(msg)
       var filterString = "[name='" + name + "']";
       //console.log("filterString: " + filterString);
       //console.log("nodeID: " + name + "   value: " + newValue);
-      var dataObj = cy.nodes().filter(filterString).data();
+      var dataObj = self.cy.nodes().filter(filterString).data();
       Object.defineProperty(dataObj, attributeName, {value: newValue});
       //cy.nodes().filter(filterString).data({attributeName: value});
       //cy.nodes().filter(filterString).data[attributeName] = value;
@@ -1341,7 +1342,7 @@ function setEdgeAttributes(msg)
                        "'][edgeType='" + edgeTypes[i] + "']";
 
       //console.log(selectorString);
-      var dataObj = cy.edges().filter(selectorString).data();
+      var dataObj = self.cy.edges().filter(selectorString).data();
       if(dataObj != undefined){
          Object.defineProperty(dataObj, attributeName, {value: values[i]});
          }
@@ -1385,15 +1386,15 @@ function getNodes(msg)
    var status = "success";  // be optimistic
    var payload;
 
-   if (typeof (cy) == "undefined"){
+   if (typeof (self.cy) == "undefined"){
       payload = JSON.stringify([]);
       status = "error";
       }
-   else if (cy.nodes().length == 0){
+   else if (self.cy.nodes().length == 0){
       payload = JSON.stringify([]);
       }
    else {
-      payload =  JSON.stringify(cy.nodes().map(function(node) {
+      payload =  JSON.stringify(self.cy.nodes().map(function(node) {
                                 return {id: node.data().id, name: node.data().name}}));
       }
 
@@ -1437,7 +1438,7 @@ function layout(strategy)
                         ready: undefined, // callback on layoutready
                         stop: undefined // callback on layoutstop
                         };
-         cy.layout(options);
+         self.cy.layout(options);
          break;
       default:
          console.log("unrecognized layout strategy: " + strategy);
@@ -1452,7 +1453,7 @@ function addNode(propsJSON)
   console.log("--- addNode, these props");
   console.log(props)
 
-  obj = cy.add({group: "nodes", data: props, position: { x: 200, y: 200 }});
+  obj = self.cy.add({group: "nodes", data: props, position: { x: 200, y: 200 }});
   return(obj.id());
 
 } // addNode
@@ -1462,7 +1463,7 @@ function addEdge(nodeA_id, nodeB_id)
    var self = this;
   console.log("--- addEdge betwee %s and %s", nodeA_id, nodeB_id);
 
-  obj = cy.add({group: "edges", data: {source: nodeA_id, target: nodeB_id}});
+  obj = self.cy.add({group: "edges", data: {source: nodeA_id, target: nodeB_id}});
 
   return(obj.id());
 
@@ -1481,8 +1482,8 @@ function addGraph(msg)
      network.elements.nodes[n].position = {x: 0, y:0};
      }
 
-  obj = cy.add(network.elements)
-  cy.nodes().map(function(node){node.data({degree: node.degree()})});
+  obj = self.cy.add(network.elements)
+  self.cy.nodes().map(function(node){node.data({degree: node.degree()})});
   console.log("after add")
 
   return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
@@ -1556,7 +1557,7 @@ function setVizmapByName(requestedName)
    var self = this;
   for(var i=0; i < vizmaps.length; i++){
     if(vizmaps[i].title == requestedName) {
-       cy.style(vizmaps[i].style);
+       self.cy.style(vizmaps[i].style);
        return(true);
        } // if matched
    } // for i
@@ -1596,7 +1597,7 @@ function setupDefaultStyles(cy)
    cy.style().selector('node:selected').css({'overlay-color': 'grey', 'overlay-opacity': 0.3})
    cy.style().selector('edge:selected').css({'overlay-color': 'grey', 'overlay-opacity': 0.3})
 
-   // cy.style().selector('node:selected').css('background-color', 'red')
+   // self.cy.style().selector('node:selected').css('background-color', 'red')
 
 }  // setupDefaultStyles
 //----------------------------------------------------------------------------------------------------
@@ -1700,7 +1701,7 @@ function loadStyle(filename)
      .done(function(script, textStatus) {
         console.log(textStatus);
         //console.log("style elements " + layout.length);
-        cy.style(vizmap);
+        self.cy.style(vizmap);
        })
     .fail(function( jqxhr, settings, exception ) {
        console.log("getScript error trying to read " + filename);
@@ -1739,15 +1740,28 @@ function addNetwork (filename)
 function setEdgeRenderingMethod(newMethod)
 {
    var self = this;
-  cy.edges().css({"curve-style": newMethod});
+   self.cy.edges().css({"curve-style": newMethod});
 
 } // setEdgeRenderingMethod
 //----------------------------------------------------------------------------------------------------
+function bindFunctionsToSelf(rcy)
+{
+  setNodeColorRule.bind(rcy)
+  setNodeColorLookupRule.bind(rcy)
+  setNodeColorInterpolatingRule.bind(rcy)
+
+  setNodeSizeRule.bind(rcy)
+  redraw.bind(rcy)
+  layout.bind(rcy)
+
+
+} // bindFunctionsToSelf
+//----------------------------------------------------------------------------------------------------
 function demoSimpleNetwork(cy)
 {
-  node0 = cy.add({group: "nodes", data: { weight: 75, name: "A"}, position: { x: 200, y: 200 }});
-  node1 = cy.add({group: "nodes", data: { weight: 75, name: "B"}, position: { x: 300, y: 300 }});
-  cy.add({group: "edges", data: { id: "e0", source: node0.data("id"), target: node1.data("id")}});
+  node0 = self.cy.add({group: "nodes", data: { weight: 75, name: "A"}, position: { x: 200, y: 200 }});
+  node1 = self.cy.add({group: "nodes", data: { weight: 75, name: "B"}, position: { x: 300, y: 300 }});
+  self.cy.add({group: "edges", data: { id: "e0", source: node0.data("id"), target: node1.data("id")}});
   setVizmapByName("Nested Network Style");
 
 } // demoSimpleNetwork
@@ -1756,6 +1770,7 @@ return{
    addMessageHandlers: addMessageHandlers,
    initializeUI: initializeUI,
    setEdgeRenderingMethod: setEdgeRenderingMethod,
+   bindFunctionsToSelf: bindFunctionsToSelf,
    loadStyle: loadStyle,
    hub: hub,
    addNetwork: addNetwork,
@@ -1768,6 +1783,7 @@ var rcy = RCyjs(hub);
 hub.init();
 rcy.addMessageHandlers()
 hub.addOnDocumentReadyFunction(rcy.initializeUI.bind(rcy));
+rcy.bindFunctionsToSelf(rcy)
 hub.start();
 window.rcy = rcy;
 window.hub = hub;

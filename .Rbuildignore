@@ -1,0 +1,9 @@
+node_modules/
+inst/browserCode/dist/bundle.js
+rcjs.html-template
+.git/
+inst/unitTests/tmp*
+
+
+^.*\.Rproj$
+^\.Rproj\.user$

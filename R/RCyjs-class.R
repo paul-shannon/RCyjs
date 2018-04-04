@@ -1,5 +1,7 @@
 #----------------------------------------------------------------------------------------------------
-cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
+# cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
+cyjsBrowserFile <- system.file(package="RCyjs", "browserCode", "dist", "rcyjs.html")
+#----------------------------------------------------------------------------------------------------
 printf <- function(...) print(noquote(sprintf(...)))
 #----------------------------------------------------------------------------------------------------
 .RCyjs <- setClass ("RCyjsClass",
@@ -106,7 +108,7 @@ setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newV
 RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
 {
 
-  obj <- .RCyjs(BrowserViz(portRange, host, title, quiet, browserFile=cyjsBrowserFile,
+  obj <- .RCyjs(BrowserViz(portRange, title, quiet, browserFile=cyjsBrowserFile,
                            httpQueryProcessingFunction=myQP),
                 graph=graph)
 

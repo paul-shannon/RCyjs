@@ -14,12 +14,6 @@ m4_include(bundle.js)
 </head>
 
 <body>
-<div id="trenaVizDiv">
-  <ul>
-    <li><a href="#igvOuterDiv">IGV</a></li>
-    <li><a href="#cyOuterDiv">TRN</a></li>
-  </ul>
-
   <div id="cyOuterDiv">
      <div id="cyMenubarDiv">
          <button id='cyFitButton' class="cyMenuButton">Fit</button>
@@ -27,16 +21,10 @@ m4_include(bundle.js)
          <button id='cySFNButton' class="cyMenuButton">SFN</button>
          <button id='cyHideUnselectedButton' class="cyMenuButton">Hide Unselected</button>
          <button id='cyShowAllButton' class="cyMenuButton">Show All</button>
-         <button id='cyCycleThroughModelsButton' class="cyMenuButton">Cycle Models</button>
      </div>
      <div id="cyDiv"></div>
   </div>
 
-  <div id="igvOuterDiv">
-     <div id="igvDiv"> </div>
-  </div>
-
-</div>
 </body>
 </html>
 

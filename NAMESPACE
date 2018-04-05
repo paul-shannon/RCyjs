@@ -16,7 +16,7 @@ exportMethods(
    setEdgeAttributes,
 
    setNodeImage,
-   
+
    setDefaultNodeSize,
    setDefaultNodeWidth,
    setDefaultNodeHeight,
@@ -70,7 +70,7 @@ exportMethods(
 
 
    redraw,
-   layoutStrategies,
+   getLayoutStrategies,
    layout,
    layoutSelectionInGrid,
    layoutSelectionInGridInferAnchor,

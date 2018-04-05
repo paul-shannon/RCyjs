@@ -1,6 +1,9 @@
 library (RCyjs)
 library (RUnit)
 #----------------------------------------------------------------------------------------------------
+if(!exists("rcy"))
+  rcy <- RCyjs(title="unit tests")
+
 colors <- list(green="rgb(0,255,0)",
                white="rgb(255,255,255)",
                red="rgb(255,0,0)",
@@ -76,7 +79,6 @@ runTests = function()
 demo <- function(portRange=PORTS)
 {
    g <- simpleDemoGraph()
-   rcy <- RCyjs(title="demo", graph=g)
 
    checkTrue(ready(rcy))
    checkEquals(getBrowserWindowTitle(rcy), "demo")
@@ -414,8 +416,11 @@ test.layoutStrategies <- function()
    setBrowserWindowTitle(rcy, title)
    checkEquals(getBrowserWindowTitle(rcy), title)
    layout.strategies <- layoutStrategies(rcy)
-   expected.strategies <- c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
+   builtinIn.strategies <- c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
+   extension.strategies <- c("cola", "dagre", "cose-bilkent")
    checkTrue(all(expected.strategies %in% layout.strategies))
+   checkTrue(all(extension.strategies %in% layout.strategies))
+
    closeWebSocket(rcy)
 
 } # test.layoutStrategies

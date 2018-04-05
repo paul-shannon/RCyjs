@@ -47,7 +47,7 @@ setGeneric('setEdgeSourceArrowShapeRule',   signature='obj', function(obj, attri
 setGeneric('setEdgeSourceArrowColorRule',   signature='obj', function(obj, attribute, control.points, colors, mode) standardGeneric('setEdgeSourceArrowColorRule'))
 
 setGeneric('layout',              signature='obj', function(obj, strategy) standardGeneric('layout'))
-setGeneric('layoutStrategies',    signature='obj', function(obj) standardGeneric('layoutStrategies'))
+setGeneric('getLayoutStrategies',    signature='obj', function(obj) standardGeneric('getLayoutStrategies'))
 setGeneric('layoutSelectionInGrid', signature='obj', function(obj, x, y, w, h) standardGeneric('layoutSelectionInGrid'))
 setGeneric('layoutSelectionInGridInferAnchor', signature='obj', function(obj, w, h) standardGeneric('layoutSelectionInGridInferAnchor'))
 setGeneric('getPosition',         signature='obj', function(obj, nodeIDs=NA) standardGeneric('getPosition'))
@@ -642,7 +642,7 @@ setMethod('setEdgeSourceArrowColorRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('layoutStrategies', 'RCyjsClass',
+setMethod('getLayoutStrategies', 'RCyjsClass',
 
   function (obj) {
      send(obj, list(cmd="layoutStrategies", callback="handleResponse", status="request",

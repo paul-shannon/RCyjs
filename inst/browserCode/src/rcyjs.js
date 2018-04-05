@@ -1,5 +1,21 @@
 "use strict";
+
 var cytoscape = require('cytoscape');
+//----------------------------------------------------------------------------------------------------
+// add layout extensions
+var cola = require('cytoscape-cola');
+cytoscape.use(cola);
+
+let dagre = require('cytoscape-dagre');
+cytoscape.use(dagre);
+
+let coseBilkent = require('cytoscape-cose-bilkent');
+cytoscape.use(coseBilkent);
+
+//let weaver = require('weaverjs')
+//let spread = require('cytoscape-spread');
+//spread(cytoscape);
+
 import css from './css/trenaviz.css';
 $ = require('jquery');
 require('jquery-ui-bundle');
@@ -93,7 +109,7 @@ function addMessageHandlers()
    self.hub.addMessageHandler("getZoom",               getZoom.bind(self));
    self.hub.addMessageHandler("setZoom",               setZoom.bind(self));
    self.hub.addMessageHandler("setBackgroundColor",    setBackgroundColor.bind(self));
-   self.hub.addMessageHandler("layoutStrategies",      layoutStrategies.bind(self));
+   self.hub.addMessageHandler("getLayoutStrategies",   getLayoutStrategies.bind(self));
    self.hub.addMessageHandler("doLayout",              doLayout.bind(self));
    self.hub.addMessageHandler("layoutSelectionInGrid", layoutSelectionInGrid.bind(self));
    self.hub.addMessageHandler("layoutSelectionInGridInferAnchor", layoutSelectionInGridInferAnchor.bind(self));
@@ -203,7 +219,7 @@ function getZoom(msg)
 {
    var self = this;
    result = self.cy.zoom();
-   returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
+   var returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
    console.log(returnMsg);
    self.hub.send(returnMsg);
 
@@ -694,17 +710,18 @@ function getNodeSize(msg)
 
 } // getNodeSize
 //----------------------------------------------------------------------------------------------------
-function layoutStrategies(msg)
+function getLayoutStrategies(msg)
 {
    var self = this;
    console.log("=== layoutStrategies");
-   var strategies = ["random", "grid", "circle", "concentric", "breadthfirst", "cose"];
-     // not yet working:   "dagre", "cola", "springy";
+   var builtinStrategies = ["breadthfirst", "circle", "concentric", "cose", "grid", "random"]
+   var extensionStrategies = ["cola", "dagre", "cose-bilkent"]
+   var strategies = builtinStrategies.concat(extensionStrategies)
 
    console.log("== layoutStrategies hub.sending " + strategies.length + " strategies");
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: strategies});
 
-} // layoutStragegies
+} // getLayoutStragegies
 //----------------------------------------------------------------------------------------------------
 function doLayout(msg)
 {
@@ -1359,7 +1376,7 @@ function getNodeCount(msg)
    var status = "success";  // be optimistic
 
    result = JSON.stringify(cy.nodes().length);
-   returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
+   var returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
    console.log("getNodeCount returning payload: " + result);
 
    console.log(returnMsg);
@@ -1371,7 +1388,7 @@ function getEdgeCount(msg)
 {
    var self = this;
    result = JSON.stringify(cy.edges().length);
-   returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
+   var returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
    console.log("getEdgeount returning payload: " + result);
 
    console.log(returnMsg);
@@ -1453,7 +1470,7 @@ function addNode(propsJSON)
   console.log("--- addNode, these props");
   console.log(props)
 
-  obj = self.cy.add({group: "nodes", data: props, position: { x: 200, y: 200 }});
+  var obj = self.cy.add({group: "nodes", data: props, position: { x: 200, y: 200 }});
   return(obj.id());
 
 } // addNode
@@ -1463,7 +1480,7 @@ function addEdge(nodeA_id, nodeB_id)
    var self = this;
   console.log("--- addEdge betwee %s and %s", nodeA_id, nodeB_id);
 
-  obj = self.cy.add({group: "edges", data: {source: nodeA_id, target: nodeB_id}});
+  var obj = self.cy.add({group: "edges", data: {source: nodeA_id, target: nodeB_id}});
 
   return(obj.id());
 
@@ -1482,11 +1499,11 @@ function addGraph(msg)
      network.elements.nodes[n].position = {x: 0, y:0};
      }
 
-  obj = self.cy.add(network.elements)
+  var obj = self.cy.add(network.elements)
   self.cy.nodes().map(function(node){node.data({degree: node.degree()})});
   console.log("after add")
 
-  return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+  var return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
   self.hub.send(return_msg);
 
 } // addGraph
@@ -1517,7 +1534,7 @@ function httpSetStyle(msg)
   var filename = msg.payload;
   console.log("httpSetStyle: '" + filename + "'");
   loadStyle(filename);
-  return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+  var return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
   self.hub.send(return_msg);
 
 } // httpSetStyle
@@ -1546,7 +1563,7 @@ function ws_getVizmapNames(msg)
    if(names.length == 0)
       statusMessage = "failure";
 
-   return_msg = {cmd: msg.callback, status: statusMessage, callback: "", payload: names};
+   var return_msg = {cmd: msg.callback, status: statusMessage, callback: "", payload: names};
 
    self.hub.send(return_msg);
 

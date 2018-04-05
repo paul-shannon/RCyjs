@@ -32,6 +32,9 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 
+# javascript intermediate buid files
+bundle.js
+
 
 # node etc
 node_modules

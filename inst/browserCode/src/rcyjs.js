@@ -12,10 +12,6 @@ cytoscape.use(dagre);
 let coseBilkent = require('cytoscape-cose-bilkent');
 cytoscape.use(coseBilkent);
 
-//let weaver = require('weaverjs')
-//let spread = require('cytoscape-spread');
-//spread(cytoscape);
-
 import css from './css/trenaviz.css';
 $ = require('jquery');
 require('jquery-ui-bundle');
@@ -78,10 +74,12 @@ function addMessageHandlers()
    var self = this;
 
    self.hub.addMessageHandler("setGraph",             setGraph.bind(self));
+   self.hub.addMessageHandler("addGraph",             httpAddGraph.bind(self));
+   self.hub.addMessageHandler("deleteGraph",          deleteGraph.bind(self));
+
    self.hub.addMessageHandler("setNodeAttributes",    setNodeAttributes.bind(self));
    self.hub.addMessageHandler("setEdgeAttributes",    setEdgeAttributes.bind(self));
-   self.hub.addMessageHandler("addGraph",             addGraph.bind(self));
-   self.hub.addMessageHandler("httpAddGraph",         httpAddGraph.bind(self));
+   self.hub.addMessageHandler("addGraphDirect",       addGraphDirect.bind(self));
    self.hub.addMessageHandler("httpSetStyle",         httpSetStyle.bind(self));
    self.hub.addMessageHandler("getNodeCount",         getNodeCount.bind(self));
    self.hub.addMessageHandler("getEdgeCount",         getEdgeCount.bind(self));
@@ -819,7 +817,7 @@ function getPosition(msg)
    var nodesToSelect = self.cy.nodes(filterStrings.join());
 
    if(allNodes)
-      layout = JSON.stringify(cy.nodes().map(function(n){return{id: n.id(),
+      layout = JSON.stringify(self.cy.nodes().map(function(n){return{id: n.id(),
                                                                 x: n.position().x,
                                                                 y: n.position().y}}));
    else{
@@ -1319,6 +1317,14 @@ function setGraph(msg)
 
 } // setGraph
 //----------------------------------------------------------------------------------------------------
+function deleteGraph(msg)
+{
+   var self = this;
+   self.cy.remove(self.cy.elements())
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // deleteGraph
+//----------------------------------------------------------------------------------------------------
 function setNodeAttributes(msg)
 {
    var self = this;
@@ -1486,27 +1492,27 @@ function addEdge(nodeA_id, nodeB_id)
 
 } // addEdge
 //----------------------------------------------------------------------------------------------------
-function addGraph(msg)
+function addGraphDirect(msg)
 {
    var self = this;
-  console.log("=== entering addGraph");
-  var network = JSON.parse(msg.payload);
-  console.log("adding graph of " + network.elements.nodes.length + " nodes and "
+   console.log("=== entering addGraphDirect");
+   var network = JSON.parse(msg.payload);
+   console.log("adding graph of " + network.elements.nodes.length + " nodes and "
                                  + network.elements.edges.length + " edges.");
 
     // new nodes must have an explicit position
-  for(var n=0; n < network.elements.nodes.length; n++){
-     network.elements.nodes[n].position = {x: 0, y:0};
-     }
+   for(var n=0; n < network.elements.nodes.length; n++){
+      network.elements.nodes[n].position = {x: 0, y:0};
+      }
 
-  var obj = self.cy.add(network.elements)
-  self.cy.nodes().map(function(node){node.data({degree: node.degree()})});
-  console.log("after add")
+   var obj = self.cy.add(network.elements)
+   self.cy.nodes().map(function(node){node.data({degree: node.degree()})});
+   console.log("after add")
 
-  var return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
-  self.hub.send(return_msg);
+   var return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+   self.hub.send(return_msg);
 
-} // addGraph
+} // addGraphDirect
 //----------------------------------------------------------------------------------------------------
 function httpAddGraph(msg)
 {

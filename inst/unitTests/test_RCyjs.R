@@ -1,8 +1,13 @@
 library (RCyjs)
 library (RUnit)
 #----------------------------------------------------------------------------------------------------
-if(!exists("rcy"))
-  rcy <- RCyjs(title="unit tests")
+if(!exists("rcy")){
+   title <- "unit tersts"
+   rcy <- RCyjs(title=title)
+   checkTrue(ready(rcy))
+   checkEquals(getBrowserWindowTitle(rcy), title)
+   checkEquals(length(getNodes(rcy)), 0);
+   }
 
 colors <- list(green="rgb(0,255,0)",
                white="rgb(255,255,255)",
@@ -27,51 +32,52 @@ PORTS=9047:9097
 runTests = function()
 {
    test.constructorNoGraph();
-   #test.biocGraphToCytoscapeJSON();
-   test.constructorWithGraph();
-   test.setBackgroundColor();
-
-   test.setNodeDefaults()
-   test.setEdgeDefaults()
-
-   test.setNodeLabelRule()
-   test.setNodeLabelAlignment()
-   test.setNodeSizeRule()
-   test.setNodeColorRule()
-   test.setNodeShapeRule()
-
-   test.setEdgeColorRule()
-   test.setEdgeWidthRule()
-
-   test.setEdgeArrowLookupRules()  # both color and shape, source and target
-
-   test.nodeSelection()
-
-   test.layoutStrategies()
-   test.layouts()
-
-   test.getSetPosition()
-   test.getNodeSize()
-   test.saveRestoreLayout()
-
-   test.getJSON()
-
    test.setGraph();
-   test.zoom()
-   #test.bigGraph()
+   test.addGraph()
 
-   test.setNodeAttributes();
-   test.setEdgeAttributes();
-
-   test.compoundNodes();
-   test.setNodeImage();
-
-   test.httpSetStyle();
-   test.httpAddGraphToExistingGraph()
-   test.httpAddGraphToEmptyGraph()
-   test.httpAddCompoundEdgeToExistingGraph()
-   test.httpAddJsonGraphFromFile()
-   test.savePNG()
+   #test.biocGraphToCytoscapeJSON();
+#   test.constructorWithGraph();
+#   test.setBackgroundColor();
+#
+#   test.setNodeDefaults()
+#   test.setEdgeDefaults()
+#
+#   test.setNodeLabelRule()
+#   test.setNodeLabelAlignment()
+#   test.setNodeSizeRule()
+#   test.setNodeColorRule()
+#   test.setNodeShapeRule()
+#
+#   test.setEdgeColorRule()
+#   test.setEdgeWidthRule()
+#
+#   test.setEdgeArrowLookupRules()  # both color and shape, source and target
+#
+#   test.nodeSelection()
+#
+#   test.layoutStrategies()
+#   test.layouts()
+#
+#   test.getSetPosition()
+#   test.getNodeSize()
+#   test.saveRestoreLayout()
+#
+#   test.getJSON()
+#
+#   test.zoom()
+#
+#   test.setNodeAttributes();
+#   test.setEdgeAttributes();
+#
+#   test.compoundNodes();
+#   test.setNodeImage();
+#
+#   test.httpSetStyle();
+#   test.httpAddGraphToExistingGraph()
+#   test.httpAddGraphToEmptyGraph()
+#   test.httpAddCompoundEdgeToExistingGraph()
+#   test.httpAddJsonGraphFromFile()
+#   test.savePNG()
 
 } # run.tests
 #----------------------------------------------------------------------------------------------------
@@ -81,36 +87,88 @@ demo <- function(portRange=PORTS)
    g <- simpleDemoGraph()
 
    checkTrue(ready(rcy))
+   addGraph(rcy, g)
+   setBrowserWindowTitle(rcy, "demo")
    checkEquals(getBrowserWindowTitle(rcy), "demo")
 
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
-   checkEquals(tbl.nodes$name, c("A", "B", "C"))
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
 
    setNodeLabelRule(rcy, "label");
    setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
    setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
    redraw(rcy)
    layout(rcy, "cose")
+   fit(rcy, 300)
 
    rcy
 
 } # demo
 #----------------------------------------------------------------------------------------------------
-test.constructorNoGraph <- function()
+test.setGraph <- function()
 {
-   print("--- test.constructor")
-   rcy <- RCyjs(title="ctorNoGraph")
+   print("--- test.setGraph")
+
    checkTrue(ready(rcy))
 
-   title <- "no graph ctor"
+   title <- "setGraph"
    setBrowserWindowTitle(rcy, title)
    checkEquals(getBrowserWindowTitle(rcy), title)
 
-   checkEquals(length(getNodes(rcy)), 0);
-   closeWebSocket(rcy)
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   setNodeLabelRule(rcy, "label");
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   redraw(rcy)
+   layout(rcy, "cola")
+   fit(rcy, 200)
 
-} # test.constructorNoGraph
+   tbl.nodes <- getNodes(rcy)
+   checkEquals(nrow(tbl.nodes), 3)
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
+
+} # test.setGraph
+#----------------------------------------------------------------------------------------------------
+test.setGraphThenAddGraph <- function()
+{
+   print("--- test.addGraph")
+
+   checkTrue(ready(rcy))
+
+   title <- "setGraphThenAddGraph"
+   setBrowserWindowTitle(rcy, title)
+   checkEquals(getBrowserWindowTitle(rcy), title)
+
+   deleteGraph(rcy)
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   setNodeLabelRule(rcy, "label");
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   redraw(rcy)
+   layout(rcy, "cola")
+   fit(rcy, 200)
+
+   g2 <- createTestGraph(10, 4)
+   addGraph(rcy, g2)
+   layout(rcy, "cola")
+
+   g3 <- createTestGraph(10, 10)
+   addGraph(rcy, g3)
+   layout(rcy, "cola")
+
+   g4 <- createTestGraph(30, 20)
+   addGraph(rcy, g4)
+   layout(rcy, "cola")
+
+   tbl.nodes <- getNodes(rcy)
+   checkEquals(nrow(tbl.nodes), 33)
+
+
+} # test.setGraph
 #----------------------------------------------------------------------------------------------------
 test.constructorWithGraph <- function()
 {
@@ -229,6 +287,12 @@ test.setGraph <- function()
 
    g <- simpleDemoGraph()
    setGraph(rcy, g)
+   setNodeLabelRule(rcy, "label");
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   redraw(rcy)
+   layout(rcy, "cola")
+   fit(rcy, 200)
 
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
@@ -416,9 +480,9 @@ test.layoutStrategies <- function()
    setBrowserWindowTitle(rcy, title)
    checkEquals(getBrowserWindowTitle(rcy), title)
    layout.strategies <- layoutStrategies(rcy)
-   builtinIn.strategies <- c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
+   builtin.strategies <- c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
    extension.strategies <- c("cola", "dagre", "cose-bilkent")
-   checkTrue(all(expected.strategies %in% layout.strategies))
+   checkTrue(all(builtin.strategies %in% layout.strategies))
    checkTrue(all(extension.strategies %in% layout.strategies))
 
    closeWebSocket(rcy)

@@ -1,19 +1,29 @@
-#----------------------------------------------------------------------------------------------------
-# cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
-cyjsBrowserFile <- system.file(package="RCyjs", "browserCode", "dist", "rcyjs.html")
-#----------------------------------------------------------------------------------------------------
-printf <- function(...) print(noquote(sprintf(...)))
-#----------------------------------------------------------------------------------------------------
-.RCyjs <- setClass ("RCyjsClass",
+#' @importFrom methods new is
+#' @import BiocGenerics
+#' @import httpuv
+#' @import BrowserViz
+#' @importFrom utils write.table
+#'
+#' @name RCyjs-class
+#' @rdname RCyjs-class
+#' @exportClass RCyjs
+
+.RCyjs <- setClass ("RCyjs",
                     representation = representation(graph="graph"),
                     contains = "BrowserVizClass",
                     prototype = prototype (uri="http://localhost", 9000)
                     )
 
 #----------------------------------------------------------------------------------------------------
+cyjsBrowserFile <- system.file(package="RCyjs", "browserCode", "dist", "rcyjs.html")
+#----------------------------------------------------------------------------------------------------
+printf <- function(...) print(noquote(sprintf(...)))
+#----------------------------------------------------------------------------------------------------
 setGeneric('setGraph',            signature='obj', function(obj, graph, hideEdges=FALSE) standardGeneric ('setGraph'))
 setGeneric('addGraph',            signature='obj', function(obj, graph) standardGeneric ('addGraph'))
-setGeneric('httpAddGraph',        signature='obj', function(obj, graph) standardGeneric ('httpAddGraph'))
+setGeneric('deleteGraph',         signature='obj', function(obj) standardGeneric ('deleteGraph'))
+
+setGeneric('addGraphDirect',      signature='obj', function(obj, graph) standardGeneric ('addGraphDirect'))
 setGeneric('httpAddJsonGraphFromFile', signature='obj', function(obj, jsonFileName) standardGeneric ('httpAddJsonGraphFromFile'))
 setGeneric('httpSetStyle',        signature='obj', function(obj, filename) standardGeneric ('httpSetStyle'))
 
@@ -46,7 +56,7 @@ setGeneric('setEdgeTargetArrowColorRule',   signature='obj', function(obj, attri
 setGeneric('setEdgeSourceArrowShapeRule',   signature='obj', function(obj, attribute, control.points, shapes) standardGeneric('setEdgeSourceArrowShapeRule'))
 setGeneric('setEdgeSourceArrowColorRule',   signature='obj', function(obj, attribute, control.points, colors, mode) standardGeneric('setEdgeSourceArrowColorRule'))
 
-setGeneric('layout',              signature='obj', function(obj, strategy) standardGeneric('layout'))
+setGeneric('layout',                 signature='obj', function(obj, strategy="random") standardGeneric('layout'))
 setGeneric('getLayoutStrategies',    signature='obj', function(obj) standardGeneric('getLayoutStrategies'))
 setGeneric('layoutSelectionInGrid', signature='obj', function(obj, x, y, w, h) standardGeneric('layoutSelectionInGrid'))
 setGeneric('layoutSelectionInGridInferAnchor', signature='obj', function(obj, w, h) standardGeneric('layoutSelectionInGridInferAnchor'))
@@ -104,73 +114,163 @@ setGeneric("setDefaultEdgeSourceArrowColor", signature="obj", function(obj, newV
 setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeSourceArrowShape"))
 
 #----------------------------------------------------------------------------------------------------
+#' Create an RCyjs object
+#'
+#' @description
+#' The RCyjs class provides an R interface to cy.js, a rich, interactive, full-featured, javascript
+#' network (graph) library.  One constructs an RCyjs instance on a specified port (default 9000),
+#' the browser code is loaded, and a websocket connection opened.
+#'
+#' @rdname RCyjs-class
+#'
+#' @param portRange The constructor looks for a free websocket port in this range.  15000:15100 by default
+#' @param title Used for the web browser window, "RCyjs" by default
+#' @param quiet A logical variable controlling verbosity during execution
+#'
+#' @return An object of the RCyjs class
+#'
+#' @export
+#'
+#' @examples
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   setNodeLabelRule(rcy, "label");
+#'   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+#'   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+#'   redraw(rcy)
+#'   layout(rcy, "cose")
+#'
+#----------------------------------------------------------------------------------------------------
 # constructor
-RCyjs = function(portRange=16000:16100, host="localhost", title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
+RCyjs = function(portRange=16000:16100, title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
 {
 
-  obj <- .RCyjs(BrowserViz(portRange, title, quiet, browserFile=cyjsBrowserFile,
-                           httpQueryProcessingFunction=myQP),
-                graph=graph)
+   obj <- .RCyjs(BrowserViz(portRange, title, quiet, browserFile=cyjsBrowserFile,
+                            httpQueryProcessingFunction=myQP),
+                 graph=graph)
 
-  print(1)
-  #while (!browserResponseReady(obj)){
-  #    Sys.sleep(.1)
-  #    printf("still waiting on browserResponseReady ")
-  #    }
-  # if(!quiet) {
-  #    message(sprintf("BrowserViz ctor called from RCyjs ctor got browser response"))
-  #    print(getBrowserResponse(obj))
-  #    }
-
-  #printf("RCyjs ctor sleeping 3 before call to setGraph")
-  # Sys.sleep(3);
-  print(2)
    setGraph(obj, graphNEL(), hideEdges=hideEdges)
-  print(3)
 
    if(!quiet)
       printf("loading graph with %d nodes", length(nodes(graph)))
 
-  print(4)
-   httpAddGraph(obj, graph)
-  print(5)
-   layout(obj, "random")
-  print(6)
+    addGraph(obj, graph)
+    layout(obj, "random")
 
    if(!quiet)
      message(sprintf("RCyjs ctor about to retrun RCyjs object"))
 
-  setBrowserWindowTitle(obj, title)
-   # setGraph(obj, graph, hideEdges=hideEdges)
+   setBrowserWindowTitle(obj, title)
 
-  print(7)
    obj
 
 } # RCyjs: constructor
 #----------------------------------------------------------------------------------------------------
-setMethod('setGraph', 'RCyjsClass',
+#' setGraph
+#'
+#' \code{setGraph} Establish a new graph in RCyjs, removing any previous graph
+#'
+#' This method will remove any previous graph in the browser, adding
+#' a new one.  Setting visual properties and performing layout must follow.
+#'
+#' @rdname setGraph
+#' @aliases setGraph
+#'
+#' @param obj  RCyjs instance
+#' @param graph  a graphNEL
+#' @param hideEdges  if TRUE, the initial display of large graphs is sped up
+#'
+#' @return nothing
+#'
+#' @seealso\code{\link{addGraph}}
+#' @export
+#'
+#' @examples
+#'   sampleGraph <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo")
+#'   setGraph(rcy, sampleGraph, hideEdges)
+#'
+setMethod('setGraph', 'RCyjs',
 
   function (obj, graph, hideEdges=FALSE) {
-     g.json <- as.character(biocGraphToCytoscapeJSON(graph))
-     #printf("RCyjs.setGraph sending g.json with %d chars", nchar(g.json))
+     g.json <- .graphToJSON(graph)
+     #g.json <- as.character(biocGraphToCytoscapeJSON(graph))
 
      send(obj, list(cmd="setGraph", callback="handleResponse", status="request",
                     payload=list(graph=g.json, hideEdges=hideEdges)))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     getBrowserResponse(obj);
+     invisible(getBrowserResponse(obj))
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('addGraph', 'RCyjsClass',
+#' deleteGraph
+#'
+#' \code{deleteGraph} Remove all nodes and edges, the elements of the current graph.
+#'
+#' This method will remove any previous graph in the browser
+#'
+#' @rdname deleteGraph
+#' @aliases deleteGraph
+#'
+#' @param obj  RCyjs instance
+#'
+#' @return nothing
+#'
+#' @seealso \code{\link{addGraph}} \code{\link{setGraph}}
+#'
+#' @export
+#'
+#' @examples
+#'   sampleGraph <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=sampleGraph)
+#'   deletetGraph(rcy)
+#'
+setMethod('deleteGraph', 'RCyjs',
+
+  function (obj) {
+     send(obj, list(cmd="deleteGraph", callback="handleResponse", status="request", payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj))
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' addGraphDirect
+#'
+#' \code{addDirectGraph} add graph, sending the data to the browser via the websocket
+#'
+#' We usually prefer to send data to the browser by writing it to a file, and then
+#' sending only the file's path to the browser.   This is the alternative.
+#' It breaks down with large amounts of data, as the size approaches 1M.
+#' if you like
+#'
+#' @rdname addGraphDirect
+#' @aliases addGraphDirect
+#'
+#' @param p1  obj RCyjs instance
+#' @param p2  graph a graphNEL
+#'
+#' @return nothing
+#'
+#' @export
+#'
+#' @examples
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   g <- simpleDemoGraph()
+#'   setGraphDirect(rcy, g)
+#'
+
+setMethod('addGraphDirect', 'RCyjs',
 
   function (obj, graph) {
-     printf("RCyjs::addGraph");
+     printf("RCyjs::addGraphDirect");
      print(graph)
      g.json <- as.character(biocGraphToCytoscapeJSON(graph))
      printf("about to send g.json: %d chars", nchar(g.json));
-     send(obj, list(cmd="addGraph", callback="handleResponse", status="request",
+     send(obj, list(cmd="addGraphDirect", callback="handleResponse", status="request",
                     payload=g.json))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -180,15 +280,40 @@ setMethod('addGraph', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('httpAddGraph', 'RCyjsClass',
+#' addGraph
+#'
+#' \code{addGraph} send these nodes and edges (with attributes) to RCyjs for display
+#'
+#' This version transmits a graph (nodes, edges and attributes) to the browser
+#' by writing the data to a file, and sending that filename to be read in the
+#' browser by javascript.
+#'
+#' @rdname addGraph
+#' @aliases addGraph
+#'
+#' @param obj  an RCyjs instance
+#' @param graph a graphNEL
+#'
+#' @return nothing
+#'
+#' @export
+#'
+#' @examples
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   g <- simpleDemoGraph()
+#'   setGraph(rcy, g)
+#'
+
+setMethod('addGraph', 'RCyjs',
 
   function (obj, graph) {
-     printf("RCyjs::httpAddGraph");
+     printf("RCyjs::addGraph");
      print(graph)
-     g.json <- paste("network = ", as.character(biocGraphToCytoscapeJSON(graph)))
+     #g.json <- paste("network = ", as.character(biocGraphToCytoscapeJSON(graph)))
+     g.json <- paste("network = ", .graphToJSON(graph))
      filename <- "g.json"
      write(g.json, file=filename)
-     send(obj, list(cmd="httpAddGraph", callback="handleResponse", status="request",
+     send(obj, list(cmd="addGraph", callback="handleResponse", status="request",
                     payload=filename))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -198,7 +323,30 @@ setMethod('httpAddGraph', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('httpAddJsonGraphFromFile', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('httpAddJsonGraphFromFile', 'RCyjs',
 
   function (obj, jsonFileName) {
      printf("RCyjs::httpAddJsonFileGraph");
@@ -212,7 +360,30 @@ setMethod('httpAddJsonGraphFromFile', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('httpSetStyle', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('httpSetStyle', 'RCyjs',
 
   function (obj, filename) {
      printf("RCyjs::httpSetStyle");
@@ -226,7 +397,30 @@ setMethod('httpSetStyle', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getNodes', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getNodes', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getNodes", callback="handleResponse", status="request", payload=""))
@@ -241,7 +435,30 @@ setMethod('getNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getNodeCount', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getNodeCount', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getNodeCount", callback="handleResponse", status="request", payload=""))
@@ -256,7 +473,30 @@ setMethod('getNodeCount', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getEdgeCount', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getEdgeCount', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getEdgeCount", callback="handleResponse", status="request", payload=""))
@@ -271,7 +511,30 @@ setMethod('getEdgeCount', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('clearSelection', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('clearSelection', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="clearSelection", callback="handleResponse", status="request",
@@ -283,7 +546,30 @@ setMethod('clearSelection', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getSelectedNodes', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getSelectedNodes', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getSelectedNodes", callback="handleResponse", status="request",
@@ -299,7 +585,30 @@ setMethod('getSelectedNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('invertNodeSelection', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('invertNodeSelection', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="invertNodeSelection", callback="handleResponse", status="request",
@@ -315,7 +624,30 @@ setMethod('invertNodeSelection', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('hideSelectedNodes', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('hideSelectedNodes', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="hideSelectedNodes", callback="handleResponse", status="request",
@@ -331,7 +663,30 @@ setMethod('hideSelectedNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('deleteSelectedNodes', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('deleteSelectedNodes', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="deleteSelectedNodes", callback="handleResponse", status="request",
@@ -347,7 +702,30 @@ setMethod('deleteSelectedNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeAttributes', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setNodeAttributes', 'RCyjs',
 
    function(obj, attribute, nodes, values){
 
@@ -374,7 +752,30 @@ setMethod('setNodeAttributes', 'RCyjsClass',
 # when implemented, this will probably resolved to this javascript, for instance
 #cy.edges("edge[source='Crem'][target='Hk2'][edgeType='undefined']").data({"score": 3})
 
-setMethod('setEdgeAttributes', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setEdgeAttributes', 'RCyjs',
 
    function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values){
      if (length (sourceNodes) == 0)
@@ -399,7 +800,30 @@ setMethod('setEdgeAttributes', 'RCyjsClass',
      }) # setEdgeAttributes
 
 #------------------------------------------------------------------------------------------------------------------------
-setMethod('redraw', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('redraw', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="redraw", callback="handleResponse", status="request",
@@ -411,7 +835,30 @@ setMethod('redraw', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeLabelRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setNodeLabelRule', 'RCyjs',
 
   function (obj, attribute) {
      send(obj, list(cmd="setNodeLabelRule", callback="handleResponse", status="request",
@@ -423,7 +870,30 @@ setMethod('setNodeLabelRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeLabelAlignment', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setNodeLabelAlignment', 'RCyjs',
 
   function (obj, horizontal, vertical) {
      stopifnot(vertical %in% c("top", "center", "bottom"))
@@ -438,7 +908,30 @@ setMethod('setNodeLabelAlignment', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeImage', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setNodeImage', 'RCyjs',
 
   function (obj, imageURLs) {
      recognizedNodes <- intersect(names(imageURLs), nodes(obj@graph))
@@ -453,7 +946,30 @@ setMethod('setNodeImage', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeSizeRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setNodeSizeRule', 'RCyjs',
 
   function (obj, attribute, control.points, node.sizes) {
      payload <- list(attribute=attribute,
@@ -468,7 +984,30 @@ setMethod('setNodeSizeRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeColorRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setNodeColorRule', 'RCyjs',
 
   function (obj, attribute, control.points, colors, mode="interpolate") {
 
@@ -490,7 +1029,30 @@ setMethod('setNodeColorRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeShapeRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setNodeShapeRule', 'RCyjs',
 
   function (obj, attribute, control.points, node.shapes) {
 
@@ -507,7 +1069,30 @@ setMethod('setNodeShapeRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setEdgeStyle', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setEdgeStyle', 'RCyjs',
 
   function (obj, mode) {
 
@@ -521,7 +1106,30 @@ setMethod('setEdgeStyle', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setEdgeColorRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setEdgeColorRule', 'RCyjs',
 
   function (obj, attribute, control.points, colors, mode="interpolate") {
 
@@ -543,7 +1151,30 @@ setMethod('setEdgeColorRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setEdgeWidthRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setEdgeWidthRule', 'RCyjs',
 
   function (obj, attribute, control.points, widths, mode="interpolate") {
 
@@ -565,7 +1196,30 @@ setMethod('setEdgeWidthRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setEdgeTargetArrowShapeRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setEdgeTargetArrowShapeRule', 'RCyjs',
 
   function (obj, attribute, control.points, shapes) {
 
@@ -581,7 +1235,30 @@ setMethod('setEdgeTargetArrowShapeRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setEdgeSourceArrowShapeRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setEdgeSourceArrowShapeRule', 'RCyjs',
 
   function (obj, attribute, control.points, shapes) {
 
@@ -598,7 +1275,30 @@ setMethod('setEdgeSourceArrowShapeRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setEdgeTargetArrowColorRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setEdgeTargetArrowColorRule', 'RCyjs',
 
   function (obj, attribute, control.points, colors, mode="interpolate") {
 
@@ -620,7 +1320,30 @@ setMethod('setEdgeTargetArrowColorRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setEdgeSourceArrowColorRule', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setEdgeSourceArrowColorRule', 'RCyjs',
 
   function (obj, attribute, control.points, colors, mode="interpolate") {
 
@@ -642,10 +1365,33 @@ setMethod('setEdgeSourceArrowColorRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getLayoutStrategies', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getLayoutStrategies', 'RCyjs',
 
   function (obj) {
-     send(obj, list(cmd="layoutStrategies", callback="handleResponse", status="request",
+     send(obj, list(cmd="getLayoutStrategies", callback="handleResponse", status="request",
                                   payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -654,7 +1400,30 @@ setMethod('getLayoutStrategies', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('layout', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('layout', 'RCyjs',
 
   function (obj, strategy="random") {
      send(obj, list(cmd="doLayout", callback="handleResponse", status="request",
@@ -666,7 +1435,30 @@ setMethod('layout', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('layoutSelectionInGrid', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('layoutSelectionInGrid', 'RCyjs',
 
    function(obj, x, y, w, h){
      payload <- list(x=x, y=y, w=w, h=h)
@@ -681,7 +1473,30 @@ setMethod('layoutSelectionInGrid', 'RCyjsClass',
 
 #----------------------------------------------------------------------------------------------------
 # anchor (the top left) of the grid is the location of the topmost/leftmost node
-setMethod('layoutSelectionInGridInferAnchor', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('layoutSelectionInGridInferAnchor', 'RCyjs',
 
    function(obj, w, h){
      payload <- list(w=w, h=h)
@@ -695,7 +1510,30 @@ setMethod('layoutSelectionInGridInferAnchor', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getPosition', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getPosition', 'RCyjs',
 
   function (obj, nodeIDs=NA) {
      if(all(is.na(nodeIDs)))
@@ -709,7 +1547,30 @@ setMethod('getPosition', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setPosition', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setPosition', 'RCyjs',
 
   function (obj, tbl.pos) {
      send(obj, list(cmd="setPosition", callback="handleResponse", status="request", payload=tbl.pos))
@@ -720,7 +1581,30 @@ setMethod('setPosition', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getNodeSize', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getNodeSize', 'RCyjs',
 
   function (obj, nodeIDs=NA) {
      if(all(is.na(nodeIDs)))
@@ -733,7 +1617,30 @@ setMethod('getNodeSize', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getLayout', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getLayout', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getLayout", callback="handleResponse", status="request",
@@ -745,7 +1652,30 @@ setMethod('getLayout', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('saveLayout', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('saveLayout', 'RCyjs',
 
   function (obj, filename="layout.RData") {
      tbl.layout <- getPosition(obj)
@@ -753,7 +1683,30 @@ setMethod('saveLayout', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('restoreLayout', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('restoreLayout', 'RCyjs',
 
   function (obj, filename="layout.RData") {
      tbl.layout <- NA
@@ -763,7 +1716,30 @@ setMethod('restoreLayout', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getJSON', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getJSON', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getJSON", callback="handleResponse", status="request",
@@ -775,7 +1751,30 @@ setMethod('getJSON', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('savePNG', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('savePNG', 'RCyjs',
 
   function (obj, filename) {
      send(obj, list(cmd="getPNG", callback="handleResponse", status="request",
@@ -823,14 +1822,60 @@ eda = function (graph, edge.attribute.name)
 
 } # eda
 #------------------------------------------------------------------------------------------------------------------------
-setMethod('fit', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('fit', 'RCyjs',
 
   function (obj, padding=30) {
      fitContent(obj, padding);
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('fitContent', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('fitContent', 'RCyjs',
 
   function (obj, padding=30) {
      send(obj, list(cmd="fit", callback="handleResponse", status="request", payload=padding))
@@ -841,7 +1886,30 @@ setMethod('fitContent', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('fitSelectedContent', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('fitSelectedContent', 'RCyjs',
 
   function (obj, padding=30) {
      send(obj, list(cmd="fitSelected", callback="handleResponse", status="request", payload=padding))
@@ -852,7 +1920,30 @@ setMethod('fitSelectedContent', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('selectNodes', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('selectNodes', 'RCyjs',
 
   function (obj, nodeIDs) {
      send(obj, list(cmd="selectNodes", callback="handleResponse", status="request",
@@ -864,7 +1955,30 @@ setMethod('selectNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('sfn', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('sfn', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="sfn", callback="handleResponse", status="request", payload=""))
@@ -875,7 +1989,30 @@ setMethod('sfn', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('hideAllEdges', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('hideAllEdges', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="hideAllEdges", callback="handleResponse", status="request",
@@ -887,7 +2024,30 @@ setMethod('hideAllEdges', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('showAllEdges', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('showAllEdges', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="showAllEdges", callback="handleResponse", status="request",
@@ -899,7 +2059,30 @@ setMethod('showAllEdges', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('showAll', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('showAll', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="showAll", callback="handleResponse", status="request", payload=""))
@@ -910,7 +2093,30 @@ setMethod('showAll', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('hideEdges', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('hideEdges', 'RCyjs',
 
   function (obj, edgeType) {
      send(obj, list(cmd="hideEdges", callback="handleResponse", status="request",
@@ -922,7 +2128,30 @@ setMethod('hideEdges', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('showEdges', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('showEdges', 'RCyjs',
 
   function (obj, edgeType) {
      send(obj, list(cmd="showEdges", callback="handleResponse", status="request",
@@ -934,7 +2163,30 @@ setMethod('showEdges', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getZoom', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('getZoom', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getZoom", callback="handleResponse", status="request",
@@ -946,7 +2198,30 @@ setMethod('getZoom', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setZoom', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setZoom', 'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setZoom", callback="handleResponse", status="request",
@@ -958,7 +2233,30 @@ setMethod('setZoom', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setBackgroundColor', 'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod('setBackgroundColor', 'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setBackgroundColor", callback="handleResponse", status="request",
@@ -970,7 +2268,30 @@ setMethod('setBackgroundColor', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeSize",  'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeSize",  'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeSize", callback="handleResponse", status="request",
@@ -981,7 +2302,30 @@ setMethod("setDefaultNodeSize",  'RCyjsClass',
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeWidth",   'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeWidth",   'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeWidth", callback="handleResponse", status="request",
@@ -992,7 +2336,30 @@ setMethod("setDefaultNodeWidth",   'RCyjsClass',
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeHeight",   'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeHeight",   'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeHeight", callback="handleResponse", status="request",
@@ -1003,7 +2370,30 @@ setMethod("setDefaultNodeHeight",   'RCyjsClass',
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeColor",   'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeColor",   'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeColor", callback="handleResponse", status="request",
@@ -1014,7 +2404,30 @@ setMethod("setDefaultNodeColor",   'RCyjsClass',
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeShape",   'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeShape",   'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeShape", callback="handleResponse", status="request",
@@ -1025,7 +2438,30 @@ setMethod("setDefaultNodeShape",   'RCyjsClass',
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeFontColor",   'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeFontColor",   'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeFontColor", callback="handleResponse", status="request",
@@ -1036,7 +2472,30 @@ setMethod("setDefaultNodeFontColor",   'RCyjsClass',
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeFontSize",  'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeFontSize",  'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeFontSize", callback="handleResponse", status="request",
@@ -1047,7 +2506,30 @@ setMethod("setDefaultNodeFontSize",  'RCyjsClass',
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeBorderWidth",  'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeBorderWidth",  'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeBorderWidth", callback="handleResponse", status="request",
@@ -1059,7 +2541,30 @@ setMethod("setDefaultNodeBorderWidth",  'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeBorderColor",  'RCyjsClass',
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultNodeBorderColor",  'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeBorderColor", callback="handleResponse", status="request",
@@ -1071,7 +2576,30 @@ setMethod("setDefaultNodeBorderColor",  'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeFontSize", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeFontSize", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultNodeFontSize", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1081,7 +2609,30 @@ setMethod("setDefaultEdgeFontSize", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeTargetArrowShape", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeTargetArrowShape", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeTargetArrowShape", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1091,7 +2642,30 @@ setMethod("setDefaultEdgeTargetArrowShape", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeColor", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeColor", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeColor", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1101,7 +2675,30 @@ setMethod("setDefaultEdgeColor", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeTargetArrowColor", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeTargetArrowColor", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeTargetArrowColor", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1111,7 +2708,30 @@ setMethod("setDefaultEdgeTargetArrowColor", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeFontSize", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeFontSize", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeFontSize", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1121,7 +2741,30 @@ setMethod("setDefaultEdgeFontSize", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeWidth", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeWidth", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeWidth", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1131,7 +2774,30 @@ setMethod("setDefaultEdgeWidth", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeLineColor", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeLineColor", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeLineColor", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1141,7 +2807,30 @@ setMethod("setDefaultEdgeLineColor", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeFont", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeFont", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeFont", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1151,7 +2840,30 @@ setMethod("setDefaultEdgeFont", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeFontWeight", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeFontWeight", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeFontWeight", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1161,7 +2873,30 @@ setMethod("setDefaultEdgeFontWeight", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeTextOpacity", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeTextOpacity", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeTextOpacity", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1171,7 +2906,30 @@ setMethod("setDefaultEdgeTextOpacity", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeLineStyle", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeLineStyle", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeLineStyle", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1181,7 +2939,30 @@ setMethod("setDefaultEdgeLineStyle", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeOpacity", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeOpacity", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeOpacity", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1191,7 +2972,30 @@ setMethod("setDefaultEdgeOpacity", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeSourceArrowColor", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeSourceArrowColor", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeSourceArrowColor", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1201,7 +3005,30 @@ setMethod("setDefaultEdgeSourceArrowColor", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeSourceArrowShape", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("setDefaultEdgeSourceArrowShape", "RCyjs",
   function (obj, newValue) {
      send(obj, list(cmd="setDefaultEdgeSourceArrowShape", callback="handleResponse", status="request",
                     payload=newValue))
@@ -1211,12 +3038,58 @@ setMethod("setDefaultEdgeSourceArrowShape", "RCyjsClass",
      invisible(getBrowserResponse(obj));    # the empty string
      })
 #----------------------------------------------------------------------------------------------------
-setMethod("vAlign", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("vAlign", "RCyjs",
    function(obj) {
      .alignSelectedNodes(obj, "vertical")
      })
 #------------------------------------------------------------------------------------------------------------------------
-setMethod("hAlign", "RCyjsClass",
+#' title
+#'
+#' \code{methodName} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname methodName
+#' @aliases methodname
+#'
+#' @param p1  some text
+#' @param p2  some text
+#' @param p3  some text
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#'   x <- 3 + 2
+#'
+
+setMethod("hAlign", "RCyjs",
    function(obj) {
      .alignSelectedNodes(obj, "horizontal")
      })

@@ -9,7 +9,7 @@ build:
 	(cd ..; R CMD build --no-build-vignettes RCyjs)
 
 install:
-	(R CMD INSTALL .)
+	(cd ..; R CMD INSTALL RCyjs)
 
 check:
 	(cd ..; R CMD check `ls -t RCyjs_* | head -1`)

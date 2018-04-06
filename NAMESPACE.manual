@@ -1,0 +1,138 @@
+exportClasses(RCyjsClass)
+
+exportMethods(
+   setGraph,
+   addGraph,
+   httpAddGraph,
+   httpAddJsonGraphFromFile,
+   httpSetStyle,
+
+   getNodeCount,
+   getEdgeCount,
+
+   getNodes,
+
+   setNodeAttributes,
+   setEdgeAttributes,
+
+   setNodeImage,
+
+   setDefaultNodeSize,
+   setDefaultNodeWidth,
+   setDefaultNodeHeight,
+   setDefaultNodeColor,
+   setDefaultNodeShape,
+   setDefaultNodeFontColor,
+   setDefaultNodeFontSize,
+   setDefaultNodeBorderWidth,
+   setDefaultNodeBorderColor,
+
+   setDefaultEdgeFontSize,
+
+   setDefaultEdgeTargetArrowShape,
+   setDefaultEdgeColor,
+   setDefaultEdgeTargetArrowColor,
+   setDefaultEdgeFontSize,
+   setDefaultEdgeWidth,
+   setDefaultEdgeLineColor,
+   setDefaultEdgeFont,
+   setDefaultEdgeFontWeight,
+   setDefaultEdgeTextOpacity,
+   setDefaultEdgeLineStyle,
+   setDefaultEdgeOpacity,
+   setDefaultEdgeSourceArrowColor,
+   setDefaultEdgeSourceArrowShape,
+
+   getSelectedNodes,
+   setNodeLabelRule,
+   setNodeLabelAlignment,
+   setNodeSizeRule,
+   setNodeColorRule,
+   setNodeShapeRule,
+
+   setEdgeStyle,
+   setEdgeColorRule,
+   setEdgeWidthRule,
+   setEdgeTargetArrowShapeRule,
+   setEdgeTargetArrowColorRule,
+   setEdgeSourceArrowShapeRule,
+   setEdgeSourceArrowColorRule,
+
+   setEdgeSourceArrowColorRule,
+   setEdgeTargetArrowColorRule,
+   setGraph,
+   setNodeAttributes,
+   setNodeColorRule,
+   setNodeLabelRule,
+   setNodeShapeRule,
+   setNodeSizeRule,
+   setZoom,
+
+
+   redraw,
+   getLayoutStrategies,
+   layout,
+   layoutSelectionInGrid,
+   layoutSelectionInGridInferAnchor,
+   getPosition,
+   setPosition,
+   getNodeSize,
+   getLayout,
+   saveLayout,
+   restoreLayout,
+   getJSON,
+   savePNG,
+   fit,
+   fitContent,
+   fitSelectedContent,
+   vAlign,
+   hAlign,
+   selectNodes,
+   invertNodeSelection,
+   hideSelectedNodes,
+   deleteSelectedNodes,
+   hideAllEdges,
+   showAllEdges,
+   showAll,
+   hideEdges,
+   showEdges,
+   clearSelection,
+   getZoom,
+   setZoom,
+   setBackgroundColor,
+   sfn
+   )
+
+export(
+   RCyjs,
+   simpleDemoGraph,
+   createTestGraph,
+   biocGraphToCytoscapeJSON,
+   noa,
+   eda,
+   noaNames,
+   edaNames
+   )
+
+
+importClassesFrom(methods, character, integer)
+
+import(BiocGenerics)
+import(graph)
+importFrom(jsonlite,fromJSON)
+importFrom(methods, new)
+importFrom(methods, as)
+import(BrowserViz)
+import(httpuv)
+import(Rcpp)
+importFrom(base64enc,base64decode)
+importFrom(igraph,graph.attributes)
+importFrom(igraph,V)
+importFrom(igraph,"V<-")
+importFrom(igraph,list.vertex.attributes)
+importFrom(igraph,vertex.attributes)
+importFrom(igraph,get.edgelist)
+importFrom(igraph,ecount)
+importFrom(igraph,edge.attributes)
+importFrom(igraph,list.edge.attributes)
+

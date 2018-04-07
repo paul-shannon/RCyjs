@@ -2,7 +2,7 @@ library (RCyjs)
 library (RUnit)
 #----------------------------------------------------------------------------------------------------
 if(!exists("rcy")){
-   title <- "unit tersts"
+   title <- "rcy test"
    rcy <- RCyjs(title=title)
    checkTrue(ready(rcy))
    checkEquals(getBrowserWindowTitle(rcy), title)
@@ -31,9 +31,10 @@ PORTS=9047:9097
 #----------------------------------------------------------------------------------------------------
 runTests = function()
 {
-   test.constructorNoGraph();
    test.setGraph();
-   test.addGraph()
+   test.deleteSetAddGraph()
+   test.constructorWithGraphSupplied()
+   test.largeGraph()
 
    #test.biocGraphToCytoscapeJSON();
 #   test.constructorWithGraph();
@@ -123,7 +124,7 @@ test.setGraph <- function()
    setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
    redraw(rcy)
    layout(rcy, "cola")
-   fit(rcy, 200)
+   fit(rcy, 100)
 
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
@@ -131,9 +132,34 @@ test.setGraph <- function()
 
 } # test.setGraph
 #----------------------------------------------------------------------------------------------------
-test.setGraphThenAddGraph <- function()
+test.setGraphEdgesInitiallyHidden <- function()
 {
-   print("--- test.addGraph")
+   print("--- test.setGraphEdgesInitiallyHidden")
+
+   checkTrue(ready(rcy))
+
+   title <- "setGraphEdgesInitiallyHidden"
+   setBrowserWindowTitle(rcy, title)
+   checkEquals(getBrowserWindowTitle(rcy), title)
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g, hideEdges=TRUE)
+   setNodeLabelRule(rcy, "label");
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   redraw(rcy)
+   layout(rcy, "cola")
+   fit(rcy, 100)
+
+   tbl.nodes <- getNodes(rcy)
+   checkEquals(nrow(tbl.nodes), 3)
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
+
+} # test.setGraphEdgesInitiallyHidden
+#----------------------------------------------------------------------------------------------------
+test.deleteSetAddGraph <- function()
+{
+   print("--- test.deleteSetAddGraph")
 
    checkTrue(ready(rcy))
 
@@ -152,7 +178,7 @@ test.setGraphThenAddGraph <- function()
    layout(rcy, "cola")
    fit(rcy, 200)
 
-   g2 <- createTestGraph(10, 4)
+   g2 <- createTestGraph(nodeCount=10, edgeCount=4)
    addGraph(rcy, g2)
    layout(rcy, "cola")
 
@@ -167,33 +193,50 @@ test.setGraphThenAddGraph <- function()
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 33)
 
-
-} # test.setGraph
+} # test.deleteSetAddGraph
 #----------------------------------------------------------------------------------------------------
-test.constructorWithGraph <- function()
+# to keep tests simple, this file creates an rcy object with an empty graph, at global scope, when
+# the file is read (sourced, loaded).  this test, unlike all the others, creates its own new RCyjs
+# object, to ensure that we can construct one with a graph, without difficulty or error
+test.constructorWithGraphSupplied <- function()
 {
-   print("--- test.constructorWithGraph");
+   print("--- test.constructorWithGraphSupplied");
 
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
+
+   rcy2 <- RCyjs(graph=g);
+   checkTrue(ready(rcy2))
+   setNodeLabelRule(rcy2, "label");
+   setNodeSizeRule(rcy2, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy2, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   redraw(rcy2)
+   layout(rcy2, "cola")
+   Sys.sleep(1)
+   fit(rcy2, 350)
 
    title <- "graph ctor"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
+   setBrowserWindowTitle(rcy2, title)
+   checkEquals(getBrowserWindowTitle(rcy2), title)
 
-   tbl.nodes <- getNodes(rcy)
+   tbl.nodes <- getNodes(rcy2)
    checkEquals(nrow(tbl.nodes), 3)
-   checkEquals(tbl.nodes$name, c("A", "B", "C"))
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
 
-      # our nodes have
-   checkEquals(colnames(tbl.nodes), c("id", "name"))
-   checkEquals(tbl.nodes$id, c ("A", "B", "C"))
-   checkEquals(tbl.nodes$name, c ("A", "B", "C"))
+   closeWebSocket(rcy2)
 
-   closeWebSocket(rcy)
+} #  test.constructorWithGraphSupplied
+#----------------------------------------------------------------------------------------------------
+test.largeGraph <- function()
+{
+   printf("--- test.largeGraph")
 
-} #  test.constructorWithGraph
+   deleteGraph(rcy)
+   g <- createTestGraph(nodeCount=1000, edgeCount=1200)
+   addGraph(rcy, g)
+   layout(rcy, "grid")
+   layout(rcy, "cola")
+
+} # test.largeGraph
 #----------------------------------------------------------------------------------------------------
 #test.biocGraphToCytoscapeJSON <- function()
 #{
@@ -274,33 +317,6 @@ test.constructorWithGraph <- function()
 #               c("phosphorylates", "synthetic lethal", "undefined"))
 #
 #} # test.biocGraphToCytoscapeJSON.RJSONIO.version
-#----------------------------------------------------------------------------------------------------
-test.setGraph <- function()
-{
-   print("--- test.setGraph")
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE);
-   checkTrue(ready(rcy))
-
-   title <- "setGraph"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-
-   g <- simpleDemoGraph()
-   setGraph(rcy, g)
-   setNodeLabelRule(rcy, "label");
-   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
-   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
-   redraw(rcy)
-   layout(rcy, "cola")
-   fit(rcy, 200)
-
-   tbl.nodes <- getNodes(rcy)
-   checkEquals(nrow(tbl.nodes), 3)
-   checkEquals(tbl.nodes$name, c("A", "B", "C"))
-
-   closeWebSocket(rcy)
-
-} # test.setGraph
 #----------------------------------------------------------------------------------------------------
 test.setNodeLabelRule <- function()
 {

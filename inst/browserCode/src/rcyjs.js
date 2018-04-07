@@ -73,13 +73,11 @@ function addMessageHandlers()
 {
    var self = this;
 
-   self.hub.addMessageHandler("setGraph",             setGraph.bind(self));
-   self.hub.addMessageHandler("addGraph",             httpAddGraph.bind(self));
+   self.hub.addMessageHandler("addGraph",             addGraph.bind(self));
    self.hub.addMessageHandler("deleteGraph",          deleteGraph.bind(self));
 
    self.hub.addMessageHandler("setNodeAttributes",    setNodeAttributes.bind(self));
    self.hub.addMessageHandler("setEdgeAttributes",    setEdgeAttributes.bind(self));
-   self.hub.addMessageHandler("addGraphDirect",       addGraphDirect.bind(self));
    self.hub.addMessageHandler("httpSetStyle",         httpSetStyle.bind(self));
    self.hub.addMessageHandler("getNodeCount",         getNodeCount.bind(self));
    self.hub.addMessageHandler("getEdgeCount",         getEdgeCount.bind(self));
@@ -1299,28 +1297,30 @@ function getNodeLabel(msg)
 
 } // getNodeLabel
 //----------------------------------------------------------------------------------------------------
-function setGraph(msg)
-{
-   var self = this;
-   console.log("in function setGraph");
-   console.log(msg.payload);
-   graph = JSON.parse(msg.payload.graph);
-   hideEdges = msg.payload.hideEdges;
-   console.log("setGraph calling createCytoscapeWindow, assiging cy");
-   self.cy = self.createCytoscapeWindow(graph, hideEdges)
-   console.log("setGraph after createCytoscapeWindow, cy assigned");
-   console.log(self.cy)
-   //cy.load(graph.elements)
-   //cy.add(graph)
-
-   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
-
-} // setGraph
+// function addGraph(msg)
+// {
+//    var self = this;
+//    console.log("in function addGraph");
+//    console.log(msg.payload);
+//    graph = JSON.parse(msg.payload.graph);
+//    hideEdges = msg.payload.hideEdges;
+//    console.log("addGraph calling createCytoscapeWindow, assiging cy");
+//    self.cy = self.createCytoscapeWindow(graph, hideEdges)
+//    console.log("setGraph after createCytoscapeWindow, cy assigned");
+//    console.log(self.cy)
+//    //cy.load(graph.elements)
+//    //cy.add(graph)
+//
+//    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: "got graph"});
+//
+// } // addGraph
 //----------------------------------------------------------------------------------------------------
 function deleteGraph(msg)
 {
    var self = this;
-   self.cy.remove(self.cy.elements())
+   if(typeof(self.cy) != "undefined"){
+      self.cy.remove(self.cy.elements())
+      }
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // deleteGraph
@@ -1492,36 +1492,27 @@ function addEdge(nodeA_id, nodeB_id)
 
 } // addEdge
 //----------------------------------------------------------------------------------------------------
-function addGraphDirect(msg)
-{
-   var self = this;
-   console.log("=== entering addGraphDirect");
-   var network = JSON.parse(msg.payload);
-   console.log("adding graph of " + network.elements.nodes.length + " nodes and "
-                                 + network.elements.edges.length + " edges.");
-
-    // new nodes must have an explicit position
-   for(var n=0; n < network.elements.nodes.length; n++){
-      network.elements.nodes[n].position = {x: 0, y:0};
-      }
-
-   var obj = self.cy.add(network.elements)
-   self.cy.nodes().map(function(node){node.data({degree: node.degree()})});
-   console.log("after add")
-
-   var return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
-   self.hub.send(return_msg);
-
-} // addGraphDirect
-//----------------------------------------------------------------------------------------------------
-function httpAddGraph(msg)
+function addGraph(msg)
 {
   var self = this;
-  console.log("=== entering httpAddGraph");
-  var filename = msg.payload;
-  console.log("httpAdding graph '" + filename + "'");
+
+  console.log("=== entering newAddGraph, msg:");
+  console.log(msg);
+
+  var filename = msg.payload.filename;
+  var status = "success"
+
+  console.log("addGraph calling createCytoscapeWindow, assiging cy");
+  if(typeof(self.cy) == "undefined"){
+     self.cy = self.createCytoscapeWindow(graph)
+     }
+
+  console.log("addGraph '" + filename + "'");
+
   status = self.addNetwork(filename);
+
   var return_msg;
+
   if (status=="success") {
      return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
      }
@@ -1531,7 +1522,7 @@ function httpAddGraph(msg)
 
   self.hub.send(return_msg);
 
-} // httpAddGraph
+} // addGraph
 //----------------------------------------------------------------------------------------------------
 function httpSetStyle(msg)
 {
@@ -1624,18 +1615,18 @@ function setupDefaultStyles(cy)
 
 }  // setupDefaultStyles
 //----------------------------------------------------------------------------------------------------
-function createCytoscapeWindow(graph, hideEdges)
+function createCytoscapeWindow()
 {
    var self = this;
    var localCy;
 
    console.log("--- createCytoscapeWindow")
    var cyElement = $("#cyDiv");
-   console.log("--- graph");
+   //console.log("--- graph");
    console.log(graph);
    var localCy = cytoscape({
        container: cyElement,
-       elements: graph.elements,
+       //elements: graph.elements,
        showOverlay: false,
        minZoom: 0.001,
        maxZoom: 100.0,
@@ -1647,8 +1638,6 @@ function createCytoscapeWindow(graph, hideEdges)
     ready: function() {
         console.log("cy ready");
         localCy = this;
-        if(hideEdges)
-           localCy.edges().style({"display": "none"});
         console.log("createCytoscapeWindow assigning degree to nodes")
         localCy.nodes().map(function(node){node.data({degree: node.degree()})});
         setupDefaultStyles(localCy);
@@ -1746,6 +1735,10 @@ function addNetwork (filename)
          //console.log("nodes: " + network.elements.nodes.length);
          //if(typeof(network.elements.edges) != "undefined")
          //  console.log("edges: " + network.elements.edges.length);
+         //if(hideEdges){
+         //    console.log(" ---- hiding edges in getScript");
+         //   self.cy.edges().style({"display": "none"});
+         //   }
          self.cy.add(network.elements);  // no positions yet
          self.cy.nodes().map(function(node){node.data({degree: node.degree()})});
          //cy.edges().style({"display": "none"});  // default hide edges for now

@@ -8,18 +8,21 @@
 #' @rdname RCyjs-class
 #' @exportClass RCyjs
 
+DEFAULT_PORT_RANGE <- 16000:16100
+
 .RCyjs <- setClass ("RCyjs",
                     representation = representation(graph="graph"),
-                    contains = "BrowserVizClass",
-                    prototype = prototype (uri="http://localhost", 9000)
+                    contains = "BrowserVizClass"
                     )
 
 #----------------------------------------------------------------------------------------------------
+# built (cd inst/browserCode; make) with npm and webpack, this html+javascript file has all of the
+# browser-side code
 cyjsBrowserFile <- system.file(package="RCyjs", "browserCode", "dist", "rcyjs.html")
 #----------------------------------------------------------------------------------------------------
 printf <- function(...) print(noquote(sprintf(...)))
 #----------------------------------------------------------------------------------------------------
-setGeneric('setGraph',            signature='obj', function(obj, graph, hideEdges=FALSE) standardGeneric ('setGraph'))
+setGeneric('setGraph',            signature='obj', function(obj, graph) standardGeneric ('setGraph'))
 setGeneric('addGraph',            signature='obj', function(obj, graph) standardGeneric ('addGraph'))
 setGeneric('deleteGraph',         signature='obj', function(obj) standardGeneric ('deleteGraph'))
 
@@ -142,20 +145,18 @@ setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newV
 #'
 #----------------------------------------------------------------------------------------------------
 # constructor
-RCyjs = function(portRange=16000:16100, title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
+RCyjs = function(portRange=DEFAULT_PORT_RANGE, title="RCyjs", graph=graphNEL(), quiet=TRUE)
 {
-
    obj <- .RCyjs(BrowserViz(portRange, title, quiet, browserFile=cyjsBrowserFile,
                             httpQueryProcessingFunction=myQP),
                  graph=graph)
 
-   setGraph(obj, graphNEL(), hideEdges=hideEdges)
-
-   if(!quiet)
-      printf("loading graph with %d nodes", length(nodes(graph)))
-
-    addGraph(obj, graph)
-    layout(obj, "random")
+   if(length(nodes(graph)) > 0){
+      setGraph(obj, graph)
+      if(!quiet)
+         printf("loading graph with %d nodes", length(nodes(graph)))
+      layout(obj, "random")
+      } # if graph
 
    if(!quiet)
      message(sprintf("RCyjs ctor about to retrun RCyjs object"))
@@ -178,7 +179,6 @@ RCyjs = function(portRange=16000:16100, title="RCyjs", graph=graphNEL(), hideEdg
 #'
 #' @param obj  RCyjs instance
 #' @param graph  a graphNEL
-#' @param hideEdges  if TRUE, the initial display of large graphs is sped up
 #'
 #' @return nothing
 #'
@@ -188,20 +188,22 @@ RCyjs = function(portRange=16000:16100, title="RCyjs", graph=graphNEL(), hideEdg
 #' @examples
 #'   sampleGraph <- simpleDemoGraph()
 #'   rcy <- RCyjs(title="rcyjs demo")
-#'   setGraph(rcy, sampleGraph, hideEdges)
+#'   setGraph(rcy, sampleGraph)
 #'
 setMethod('setGraph', 'RCyjs',
 
-  function (obj, graph, hideEdges=FALSE) {
-     g.json <- .graphToJSON(graph)
+  function (obj, graph) {
+     deleteGraph(obj)
+     addGraph(obj, graph)
+     #g.json <- .graphToJSON(graph)
      #g.json <- as.character(biocGraphToCytoscapeJSON(graph))
 
-     send(obj, list(cmd="setGraph", callback="handleResponse", status="request",
-                    payload=list(graph=g.json, hideEdges=hideEdges)))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj))
+     #send(obj, list(cmd="setGraph", callback="handleResponse", status="request",
+     #               payload=list(graph=g.json, hideEdges=hideEdges)))
+     #while (!browserResponseReady(obj)){
+     #   Sys.sleep(.1)
+     #   }
+     #invisible(getBrowserResponse(obj))
      })
 
 #----------------------------------------------------------------------------------------------------
@@ -307,19 +309,17 @@ setMethod('addGraphDirect', 'RCyjs',
 setMethod('addGraph', 'RCyjs',
 
   function (obj, graph) {
-     printf("RCyjs::addGraph");
-     print(graph)
-     #g.json <- paste("network = ", as.character(biocGraphToCytoscapeJSON(graph)))
+     printf("RCyjs::addGraph")
      g.json <- paste("network = ", .graphToJSON(graph))
      filename <- "g.json"
      write(g.json, file=filename)
-     send(obj, list(cmd="addGraph", callback="handleResponse", status="request",
-                    payload=filename))
+     payload <- list(filename=filename)
+     send(obj, list(cmd="addGraph", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     printf("browserResponseReady")
-     getBrowserResponse(obj);
+     #printf("browserResponseReady")
+     invisible(getBrowserResponse(obj));
      })
 
 #----------------------------------------------------------------------------------------------------

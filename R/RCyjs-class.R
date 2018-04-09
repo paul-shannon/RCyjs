@@ -311,9 +311,9 @@ setMethod('addGraph', 'RCyjs',
   function (obj, graph) {
      printf("RCyjs::addGraph")
      g.json <- paste("network = ", .graphToJSON(graph))
-     filename <- "g.json"
-     write(g.json, file=filename)
-     payload <- list(filename=filename)
+     temp.filename <- tempfile(fileext=".json")
+     write(g.json, file=temp.filename)
+     payload <- list(filename=temp.filename)
      send(obj, list(cmd="addGraph", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)

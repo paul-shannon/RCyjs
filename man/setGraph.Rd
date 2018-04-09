@@ -6,14 +6,12 @@
 \alias{setGraph}
 \title{setGraph}
 \usage{
-\S4method{setGraph}{RCyjs}(obj, graph, hideEdges = FALSE)
+\S4method{setGraph}{RCyjs}(obj, graph)
 }
 \arguments{
 \item{obj}{RCyjs instance}
 
 \item{graph}{a graphNEL}
-
-\item{hideEdges}{if TRUE, the initial display of large graphs is sped up}
 }
 \value{
 nothing
@@ -28,7 +26,7 @@ a new one.  Setting visual properties and performing layout must follow.
 \examples{
   sampleGraph <- simpleDemoGraph()
   rcy <- RCyjs(title="rcyjs demo")
-  setGraph(rcy, sampleGraph, hideEdges)
+  setGraph(rcy, sampleGraph)
 
 }
 \seealso{

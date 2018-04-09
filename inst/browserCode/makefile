@@ -5,10 +5,11 @@ assemble:
 	ls -l ./dist/rcyjs.html
 
 buildPackage:
+	(cd ../..; make -f build.makefile docs build)
 	(cd ../../..; R CMD build --no-build-vignettes rcyjs)
 
 installPackage:
-	(cd ../../..; R CMD INSTALL `ls -at RCyjs_* | head -1`)
+	(cd ../..; make -f build.makefile docs install)
 
 webpack:
 	npm update

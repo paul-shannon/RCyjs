@@ -25,10 +25,9 @@ printf <- function(...) print(noquote(sprintf(...)))
 setGeneric('setGraph',            signature='obj', function(obj, graph) standardGeneric ('setGraph'))
 setGeneric('addGraph',            signature='obj', function(obj, graph) standardGeneric ('addGraph'))
 setGeneric('deleteGraph',         signature='obj', function(obj) standardGeneric ('deleteGraph'))
-
-setGeneric('addGraphDirect',      signature='obj', function(obj, graph) standardGeneric ('addGraphDirect'))
-setGeneric('httpAddJsonGraphFromFile', signature='obj', function(obj, jsonFileName) standardGeneric ('httpAddJsonGraphFromFile'))
-setGeneric('httpSetStyle',        signature='obj', function(obj, filename) standardGeneric ('httpSetStyle'))
+setGeneric('loadStyleFile',       signature='obj', function(obj, filename) standardGeneric ('loadStyleFile'))
+setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
+setGeneric('addGraphFromFile',    signature='obj', function(obj, jsonFileName) standardGeneric ('addGraphFromFile'))
 
 setGeneric('getNodeCount',        signature='obj', function(obj) standardGeneric ('getNodeCount'))
 setGeneric('getEdgeCount',        signature='obj', function(obj) standardGeneric ('getEdgeCount'))
@@ -193,8 +192,8 @@ RCyjs = function(portRange=DEFAULT_PORT_RANGE, title="RCyjs", graph=graphNEL(), 
 setMethod('setGraph', 'RCyjs',
 
   function (obj, graph) {
-     deleteGraph(obj)
-     addGraph(obj, graph)
+     x <- deleteGraph(obj)
+     x <- addGraph(obj, graph)
      #g.json <- .graphToJSON(graph)
      #g.json <- as.character(biocGraphToCytoscapeJSON(graph))
 
@@ -203,7 +202,7 @@ setMethod('setGraph', 'RCyjs',
      #while (!browserResponseReady(obj)){
      #   Sys.sleep(.1)
      #   }
-     #invisible(getBrowserResponse(obj))
+     invisible(getBrowserResponse(obj))
      })
 
 #----------------------------------------------------------------------------------------------------
@@ -240,48 +239,6 @@ setMethod('deleteGraph', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' addGraphDirect
-#'
-#' \code{addDirectGraph} add graph, sending the data to the browser via the websocket
-#'
-#' We usually prefer to send data to the browser by writing it to a file, and then
-#' sending only the file's path to the browser.   This is the alternative.
-#' It breaks down with large amounts of data, as the size approaches 1M.
-#' if you like
-#'
-#' @rdname addGraphDirect
-#' @aliases addGraphDirect
-#'
-#' @param p1  obj RCyjs instance
-#' @param p2  graph a graphNEL
-#'
-#' @return nothing
-#'
-#' @export
-#'
-#' @examples
-#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
-#'   g <- simpleDemoGraph()
-#'   setGraphDirect(rcy, g)
-#'
-
-setMethod('addGraphDirect', 'RCyjs',
-
-  function (obj, graph) {
-     printf("RCyjs::addGraphDirect");
-     print(graph)
-     g.json <- as.character(biocGraphToCytoscapeJSON(graph))
-     printf("about to send g.json: %d chars", nchar(g.json));
-     send(obj, list(cmd="addGraphDirect", callback="handleResponse", status="request",
-                    payload=g.json))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     printf("browserResponseReady")
-     getBrowserResponse(obj);
-     })
-
-#----------------------------------------------------------------------------------------------------
 #' addGraph
 #'
 #' \code{addGraph} send these nodes and edges (with attributes) to RCyjs for display
@@ -309,7 +266,6 @@ setMethod('addGraphDirect', 'RCyjs',
 setMethod('addGraph', 'RCyjs',
 
   function (obj, graph) {
-     printf("RCyjs::addGraph")
      g.json <- paste("network = ", .graphToJSON(graph))
      temp.filename <- tempfile(fileext=".json")
      write(g.json, file=temp.filename)
@@ -318,106 +274,100 @@ setMethod('addGraph', 'RCyjs',
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     #printf("browserResponseReady")
      invisible(getBrowserResponse(obj));
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' addGraphFromFile
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{addGraphFromFile} add graph from specified file, which contains a cytoscape.js JSON graph
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' More description
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @rdname addGraphFromFile
+#' @aliases addGraphFromFile
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
+#' @param obj an RCyjs instance
+#' @param jsonFileName path to the file
 #'
-#' @return explain what the method returns
+#' @return nothin
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#'   g <- createTestGraph(nodeCount=10, edgeCount=20)
+#'   filename <- tempfile(filext=".json")
+#'   addGraphFromFile(rcy, filename)
 #'
 
-setMethod('httpAddJsonGraphFromFile', 'RCyjs',
+setMethod('addGraphFromFile', 'RCyjs',
 
   function (obj, jsonFileName) {
-     printf("RCyjs::httpAddJsonFileGraph");
-     send(obj, list(cmd="httpAddGraph", callback="handleResponse", status="request",
-                    payload=jsonFileName))
+     payload <- list(filename=jsonFileName)
+     send(obj, list(cmd="addGraph", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     printf("browserResponseReady")
+     #printf("browserResponseReady")
      getBrowserResponse(obj);
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' loadStyleFile
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{loadStyleFile} load a named JSON cytoscape.js style file into the browser
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' Though we provide access to individual styling rules (see below) we often find
+#' it convenient to express all aspects of a visual style in a single JSON file
+#' See \link{http://js.cytoscape.org/#style}.
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @rdname loadStyleFile
+#' @aliases loadStyleFile
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
+#' @param filename contains json in the proper cytoscape.js format
 #'
-#' @return explain what the method returns
+#' @return nothing
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#'   rcy <- demo()
+#'   filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+#'   loadStyleFile(rcy, filename)
 #'
 
-setMethod('httpSetStyle', 'RCyjs',
+setMethod('loadStyleFile', 'RCyjs',
 
   function (obj, filename) {
-     printf("RCyjs::httpSetStyle");
-     send(obj, list(cmd="httpSetStyle", callback="handleResponse", status="request",
+     send(obj, list(cmd="loadStyleFile", callback="handleResponse", status="request",
                     payload=filename))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     printf("browserResponseReady")
+     #printf("browserResponseReady")
      getBrowserResponse(obj);
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' getNodes
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{getNodes} returns a data.frame, one row per node, providing id and (if present) name and
+#' label columns
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' Every node is guaranteed to have an "id" attribute.  Becuase "name" and "label" are commonly
+#' used as well, they are returned as columns in the data.frame if present
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @rdname getNodes
+#' @aliases getNodes
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
+#' @param obj an RCyjs instance
 #'
-#' @return explain what the method returns
+#' @return a data.frame with at least and "id" column
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#'   rcy <- demo()
 #'
 
 setMethod('getNodes', 'RCyjs',
@@ -935,8 +885,6 @@ setMethod('setNodeImage', 'RCyjs',
 
   function (obj, imageURLs) {
      recognizedNodes <- intersect(names(imageURLs), nodes(obj@graph))
-     printf("setNodeImage: %d/%d node names (ids) recognized", length(recognizedNodes),
-            length(nodes(obj@graph)))
      send(obj, list(cmd="setNodeImage", callback="handleResponse", status="request",
                                   payload=imageURLs))
      while (!browserResponseReady(obj)){
@@ -1716,34 +1664,29 @@ setMethod('restoreLayout', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' getJSON
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{getJSON} a JSON string from the browser, describing the graph in cytoscape.js terms
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname getJSON
+#' @aliases getJSON
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj an RCyjs instance
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return a JSON string
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#'   sampleGraph <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="getJSON example", graph=sampleGraph)
+#'   s <- getJSON(rcy)
 #'
 
 setMethod('getJSON', 'RCyjs',
 
   function (obj) {
-     send(obj, list(cmd="getJSON", callback="handleResponse", status="request",
-                                  payload=""))
+     send(obj, list(cmd="getJSON", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -3116,7 +3059,7 @@ setMethod("hAlign", "RCyjs",
 #------------------------------------------------------------------------------------------------------------------------
 myQP <- function(queryString)
 {
-   printf("=== RCYjs-class::myQP");
+   #printf("=== RCYjs-class::myQP");
    #print(queryString)
      # for reasons not quite clear, the query string comes in with extra characters
      # following the expected filename:
@@ -3144,11 +3087,11 @@ myQP <- function(queryString)
 
    stopifnot(file.exists(filename))
 
-   printf("--- about to scan %s", filename);
+   #printf("--- about to scan %s", filename);
       # reconstitute linefeeds though collapsing file into one string, so json
       # structure is intact, and any "//" comment tokens only affect one line
    text <- paste(scan(filename, what=character(0), sep="\n", quiet=TRUE), collapse="\n")
-   printf("%d chars read from %s", nchar(text), filename);
+   #printf("%d chars read from %s", nchar(text), filename);
 
    return(text);
 

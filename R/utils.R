@@ -245,7 +245,7 @@ mapAttributes <- function(attr.names, all.attr, i)
    i <- i + 1;
    vec [i] <- "}"  # close the elements object
    vec.trimmed <- vec [which(vec != "")]
-   printf("%d strings used in constructing json", length(vec.trimmed))
+   #printf("%d strings used in constructing json", length(vec.trimmed))
    paste0(vec.trimmed, collapse=" ")
 
 } # .graphToJSON

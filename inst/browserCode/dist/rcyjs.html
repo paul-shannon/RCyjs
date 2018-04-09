@@ -100722,7 +100722,7 @@ function addMessageHandlers()
 
    self.hub.addMessageHandler("setNodeAttributes",    setNodeAttributes.bind(self));
    self.hub.addMessageHandler("setEdgeAttributes",    setEdgeAttributes.bind(self));
-   self.hub.addMessageHandler("httpSetStyle",         httpSetStyle.bind(self));
+   self.hub.addMessageHandler("loadStyleFile",         loadStyleFile.bind(self));
    self.hub.addMessageHandler("getNodeCount",         getNodeCount.bind(self));
    self.hub.addMessageHandler("getEdgeCount",         getEdgeCount.bind(self));
    self.hub.addMessageHandler("getNodes",             getNodes.bind(self));
@@ -101418,7 +101418,7 @@ function getJSON(msg)
 {
    var self = this;
    console.log("=== getJSON");
-   json = JSON.stringify(cy.json());
+   var json = JSON.stringify(self.cy.json());
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: json});
 
 } // getJSON
@@ -102062,7 +102062,7 @@ function getNodes(msg)
       }
    else {
       payload =  JSON.stringify(self.cy.nodes().map(function(node) {
-                                return {id: node.data().id, name: node.data().name}}));
+            return {id: node.data().id, name: node.data().name, label: node.data().label}}));
       }
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
@@ -102168,17 +102168,17 @@ function addGraph(msg)
 
 } // addGraph
 //----------------------------------------------------------------------------------------------------
-function httpSetStyle(msg)
+function loadStyleFile(msg)
 {
    var self = this;
-  console.log("=== entering httpSetStyle");
-  var filename = msg.payload;
-  console.log("httpSetStyle: '" + filename + "'");
-  loadStyle(filename);
-  var return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
-  self.hub.send(return_msg);
+   console.log("=== entering loadStyleFile");
+   var filename = msg.payload;
+   console.log("loadStyleFile: '" + filename + "'");
+   self.loadStyle(filename);
+   var return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
+   self.hub.send(return_msg);
 
-} // httpSetStyle
+} // loadStyleFile
 //----------------------------------------------------------------------------------------------------
 function getVizmapNames()
 {
@@ -102342,12 +102342,11 @@ function qtipOptions()
 
 } // qtipOptions
 //----------------------------------------------------------------------------------------------------
-// requires an http server at localhost:8000, started in the directory where filename is found
+// requires an http server at localhost, started in the directory where filename is found
 // expected file contents:  vizmap = [{selector:"node",css: {...
 function loadStyle(filename)
 {
    var self = this;
-   //var s = "http://localhost:8000/" + filename;
    console.log("rcyjs.loadStyle, filename: " + filename);
 
    var s = window.location.href + "?" + filename;
@@ -102434,6 +102433,8 @@ return{
    loadStyle: loadStyle,
    hub: hub,
    addNetwork: addNetwork,
+   loadStyle: loadStyle,
+   getJSON: getJSON,
    createCytoscapeWindow: createCytoscapeWindow
    };
 

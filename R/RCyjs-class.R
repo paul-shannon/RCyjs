@@ -295,9 +295,10 @@ setMethod('addGraph', 'RCyjs',
 #' @export
 #'
 #' @examples
-#'   g <- createTestGraph(nodeCount=10, edgeCount=20)
-#'   filename <- tempfile(filext=".json")
+#'   filename <- system.file(package="RCyjs", "extdata", "sampleGraph.json")
 #'   addGraphFromFile(rcy, filename)
+#'   layout(rcy, "cose")
+#'   fit(rcy, 200)
 #'
 
 setMethod('addGraphFromFile', 'RCyjs',
@@ -385,27 +386,24 @@ setMethod('getNodes', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' getNodeCount
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{getNodeCount} the number of nodes in the current cytoscape.js graph
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname getNodeCount
+#' @aliases getNodeCount
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj RCyjs instance
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return numeric count
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' g <- simpleDemoGraph()
+#' rcy <- RCyjs(title="getNodeCount.ex", graph=g)
+#' getNodeCount(rcy)
+#'
 #'
 
 setMethod('getNodeCount', 'RCyjs',
@@ -423,27 +421,23 @@ setMethod('getNodeCount', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' getEdgeCount
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{getEdgeCount} the number of edges in the current cytoscape.js graph
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname getEdgeCount
+#' @aliases getEdgeCount
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj RCyjs instance
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return numeric count
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' g <- createTestGraph(nodeCount=10, edgeCount=13)
+#' rcy <- RCyjs(title="getEdgeCount.ex", graph=g)
+#' getEdgeCount(rcy)
 #'
 
 setMethod('getEdgeCount', 'RCyjs',

@@ -23,8 +23,9 @@ nothin
 More description
 }
 \examples{
-  g <- createTestGraph(nodeCount=10, edgeCount=20)
-  filename <- tempfile(filext=".json")
+  filename <- system.file(package="RCyjs", "extdata", "sampleGraph.json")
   addGraphFromFile(rcy, filename)
+  layout(rcy, "cose")
+  fit(rcy, 200)
 
 }

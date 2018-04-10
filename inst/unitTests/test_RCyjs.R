@@ -39,6 +39,8 @@ runTests = function()
    test.getJSON()
    test.addGraphFromFile()
 
+   test.getCounts()
+
    test.constructorWithGraphSupplied()
 
 
@@ -316,6 +318,32 @@ test.addGraphFromFile <- function()
    checkEquals(sort(tbl.nodes.0$id), sort(tbl.nodes.1$id))
 
 } # test.addGraphFromFile
+#----------------------------------------------------------------------------------------------------
+test.getCounts <- function()
+{
+   printf("--- test.getCounts")
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   checkEquals(getNodeCount(rcy), length(nodes(g)))
+   checkEquals(getEdgeCount(rcy), length(edgeNames(g)))
+
+   nodesRequested <- 10
+   edgesRequested <- 15
+   g2 <- createTestGraph(nodeCount=nodesRequested, edgeCount=edgesRequested)
+   setGraph(rcy, g2)
+   layout(rcy, "cola")
+      # createTestGraph cannot always return as many edges as requested
+      # the edge possiblities may be used up before the full complement
+      # is achieved.   so only expect as many edges in rcy as there are in R
+   checkEquals(getEdgeCount(rcy), length(edgeNames(g2)))
+
+   addGraph(rcy, g)
+   layout(rcy, "cola")
+   checkEquals(getNodeCount(rcy), 13)
+   checkEquals(getEdgeCount(rcy), length(edgeNames(g2)) + length(edgeNames(g)))
+
+} # test.getCounts
 #----------------------------------------------------------------------------------------------------
 #test.biocGraphToCytoscapeJSON <- function()
 #{

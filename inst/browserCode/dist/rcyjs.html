@@ -100702,9 +100702,9 @@ function handleWindowResize ()
    var windowHeight = window.innerHeight;
    var cyDivHeight = windowHeight - (menubarHeight + 30);
 
-   console.log("menubar: " + menubarHeight);
-   console.log("window: " + windowHeight);
-   console.log("   div: " + cyDivHeight);
+     //console.log("menubar: " + menubarHeight);
+     //console.log("window: " + windowHeight);
+     //console.log("   div: " + cyDivHeight);
 
    cyDiv.height(cyDivHeight);
 
@@ -100722,7 +100722,7 @@ function addMessageHandlers()
 
    self.hub.addMessageHandler("setNodeAttributes",    setNodeAttributes.bind(self));
    self.hub.addMessageHandler("setEdgeAttributes",    setEdgeAttributes.bind(self));
-   self.hub.addMessageHandler("loadStyleFile",         loadStyleFile.bind(self));
+   self.hub.addMessageHandler("loadStyleFile",        loadStyleFile.bind(self));
    self.hub.addMessageHandler("getNodeCount",         getNodeCount.bind(self));
    self.hub.addMessageHandler("getEdgeCount",         getEdgeCount.bind(self));
    self.hub.addMessageHandler("getNodes",             getNodes.bind(self));
@@ -102025,7 +102025,7 @@ function getNodeCount(msg)
    var self = this;
    var status = "success";  // be optimistic
 
-   result = JSON.stringify(cy.nodes().length);
+   var result = JSON.stringify(self.cy.nodes().length);
    var returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
    console.log("getNodeCount returning payload: " + result);
 
@@ -102037,13 +102037,11 @@ function getNodeCount(msg)
 function getEdgeCount(msg)
 {
    var self = this;
-   result = JSON.stringify(cy.edges().length);
+
+   var result = JSON.stringify(self.cy.edges().length);
    var returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
-   console.log("getEdgeount returning payload: " + result);
 
-   console.log(returnMsg);
    self.hub.send(returnMsg);
-
 
 } // getEdgeCount
 //---------------------------------------------------------------------------------------------------
@@ -102435,6 +102433,8 @@ return{
    addNetwork: addNetwork,
    loadStyle: loadStyle,
    getJSON: getJSON,
+   getNodeCount: getNodeCount,
+   getEdgeCount: getEdgeCount,
    createCytoscapeWindow: createCytoscapeWindow
    };
 

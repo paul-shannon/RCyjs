@@ -6,10 +6,12 @@
 \alias{getNodes}
 \title{getNodes}
 \usage{
-\S4method{getNodes}{RCyjs}(obj)
+\S4method{getNodes}{RCyjs}(obj, which = "all")
 }
 \arguments{
 \item{obj}{an RCyjs instance}
+
+\item{which}{a character string, either "all", "visible" or "hidden"}
 }
 \value{
 a data.frame with at least and "id" column

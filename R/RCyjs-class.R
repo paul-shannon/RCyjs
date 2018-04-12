@@ -31,10 +31,7 @@ setGeneric('addGraphFromFile',    signature='obj', function(obj, jsonFileName) s
 
 setGeneric('getNodeCount',        signature='obj', function(obj) standardGeneric ('getNodeCount'))
 setGeneric('getEdgeCount',        signature='obj', function(obj) standardGeneric ('getEdgeCount'))
-setGeneric('getNodes',            signature='obj', function(obj) standardGeneric ('getNodes'))
-
-setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, nodes, values) standardGeneric('setNodeAttributes'))
-setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values) standardGeneric('setEdgeAttributes'))
+setGeneric('getNodes',            signature='obj', function(obj, which="all") standardGeneric ('getNodes'))
 
 setGeneric('getSelectedNodes',    signature='obj', function(obj) standardGeneric ('getSelectedNodes'))
 setGeneric('clearSelection',      signature='obj', function(obj) standardGeneric ('clearSelection'))
@@ -42,6 +39,12 @@ setGeneric('invertNodeSelection', signature='obj', function(obj) standardGeneric
 setGeneric('hideSelectedNodes',   signature='obj', function(obj) standardGeneric ('hideSelectedNodes'))
 setGeneric('deleteSelectedNodes', signature='obj', function(obj) standardGeneric ('deleteSelectedNodes'))
 setGeneric('redraw',              signature='obj', function(obj) standardGeneric ('redraw'))
+
+
+setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, nodes, values) standardGeneric('setNodeAttributes'))
+setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values) standardGeneric('setEdgeAttributes'))
+
+
 setGeneric('setNodeLabelRule',    signature='obj', function(obj, attribute) standardGeneric ('setNodeLabelRule'))
 setGeneric('setNodeLabelAlignment',  signature='obj', function(obj, horizontal, vertical) standardGeneric ('setNodeLabelAlignment'))
 setGeneric('setNodeSizeRule',     signature='obj', function(obj, attribute, control.points, node.sizes) standardGeneric('setNodeSizeRule'))
@@ -362,6 +365,7 @@ setMethod('loadStyleFile', 'RCyjs',
 #' @aliases getNodes
 #'
 #' @param obj an RCyjs instance
+#' @param which a character string, either "all", "visible" or "hidden"
 #'
 #' @return a data.frame with at least and "id" column
 #'
@@ -373,8 +377,10 @@ setMethod('loadStyleFile', 'RCyjs',
 
 setMethod('getNodes', 'RCyjs',
 
-  function (obj) {
-     send(obj, list(cmd="getNodes", callback="handleResponse", status="request", payload=""))
+  function (obj, which) {
+     stopifnot(which %in% c("all", "visible", "hidden"))
+     payload <- list(which=which)
+     send(obj, list(cmd="getNodes", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -522,8 +528,12 @@ setMethod('getSelectedNodes', 'RCyjs',
         Sys.sleep(.1)
         }
      result <- getBrowserResponse(obj)
-     if(nchar(result) > 0)
-       return(fromJSON(getBrowserResponse(obj)))
+     if(nchar(result) > 0){
+        result <- fromJSON(getBrowserResponse(obj))
+        if(!is.data.frame(result))  # always empty, indicates no selected nodes
+          result <- data.frame()
+        return(result)
+        }
      else
        return("")
      })

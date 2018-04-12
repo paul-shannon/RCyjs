@@ -1405,6 +1405,7 @@ function getNodes(msg)
 {
    var self = this;
    var status = "success";  // be optimistic
+   var filter = msg.payload.which;  // "all", "visible", "hidden"
    var payload;
 
    if (typeof (self.cy) == "undefined"){
@@ -1415,9 +1416,14 @@ function getNodes(msg)
       payload = JSON.stringify([]);
       }
    else {
-      payload =  JSON.stringify(self.cy.nodes().map(function(node) {
-            return {id: node.data().id, name: node.data().name, label: node.data().label}}));
-      }
+      var nodes = self.cy.nodes();  // all nodes is the default
+      if(filter != "all"){  // "hidden" or "visible"
+         nodes = self.cy.nodes(":" + filter);
+         }
+      //payload =  JSON.stringify(self.cy.nodes(filterString).map(function(node) {
+      payload =  JSON.stringify(nodes.map(function(node){
+           return {id: node.data().id, name: node.data().name, label: node.data().label}}));
+      } // else
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
 
@@ -1427,23 +1433,24 @@ function getSelectedNodes(msg)
 {
    var self = this;
    var status = "success";  // be optimistic
+   var payload = ""
 
-   if (typeof (cy) == "undefined"){
+   if (typeof(self.cy) == "undefined"){
       payload = JSON.stringify([]);
       status = "error";
       }
-   else if (cy.nodes().length == 0){
+   else if (self.cy.nodes().length == 0){
       payload = JSON.stringify([]);
       }
    else {
-      payload =  JSON.stringify(cy.filter("node:selected").map(function(node) {
+      payload =  JSON.stringify(self.cy.filter("node:selected").map(function(node) {
                                 return {id: node.data().id, name: node.data().name}}));
       }
 
    console.log("getNodes returning payload: " + payload);
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: payload});
 
-} // getNodes
+} // getSelectedNodes
 //---------------------------------------------------------------------------------------------------
 function layout(strategy)
 {

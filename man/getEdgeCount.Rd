@@ -18,8 +18,9 @@ numeric count
 \code{getEdgeCount} the number of edges in the current cytoscape.js graph
 }
 \examples{
-g <- createTestGraph(nodeCount=10, edgeCount=13)
-rcy <- RCyjs(title="getEdgeCount.ex", graph=g)
-getEdgeCount(rcy)
+if(interactive()){
+   rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+   getEdgeCount(rcy)
+   }
 
 }

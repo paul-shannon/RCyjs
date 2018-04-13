@@ -25,8 +25,10 @@ by writing the data to a file, and sending that filename to be read in the
 browser by javascript.
 }
 \examples{
+if(interactive()){
   rcy <- RCyjs(title="rcyjs demo", graph=g)
   g <- simpleDemoGraph()
   setGraph(rcy, g)
+  }
 
 }

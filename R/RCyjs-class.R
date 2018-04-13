@@ -34,7 +34,7 @@ setGeneric('getEdgeCount',        signature='obj', function(obj) standardGeneric
 setGeneric('getNodes',            signature='obj', function(obj, which="all") standardGeneric ('getNodes'))
 
 setGeneric('getSelectedNodes',    signature='obj', function(obj) standardGeneric ('getSelectedNodes'))
-setGeneric('clearSelection',      signature='obj', function(obj) standardGeneric ('clearSelection'))
+setGeneric('clearSelection',      signature='obj', function(obj, which="both") standardGeneric ('clearSelection'))
 setGeneric('invertNodeSelection', signature='obj', function(obj) standardGeneric ('invertNodeSelection'))
 setGeneric('hideSelectedNodes',   signature='obj', function(obj) standardGeneric ('hideSelectedNodes'))
 setGeneric('deleteSelectedNodes', signature='obj', function(obj) standardGeneric ('deleteSelectedNodes'))
@@ -83,8 +83,7 @@ setGeneric('selectNodes',         signature='obj', function(obj, nodeIDs) standa
 setGeneric('sfn',                 signature='obj', function(obj) standardGeneric('sfn'))
 
 setGeneric('hideAllEdges',        signature='obj', function(obj) standardGeneric('hideAllEdges'))
-setGeneric('showAllEdges',        signature='obj', function(obj) standardGeneric('showAllEdges'))
-setGeneric('showAll',             signature='obj', function(obj) standardGeneric('showAll'))
+setGeneric('showAll',             signature='obj', function(obj, which="both") standardGeneric('showAll'))
 setGeneric('hideEdges',           signature='obj', function(obj, edgeType) standardGeneric('hideEdges'))
 setGeneric('showEdges',           signature='obj', function(obj, edgeType) standardGeneric('showEdges'))
 setGeneric('vAlign',              signature='obj', function(obj) standardGeneric('vAlign'))
@@ -137,6 +136,7 @@ setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newV
 #' @export
 #'
 #' @examples
+#' if(interactive()){
 #'   g <- simpleDemoGraph()
 #'   rcy <- RCyjs(title="rcyjs demo", graph=g)
 #'   setNodeLabelRule(rcy, "label");
@@ -144,6 +144,7 @@ setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newV
 #'   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
 #'   redraw(rcy)
 #'   layout(rcy, "cose")
+#'   }
 #'
 #----------------------------------------------------------------------------------------------------
 # constructor
@@ -188,9 +189,11 @@ RCyjs = function(portRange=DEFAULT_PORT_RANGE, title="RCyjs", graph=graphNEL(), 
 #' @export
 #'
 #' @examples
+#' if(interactive()){
 #'   sampleGraph <- simpleDemoGraph()
 #'   rcy <- RCyjs(title="rcyjs demo")
 #'   setGraph(rcy, sampleGraph)
+#'   }
 #'
 setMethod('setGraph', 'RCyjs',
 
@@ -227,9 +230,11 @@ setMethod('setGraph', 'RCyjs',
 #' @export
 #'
 #' @examples
+#' if(interactive()){
 #'   sampleGraph <- simpleDemoGraph()
 #'   rcy <- RCyjs(title="rcyjs demo", graph=sampleGraph)
 #'   deletetGraph(rcy)
+#'   }
 #'
 setMethod('deleteGraph', 'RCyjs',
 
@@ -261,9 +266,11 @@ setMethod('deleteGraph', 'RCyjs',
 #' @export
 #'
 #' @examples
+#' if(interactive()){
 #'   rcy <- RCyjs(title="rcyjs demo", graph=g)
 #'   g <- simpleDemoGraph()
 #'   setGraph(rcy, g)
+#'   }
 #'
 
 setMethod('addGraph', 'RCyjs',
@@ -298,10 +305,12 @@ setMethod('addGraph', 'RCyjs',
 #' @export
 #'
 #' @examples
+#' if(interactive()){
 #'   filename <- system.file(package="RCyjs", "extdata", "sampleGraph.json")
 #'   addGraphFromFile(rcy, filename)
 #'   layout(rcy, "cose")
 #'   fit(rcy, 200)
+#'   }
 #'
 
 setMethod('addGraphFromFile', 'RCyjs',
@@ -335,9 +344,11 @@ setMethod('addGraphFromFile', 'RCyjs',
 #' @export
 #'
 #' @examples
+#'   if(interactive()){
 #'   rcy <- demo()
 #'   filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
 #'   loadStyleFile(rcy, filename)
+#'   }
 #'
 
 setMethod('loadStyleFile', 'RCyjs',
@@ -372,7 +383,10 @@ setMethod('loadStyleFile', 'RCyjs',
 #' @export
 #'
 #' @examples
-#'   rcy <- demo()
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getNodes(rcy)
+#'    }
 #'
 
 setMethod('getNodes', 'RCyjs',
@@ -406,10 +420,10 @@ setMethod('getNodes', 'RCyjs',
 #' @export
 #'
 #' @examples
-#' g <- simpleDemoGraph()
-#' rcy <- RCyjs(title="getNodeCount.ex", graph=g)
-#' getNodeCount(rcy)
-#'
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getNodeCount(rcy)
+#'    }
 #'
 
 setMethod('getNodeCount', 'RCyjs',
@@ -441,9 +455,10 @@ setMethod('getNodeCount', 'RCyjs',
 #' @export
 #'
 #' @examples
-#' g <- createTestGraph(nodeCount=10, edgeCount=13)
-#' rcy <- RCyjs(title="getEdgeCount.ex", graph=g)
-#' getEdgeCount(rcy)
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getEdgeCount(rcy)
+#'    }
 #'
 
 setMethod('getEdgeCount', 'RCyjs',
@@ -461,34 +476,33 @@ setMethod('getEdgeCount', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' clearSelection
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{clearSelection} deselect all selected nodes, all selected edges, or both
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname clearSelection
+#' @aliases clearSelection
 #'
-#' @rdname methodName
-#' @aliases methodname
-#'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @param obj an RCyjs object
+#' @param which a character string:  "both" (the default), "nodes" or "edges"
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    selectNodes(rcy, c("A", "B"))
+#'    clearSelection(rcy)
+#'    }
 #'
 
 setMethod('clearSelection', 'RCyjs',
 
-  function (obj) {
+  function (obj, which="both") {
+     stopifnot(which %in% c("both", "nodes", "edges"))
+     payload <- list(which=which)
      send(obj, list(cmd="clearSelection", callback="handleResponse", status="request",
-                                  payload=""))
+                    payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -496,27 +510,25 @@ setMethod('clearSelection', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' getSelectedNodes
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{getSelectedNodes} get the selected nodes
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname getSelectedNodes
+#' @aliases getSelectedNodes
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj an RCyjs instance
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return a data.frame with (at least) an id column
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    nodes.to.select <- getNodes(rcy)$id
+#'    selectNodes(rcy, nodes.to.select)
+#'    }
 #'
 
 setMethod('getSelectedNodes', 'RCyjs',
@@ -539,27 +551,27 @@ setMethod('getSelectedNodes', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' invertNodeSelection
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{invertNodeSelection} deselect all selected nodes, select all previously unselected nodes
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname invertNodeSelection
+#' @aliases invertNodeSelection
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj an RCyjs instance
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return no return value
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    target <- nodes(g)[1]
+#'    selectNodes(rcy, target)
+#'    invertNodeSelection(rcy)
+#'    }
 #'
 
 setMethod('invertNodeSelection', 'RCyjs',
@@ -578,28 +590,34 @@ setMethod('invertNodeSelection', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' hideSelectedNodes
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{hideSelectedNodes} hide selected nodes from view
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' The hidden nodes are not deleted from the graph
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @rdname hideSelectedNodes
+#' @aliases hideSelectedNodes
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
+#' @param obj  an RCyjs instance
 #'
-#' @return explain what the method returns
+#' @return no return value
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    target <- nodes(g)[1]
+#'    selectNodes(rcy, target)
+#'    hideSelectedNodes(rcy)
+#'    getNodes(rcy, "hidden")
+#'    getNodes(rcy, "visible")
+#'    showAll(rcy, which="nodes")
+#'    }
 #'
+#' @seealso \code{\link{showAll}}
 
 setMethod('hideSelectedNodes', 'RCyjs',
 
@@ -1317,27 +1335,21 @@ setMethod('setEdgeSourceArrowColorRule', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' getLayoutStrategies
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{getLayoutStrategies} return a list of those currently offered
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname getLayoutStrategies
+#' @aliases getLayoutStrategies
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj  an RCyjs instance
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return a list of character strings
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#'
 #'
 
 setMethod('getLayoutStrategies', 'RCyjs',
@@ -1971,68 +1983,37 @@ setMethod('hideAllEdges', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' showAll
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{showAll} show any hidden objects: nodes, edges, or both
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname showAll
+#' @aliases showAll
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj an RCyjs instance
+#' @param which a character string, either "nodes", "edges" or "both"
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return no return value
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
-#'
-
-setMethod('showAllEdges', 'RCyjs',
-
-  function (obj) {
-     send(obj, list(cmd="showAllEdges", callback="handleResponse", status="request",
-                    payload=""))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-
-#----------------------------------------------------------------------------------------------------
-#' title
-#'
-#' \code{methodName} put somewhat more detailed description here
-#'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
-#'
-#' @rdname methodName
-#' @aliases methodname
-#'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
-#'
-#' @export
-#'
-#' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   layout(rcy, "cose")
+#'   selectNodes(rcy, getNodes(rcy)$id)
+#'   hideSelectedNodes(rcy)
+#'   showAll(rcy, "nodes")
+#'   }
 #'
 
 setMethod('showAll', 'RCyjs',
 
-  function (obj) {
-     send(obj, list(cmd="showAll", callback="handleResponse", status="request", payload=""))
+  function (obj, which="both") {
+     stopifnot(which %in% c("both", "nodes", "edges"))
+     payload <- list(which=which)
+     send(obj, list(cmd="showAll", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }

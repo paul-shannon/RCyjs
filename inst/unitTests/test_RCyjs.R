@@ -42,7 +42,19 @@ runTests = function()
    test_getCounts()
    test_nodeSelection()
 
-   test_constructorWithGraphSupplied()
+   test_getLayoutStrategies()
+#   test_layouts()
+
+#
+#   test_getSetPosition()
+#   test_getNodeSize()
+#   test_saveRestoreLayout()
+
+
+   #--------------------------------------------------------------------------------
+   # re-enable this at end.  it writes to a new browser tab/window, hiding the above.
+   #--------------------------------------------------------------------------------
+      # test_constructorWithGraphSupplied()
 
 #   test_constructorWithGraph();
 #   test_setBackgroundColor();
@@ -381,6 +393,10 @@ test_nodeSelection <- function()
       selectNodes(rcy, target.nodes)
       Sys.sleep(1)
       hideSelectedNodes(rcy)
+      checkEquals(length(getNodes(rcy, "hidden")$id), length(target.nodes))
+      checkEquals(length(getNodes(rcy, "visible")$id), count - length(target.nodes))
+      checkEquals(length(getNodes(rcy, "all")$id), count)
+      checkEquals(length(getNodes(rcy)$id), count)
       Sys.sleep(1)
       checkEquals(sort(getNodes(rcy, "hidden")$id), sort(target.nodes))
       checkEquals(length(getNodes(rcy, "visible")$id), count - 3)
@@ -406,11 +422,46 @@ test_nodeSelection <- function()
       showAll(rcy)
       Sys.sleep(1)
       checkEquals(length(getNodes(rcy)$id), 17)
+      showAll(rcy)
       } # if interactive
 
 } # test_nodeSelection
 #----------------------------------------------------------------------------------------------------
+test_getLayoutStrategies <- function()
+{
+   printf("--- test_getLayoutStrategies")
 
+   actual <- getLayoutStrategies(rcy)
+
+   expected.builtin.strategies <- c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
+   expected.extension.strategies <- c("cola", "dagre", "cose-bilkent")
+
+   checkTrue(all(expected.builtin.strategies %in% actual))
+   checkTrue(all(expected.extension.strategies %in% actual))
+
+} # test_getLayoutStrategies
+#----------------------------------------------------------------------------------------------------
+test_layouts <- function()
+{
+   printf("--- test_layouts")
+
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
+   checkTrue(ready(rcy))
+   setNodeLabelRule(rcy, "label");
+   redraw(rcy)
+
+   title <- "layouts"
+   setBrowserWindowTitle(rcy, title)
+   layout.strategies <- layoutStrategies(rcy)
+   for(strategy in layout.strategies){
+     layout(rcy, strategy)
+     Sys.sleep(0.5)
+     } # for strategy
+
+   closeWebSocket(rcy)
+
+} #  test_layouts
 #----------------------------------------------------------------------------------------------------
 #test_biocGraphToCytoscapeJSON <- function()
 #{
@@ -637,51 +688,6 @@ test_setNodeShapeRule <- function()
    closeWebSocket(rcy)
 
 } # test_setNodeShapeRule
-#----------------------------------------------------------------------------------------------------
-test_layoutStrategies <- function()
-{
-   printf("--- test_layoutStrategies")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   title <- "layoutStrategies"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-   layout.strategies <- layoutStrategies(rcy)
-   builtin.strategies <- c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
-   extension.strategies <- c("cola", "dagre", "cose-bilkent")
-   checkTrue(all(builtin.strategies %in% layout.strategies))
-   checkTrue(all(extension.strategies %in% layout.strategies))
-
-   closeWebSocket(rcy)
-
-} # test_layoutStrategies
-#----------------------------------------------------------------------------------------------------
-test_layouts <- function()
-{
-   printf("--- test_layouts")
-
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   title <- "layouts"
-   setBrowserWindowTitle(rcy, title)
-   layout.strategies <- layoutStrategies(rcy)
-   for(strategy in layout.strategies){
-     layout(rcy, strategy)
-     Sys.sleep(0.5)
-     } # for strategy
-
-   closeWebSocket(rcy)
-
-} #  test_layouts
-#----------------------------------------------------------------------------------------------------
 # there is some non-deterministic behavior here, the exploration of which is deferred.
 # numbers don't have quite the values arithmetic suggests.  sometimes the final zoom is larger than
 # the initial zoom.

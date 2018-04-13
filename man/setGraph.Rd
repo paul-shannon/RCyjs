@@ -24,9 +24,11 @@ This method will remove any previous graph in the browser, adding
 a new one.  Setting visual properties and performing layout must follow.
 }
 \examples{
+if(interactive()){
   sampleGraph <- simpleDemoGraph()
   rcy <- RCyjs(title="rcyjs demo")
   setGraph(rcy, sampleGraph)
+  }
 
 }
 \seealso{

@@ -18,9 +18,9 @@ numeric count
 \code{getNodeCount} the number of nodes in the current cytoscape.js graph
 }
 \examples{
-g <- simpleDemoGraph()
-rcy <- RCyjs(title="getNodeCount.ex", graph=g)
-getNodeCount(rcy)
-
+if(interactive()){
+   rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+   getNodeCount(rcy)
+   }
 
 }

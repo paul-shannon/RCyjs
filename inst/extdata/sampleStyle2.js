@@ -25,6 +25,13 @@ vizmap = [
         'source-arrow-color': 'orange',
         'target-arrow-shape': 'tee',
         'target-arrow-color': 'black',
-        'curve-style': 'bezier'}}
+        'curve-style': 'bezier'
+        }},
+
+    {selector: 'edge:selected', css: {
+       "overlay-opacity": 0.2,
+       "overlay-color": "maroon"
+        }},
+
 
    ];

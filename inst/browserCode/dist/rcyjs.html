@@ -101605,8 +101605,15 @@ function showEdges(msg)
 function showAll(msg)
 {
    var self = this;
-   self.cy.nodes().show();
-   self.cy.edges().show();
+   var which = msg.payload.which
+
+   if(which == "both" | which == "edges"){
+       self.cy.edges().show()
+      }
+
+   if(which == "both" | which == "nodes"){
+     self.cy.nodes().show()
+     }
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -101897,8 +101904,15 @@ function sfn(msg)
 function clearSelection(msg)
 {
    var self = this;
-   console.log("==== clearSelection");
-   self.cy.filter("node:selected").unselect()
+   var which = msg.payload.which;
+
+   if(which == "both" | which == "edges"){
+     self.cy.filter("edge:selected").unselect()
+     }
+
+   if(which == "both" | which == "nodes"){
+     self.cy.filter("node:selected").unselect()
+     }
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 

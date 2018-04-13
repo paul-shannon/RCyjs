@@ -25,6 +25,9 @@ Every node is guaranteed to have an "id" attribute.  Becuase "name" and "label" 
 used as well, they are returned as columns in the data.frame if present
 }
 \examples{
-  rcy <- demo()
+if(interactive()){
+   rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+   getNodes(rcy)
+   }
 
 }

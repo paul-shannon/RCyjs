@@ -29,6 +29,7 @@ network (graph) library.  One constructs an RCyjs instance on a specified port (
 the browser code is loaded, and a websocket connection opened.
 }
 \examples{
+if(interactive()){
   g <- simpleDemoGraph()
   rcy <- RCyjs(title="rcyjs demo", graph=g)
   setNodeLabelRule(rcy, "label");
@@ -36,6 +37,7 @@ the browser code is loaded, and a websocket connection opened.
   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
   redraw(rcy)
   layout(rcy, "cose")
+  }
 
 }
 \keyword{datasets}

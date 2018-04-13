@@ -23,8 +23,10 @@ it convenient to express all aspects of a visual style in a single JSON file
 See \link{http://js.cytoscape.org/#style}.
 }
 \examples{
+  if(interactive()){
   rcy <- demo()
   filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
   loadStyleFile(rcy, filename)
+  }
 
 }

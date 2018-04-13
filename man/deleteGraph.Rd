@@ -21,9 +21,11 @@ nothing
 This method will remove any previous graph in the browser
 }
 \examples{
+if(interactive()){
   sampleGraph <- simpleDemoGraph()
   rcy <- RCyjs(title="rcyjs demo", graph=sampleGraph)
   deletetGraph(rcy)
+  }
 
 }
 \seealso{

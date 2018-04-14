@@ -3,6 +3,7 @@
 #' @import httpuv
 #' @import BrowserViz
 #' @importFrom utils write.table
+#' @importFrom base64enc base64decode
 #'
 #' @name RCyjs-class
 #' @rdname RCyjs-class
@@ -72,6 +73,7 @@ setGeneric('getLayout',           signature='obj', function(obj) standardGeneric
 setGeneric('saveLayout',          signature='obj', function(obj, filename) standardGeneric('saveLayout'))
 setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
 setGeneric('savePNG',             signature='obj', function(obj, filename) standardGeneric('savePNG'))
+setGeneric('saveJPG',             signature='obj', function(obj, filename, quality=1, width=1000, height=1600) standardGeneric('saveJPG'))
 setGeneric('restoreLayout',       signature='obj', function(obj, filename) standardGeneric('restoreLayout'))
 setGeneric('setZoom',             signature='obj', function(obj, newValue) standardGeneric('setZoom'))
 setGeneric('getZoom',             signature='obj', function(obj) standardGeneric('getZoom'))
@@ -1364,28 +1366,32 @@ setMethod('getLayoutStrategies', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' layout
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{layout} apply a layout algorithm to the current grap
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname layout
+#' @aliases layout
 #'
-#' @rdname methodName
-#' @aliases methodname
-#'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
+#' @param obj  an RCyjs instance
+#' @param strategy  a character string, one of the supported algorithms
 #'
 #' @return explain what the method returns
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'   g <- createTestGraph(nodeCount=20, edgeCount=20)
+#'   rcy <- RCyjs(title="layouts", graph=g)
+#'   strategies <- getLayoutStrategies(rcy)
+#'   for(strategy in stategies){
+#'      layout(rcy, strategy)
+#'      Sys.sleep(1)
+#'      }
+#'   }
 #'
+#' @seealso \code{\link{getLayoutStrategies}}
 
 setMethod('layout', 'RCyjs',
 
@@ -1474,27 +1480,30 @@ setMethod('layoutSelectionInGridInferAnchor', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' getPosition
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{getPosition} for all or specified nodes
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname getPosition
+#' @aliases
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj an RCyjs instance
+#' @param nodeIDs a vector of character strings, default NA
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return a data.frame with "id", "x" and "y" columns
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="getPosition", graph=g)
+#'   layout(rcy, "cose")
+#'   tbl.pos <- getPosition(rcy)
+#'   tbl.posA <- getPosition(rcy, "A")
+#'   }
+#'
+#' @seealso \code{\link{setPosition}}
 #'
 
 setMethod('getPosition', 'RCyjs',
@@ -1511,27 +1520,32 @@ setMethod('getPosition', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' setPosition
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{setPosition} of nodes by their id
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname setPosition
+#' @aliases setPosition
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj  an RCyjs instance
+#' @param tbl.pos a data.frame with three columns: id, x, y
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return no return value
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="getPosition", graph=g)
+#'   layout(rcy, "cose")
+#'   tbl.pos <- getPosition(rcy)
+#'     # shift all the nodes to the right
+#'   tbl.pos$x <- tbl.pos$x + 50
+#'   setPosition(rcy, tbl.pos)
+#'   }
+#'
+#' @seealso \code{\link{getPosition}}
 #'
 
 setMethod('setPosition', 'RCyjs',
@@ -1542,42 +1556,6 @@ setMethod('setPosition', 'RCyjs',
         Sys.sleep(.1)
         }
      getBrowserResponse(obj)
-     })
-
-#----------------------------------------------------------------------------------------------------
-#' title
-#'
-#' \code{methodName} put somewhat more detailed description here
-#'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
-#'
-#' @rdname methodName
-#' @aliases methodname
-#'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
-#'
-#' @export
-#'
-#' @examples
-#'   x <- 3 + 2
-#'
-
-setMethod('getNodeSize', 'RCyjs',
-
-  function (obj, nodeIDs=NA) {
-     if(all(is.na(nodeIDs)))
-        nodeIDs <- ""
-     send(obj, list(cmd="getNodeSize", callback="handleResponse", status="request", payload=nodeIDs))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     fromJSON(getBrowserResponse(obj))
      })
 
 #----------------------------------------------------------------------------------------------------
@@ -1616,27 +1594,34 @@ setMethod('getLayout', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' saveLayout
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{saveLayout} to a named file
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' All node positions are saved to a functionally opaque RData object,
+#' in a file whose name you supply.  These files are used by
+#' restoreLayout.
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @rdname saveLayout
+#' @aliases saveLayout
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
+#' @param obj a RCyjs instance
+#' @param filename "layout.RData" by default
 #'
-#' @return explain what the method returns
+#' @return no return value
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    layout(rcy, "grid")
+#'    saveLayout(rcy, filename="gridLayout.RData")
+#'    layout(rcy, "circle")
+#'    restoreLayout(rcy, "gridLayout.RData")
+#'    }
+#'
+#' @seealso\code{\link{restoreLayout}}
 #'
 
 setMethod('saveLayout', 'RCyjs',
@@ -1647,33 +1632,37 @@ setMethod('saveLayout', 'RCyjs',
      })
 
 #----------------------------------------------------------------------------------------------------
-#' title
+#' restoreLayout
 #'
-#' \code{methodName} put somewhat more detailed description here
+#' \code{restoreLayout} restore a previously-saved layout
 #'
-#' multi-line description goes here with
-#' continuations on subsequent lines
-#' if you like
+#' @rdname restoreLayout
+#' @aliases restoreLayout
 #'
-#' @rdname methodName
-#' @aliases methodname
+#' @param obj an RCyjs instance
+#' @param filename  a character string, default "layout.RData"
 #'
-#' @param p1  some text
-#' @param p2  some text
-#' @param p3  some text
-#'
-#' @return explain what the method returns
+#' @return no return value
 #'
 #' @export
 #'
 #' @examples
-#'   x <- 3 + 2
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    layout(rcy, "grid")
+#'    saveLayout(rcy, filename="gridLayout.RData")
+#'    layout(rcy, "circle")
+#'    restoreLayout(rcy, "gridLayout.RData")
+#'    }
 #'
+#' @seealso\code{\link{saveLayout}}
+
 
 setMethod('restoreLayout', 'RCyjs',
 
   function (obj, filename="layout.RData") {
      tbl.layout <- NA
+     stopifnot(file.exists(filename))
      load(filename)
      if(!all(is.na(tbl.layout)))
         x <- setPosition(obj, tbl.layout)
@@ -1694,9 +1683,12 @@ setMethod('restoreLayout', 'RCyjs',
 #' @export
 #'
 #' @examples
-#'   sampleGraph <- simpleDemoGraph()
-#'   rcy <- RCyjs(title="getJSON example", graph=sampleGraph)
-#'   s <- getJSON(rcy)
+#' if(interactive()){
+#'    sampleGraph <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="getJSON", graph=sampleGraph)
+#'    s <- getJSON(rcy)
+#'    s.asList <- fromJSON(s)  # easier to inspect if you wish toa
+#'    }
 #'
 
 setMethod('getJSON', 'RCyjs',
@@ -1707,6 +1699,104 @@ setMethod('getJSON', 'RCyjs',
         Sys.sleep(.1)
         }
      getBrowserResponse(obj)
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' savePNG
+#'
+#' \code{savePNG} write current cytoscape view, at current resolution, to a PNG file.
+#'
+#' @rdname savePNG
+#' @aliases savePNG
+#'
+#' @param obj  an RCyjs instance
+#' @param filename  a character string
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="layouts", graph=createTestGraph(nodeCount=20, edgeCount=20)
+#'    style.filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+#'    loadStyleFile(rcy, style.filename)
+#'    layout(rcy, "cose")
+#'    fit(rcy)
+#'    filename <- tempfile(fileext=".png")
+#'    savePNG(rcy, filename)
+#'    }
+
+
+setMethod('savePNG', 'RCyjs',
+
+  function (obj, filename) {
+     send(obj, list(cmd="getPNG", callback="handleResponse", status="request",
+                                  payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     png <- getBrowserResponse(obj)
+     png.parsed <- fromJSON(png)
+     substr(png.parsed, 1, 30) # [1] "data:image/png;base64,iVBORw0K"
+     nchar(png.parsed)  # [1] 768714
+     png.parsed.headless <- substr(png.parsed, 23, nchar(png.parsed))  # chop off the uri header
+     png.parsed.binary <- base64decode(png.parsed.headless)
+     conn <- file(filename, "wb")
+     writeBin(png.parsed.binary, conn)
+     close(conn)
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' saveJPG
+#'
+#' \code{saveJPG} write current cytoscape view, at current resolution, to a JPG file.
+#'
+#' @rdname saveJPG
+#' @aliases saveJPG
+#'
+#' @param obj  an RCyjs instance
+#' @param filename  a character string
+#' @param quality   numeric between 0 and 1
+#' @param width     numeric between (say) 1000 and 10000
+#' @param height    numeric between (say) 1000 and 10000
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="layouts", graph=createTestGraph(nodeCount=20, edgeCount=20)
+#'    style.filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+#'    loadStyleFile(rcy, style.filename)
+#'    layout(rcy, "cose")
+#'    fit(rcy)
+#'    filename <- tempfile(fileext=".jpg")
+#'    saveJPG(rcy, filename)
+#'    }
+
+
+setMethod('saveJPG', 'RCyjs',
+
+  function (obj, filename, quality=1, width=1000, height=1600) {
+     payload <- list(quality=quality,
+                     width=width,
+                     height=height)
+     send(obj, list(cmd="getJPG", callback="handleResponse", status="request",
+                                  payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     jpg <- getBrowserResponse(obj)
+     jpg.parsed <- fromJSON(jpg)
+     substr(jpg.parsed, 1, 30) # [1] "data:image/jpg;base64,iVBORw0K"
+     nchar(jpg.parsed)  # [1] 768714
+     jpg.parsed.headless <- substr(jpg.parsed, 23, nchar(jpg.parsed))  # chop off the uri header
+     jpg.parsed.binary <- base64decode(jpg.parsed.headless)
+     conn <- file(filename, "wb")
+     writeBin(jpg.parsed.binary, conn)
+     close(conn)
      })
 
 #----------------------------------------------------------------------------------------------------
@@ -1733,23 +1823,16 @@ setMethod('getJSON', 'RCyjs',
 #'   x <- 3 + 2
 #'
 
-setMethod('savePNG', 'RCyjs',
+setMethod('getNodeSize', 'RCyjs',
 
-  function (obj, filename) {
-     send(obj, list(cmd="getPNG", callback="handleResponse", status="request",
-                                  payload=""))
+  function (obj, nodeIDs=NA) {
+     if(all(is.na(nodeIDs)))
+        nodeIDs <- ""
+     send(obj, list(cmd="getNodeSize", callback="handleResponse", status="request", payload=nodeIDs))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     png <- getBrowserResponse(obj)
-     png.parsed <- fromJSON(png)
-     substr(png.parsed, 1, 30) # [1] "data:image/png;base64,iVBORw0K"
-     nchar(png.parsed)  # [1] 768714
-     png.parsed.headless <- substr(png.parsed, 23, nchar(png.parsed))  # chop off the uri header
-     png.parsed.binary <- base64decode(png.parsed.headless)
-     conn <- file(filename, "wb")
-     writeBin(png.parsed.binary, conn)
-     close(conn)
+     fromJSON(getBrowserResponse(obj))
      })
 
 #----------------------------------------------------------------------------------------------------

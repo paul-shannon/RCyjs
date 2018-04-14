@@ -18,8 +18,11 @@ a JSON string
 \code{getJSON} a JSON string from the browser, describing the graph in cytoscape.js terms
 }
 \examples{
-  sampleGraph <- simpleDemoGraph()
-  rcy <- RCyjs(title="getJSON example", graph=sampleGraph)
-  s <- getJSON(rcy)
+if(interactive()){
+   sampleGraph <- simpleDemoGraph()
+   rcy <- RCyjs(title="getJSON", graph=sampleGraph)
+   s <- getJSON(rcy)
+   s.asList <- fromJSON(s)  # easier to inspect if you wish toa
+   }
 
 }

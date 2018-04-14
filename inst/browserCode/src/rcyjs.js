@@ -121,6 +121,7 @@ function addMessageHandlers()
 
    self.hub.addMessageHandler("getJSON",              getJSON.bind(self));
    self.hub.addMessageHandler("getPNG",               getPNG.bind(self));
+   self.hub.addMessageHandler("getJPG",               getJPG.bind(self));
    self.hub.addMessageHandler("selectNodes",          selectNodes.bind(self));
    self.hub.addMessageHandler("invertNodeSelection",  invertNodeSelection.bind(self));
    self.hub.addMessageHandler("hideSelectedNodes",    hideSelectedNodes.bind(self));
@@ -783,10 +784,27 @@ function getPNG(msg)
 {
    var self = this;
    console.log("=== getPNG");
-   var png_json = JSON.stringify(cy.png());
+   var png_json = JSON.stringify(self.cy.png());
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: png_json});
 
 } // getPNG
+//----------------------------------------------------------------------------------------------------
+function getJPG(msg)
+{
+   var self = this;
+   var quality = msg.payload.quality;
+   var width = msg.payload.width;
+   var height = msg.payload.height;
+   console.log("=== getJPG");
+   var options = {full: false,
+                  quality: quality,
+                  maxWidth: width,
+                  maxHeight: height};
+     // options ignored for now
+   var jpg_json = JSON.stringify(self.cy.jpg(options));
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: jpg_json});
+
+} // getJPG
 //----------------------------------------------------------------------------------------------------
 function getPosition(msg)
 {

@@ -43,12 +43,14 @@ runTests = function()
    test_nodeSelection()
 
    test_getLayoutStrategies()
-#   test_layouts()
+   test_layouts()
 
-#
-#   test_getSetPosition()
+   test_getSetPosition()
+   test_saveRestoreLayout()
+
+   test_savePNG()
+
 #   test_getNodeSize()
-#   test_saveRestoreLayout()
 
 
    #--------------------------------------------------------------------------------
@@ -445,24 +447,67 @@ test_layouts <- function()
 {
    printf("--- test_layouts")
 
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
+   g <- createTestGraph(nodeCount=20, edgeCount=20)
+   setGraph(rcy, g)
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle1.js"))
+   fit(rcy)
    redraw(rcy)
-
-   title <- "layouts"
-   setBrowserWindowTitle(rcy, title)
-   layout.strategies <- layoutStrategies(rcy)
+   layout.strategies <- getLayoutStrategies(rcy)
    for(strategy in layout.strategies){
+     setBrowserWindowTitle(rcy, strategy)
      layout(rcy, strategy)
-     Sys.sleep(0.5)
+     Sys.sleep(2)
      } # for strategy
-
-   closeWebSocket(rcy)
 
 } #  test_layouts
 #----------------------------------------------------------------------------------------------------
+test_getSetPosition <- function()
+{
+   printf("--- test_getSetPosition");
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   setBrowserWindowTitle(rcy, "getSetPosition");
+   setNodeLabelRule(rcy, "label");
+   layout(rcy, "cola")
+   fit(rcy)
+   redraw(rcy)
+
+   tbl <- getPosition(rcy, "A")
+   checkEquals(nrow(tbl), 1)
+   checkEquals(colnames(tbl), c("id", "x", "y"))
+   checkEquals(tbl[1, "id"], "A")
+
+      # now get positions of all
+   tbl <- getPosition(rcy)
+   checkEquals(nrow(tbl), 3)
+   checkEquals(colnames(tbl), c("id", "x", "y"))
+   checkEquals(tbl$id, nodes(g))
+   checkTrue(all(is.integer(tbl$x)))
+   checkTrue(all(is.integer(tbl$y)))
+
+   tbl2 <- tbl
+   tbl2[, 2:3] <- tbl2[, 2:3] + 50
+
+   for(i in 1:2){
+      setPosition(rcy, tbl2)
+      Sys.sleep(0.5)
+      setPosition(rcy, tbl)
+      Sys.sleep(0.5)
+      } # for i
+
+   for(i in 1:2){
+      setPosition(rcy, tbl2[1,])
+      Sys.sleep(0.5)
+      setPosition(rcy, tbl[1,])
+      Sys.sleep(0.5)
+      } # for i
+
+} # test_getSetPosition
+#----------------------------------------------------------------------------------------------------
+
+
+
 #test_biocGraphToCytoscapeJSON <- function()
 #{
 #   print("--- test_biocGraphToCytoscapeJSON")
@@ -1025,34 +1070,64 @@ test_saveRestoreLayout <- function()
 
    printf("--- test_saveRestoreLayout");
 
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "restoreLayout");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   tbl.layout <- getPosition(rcy)
-
-   layoutFilename <- "testLayout.RData";
-   if(file.exists(layoutFilename))
-      unlink(layoutFilename)
-
-   saveLayout(rcy, layoutFilename)
-   checkTrue(file.exists(layoutFilename))
-
-   layout(rcy, "cose")
-   Sys.sleep(0.4)
-   restoreLayout(rcy, layoutFilename)
-   fitContent(rcy)
-   setZoom(rcy, 0.9 * getZoom(rcy))
-
-   tbl.layout2 <- getPosition(rcy)
-   checkEquals(tbl.layout, tbl.layout2)
-
-   closeWebSocket(rcy)
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   fit(rcy, 200)
+   tbl.pos.1 <- getPosition(rcy)
+   f <- tempfile(fileext=".RData")
+   saveLayout(rcy, f)
+   layout(rcy, "random")
+   restoreLayout(rcy, f)
+   fit(rcy, 200)
+   tbl.pos.2 <- getPosition(rcy)
+   checkEqualsNumeric(tbl.pos.1$x, tbl.pos.2$x, tol=1e-2)
+   checkEqualsNumeric(tbl.pos.1$y, tbl.pos.2$y, tol=1e-2)
 
 } # test_saveRestoreLayout
+#----------------------------------------------------------------------------------------------------
+test_savePNG <- function()
+{
+   if(!interactive())
+       return(TRUE);
+
+   printf("--- test_savePNG")
+
+   setBrowserWindowTitle(rcy, "savePNG")
+   g <- createTestGraph(100, 100)
+   setGraph(rcy, g)
+   layout(rcy, "cose")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle1.js"))
+
+   filename <- tempfile(fileext=".png")
+   savePNG(rcy, filename)
+   checkTrue(file.exists(filename))
+   #system(sprintf("open %s", filename))
+
+} # test_savePNG
+#----------------------------------------------------------------------------------------------------
+test_saveJPG <- function()
+{
+   if(!interactive())
+       return(TRUE);
+
+   printf("--- test_saveJPG")
+
+   setBrowserWindowTitle(rcy, "saveJPG")
+   g <- createTestGraph(100, 100)
+   setGraph(rcy, g)
+   layout(rcy, "cose")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle1.js"))
+
+   filename <- tempfile(fileext=".jpg")
+   saveJPG(rcy, filename, quality=0)
+   saveJPG(rcy, filename, quality=1)
+   saveJPG(rcy, filename, quality=1, width=8000, height=128000)
+   checkTrue(file.exists(filename))
+   #system(sprintf("open %s", filename))
+
+} # test_saveJPG
 #----------------------------------------------------------------------------------------------------
 test_setBackgroundColor <- function()
 {
@@ -1386,17 +1461,6 @@ test_httpAddJsonGraphFromFile <- function()
    checkTrue(nrow(getNodes(rcy)) > 300)
 
 } # test_httpAddGraphToEmptyGraph
-#----------------------------------------------------------------------------------------------------
-test_savePNG <- function()
-{
-   printf("--- test_savePNG")
-   rcy <- rcy.demo()
-   filename <- tempfile(fileext=".png")
-   savePNG(rcy, filename)
-   checkTrue(file.exists(filename))
-   #system(sprintf("open %s", filename))
-
-} # test_savePNG
 #----------------------------------------------------------------------------------------------------
 test_multiGraphSeparatelyVisibleEdges <- function()
 {

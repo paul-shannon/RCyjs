@@ -36,25 +36,13 @@
 \alias{methodname}
 \alias{setEdgeSourceArrowColorRule,RCyjs-method}
 \alias{methodname}
-\alias{layout,RCyjs-method}
-\alias{methodname}
 \alias{layoutSelectionInGrid,RCyjs-method}
 \alias{methodname}
 \alias{layoutSelectionInGridInferAnchor,RCyjs-method}
 \alias{methodname}
-\alias{getPosition,RCyjs-method}
-\alias{methodname}
-\alias{setPosition,RCyjs-method}
-\alias{methodname}
-\alias{getNodeSize,RCyjs-method}
-\alias{methodname}
 \alias{getLayout,RCyjs-method}
 \alias{methodname}
-\alias{saveLayout,RCyjs-method}
-\alias{methodname}
-\alias{restoreLayout,RCyjs-method}
-\alias{methodname}
-\alias{savePNG,RCyjs-method}
+\alias{getNodeSize,RCyjs-method}
 \alias{methodname}
 \alias{fit,RCyjs-method}
 \alias{methodname}
@@ -172,25 +160,13 @@
 \S4method{setEdgeSourceArrowColorRule}{RCyjs}(obj, attribute, control.points,
   colors, mode = "interpolate")
 
-\S4method{layout}{RCyjs}(obj, strategy = "random")
-
 \S4method{layoutSelectionInGrid}{RCyjs}(obj, x, y, w, h)
 
 \S4method{layoutSelectionInGridInferAnchor}{RCyjs}(obj, w, h)
 
-\S4method{getPosition}{RCyjs}(obj, nodeIDs = NA)
-
-\S4method{setPosition}{RCyjs}(obj, tbl.pos)
-
-\S4method{getNodeSize}{RCyjs}(obj, nodeIDs = NA)
-
 \S4method{getLayout}{RCyjs}(obj)
 
-\S4method{saveLayout}{RCyjs}(obj, filename = "layout.RData")
-
-\S4method{restoreLayout}{RCyjs}(obj, filename = "layout.RData")
-
-\S4method{savePNG}{RCyjs}(obj, filename)
+\S4method{getNodeSize}{RCyjs}(obj, nodeIDs = NA)
 
 \S4method{fit}{RCyjs}(obj, padding = 30)
 
@@ -265,42 +241,6 @@
 \S4method{hAlign}{RCyjs}(obj)
 }
 \arguments{
-\item{p1}{some text}
-
-\item{p2}{some text}
-
-\item{p3}{some text}
-
-\item{p1}{some text}
-
-\item{p2}{some text}
-
-\item{p3}{some text}
-
-\item{p1}{some text}
-
-\item{p2}{some text}
-
-\item{p3}{some text}
-
-\item{p1}{some text}
-
-\item{p2}{some text}
-
-\item{p3}{some text}
-
-\item{p1}{some text}
-
-\item{p2}{some text}
-
-\item{p3}{some text}
-
-\item{p1}{some text}
-
-\item{p2}{some text}
-
-\item{p3}{some text}
-
 \item{p1}{some text}
 
 \item{p2}{some text}
@@ -757,32 +697,8 @@ explain what the method returns
 explain what the method returns
 
 explain what the method returns
-
-explain what the method returns
-
-explain what the method returns
-
-explain what the method returns
-
-explain what the method returns
-
-explain what the method returns
-
-explain what the method returns
 }
 \description{
-\code{methodName} put somewhat more detailed description here
-
-\code{methodName} put somewhat more detailed description here
-
-\code{methodName} put somewhat more detailed description here
-
-\code{methodName} put somewhat more detailed description here
-
-\code{methodName} put somewhat more detailed description here
-
-\code{methodName} put somewhat more detailed description here
-
 \code{methodName} put somewhat more detailed description here
 
 \code{methodName} put somewhat more detailed description here
@@ -1125,44 +1041,8 @@ if you like
 multi-line description goes here with
 continuations on subsequent lines
 if you like
-
-multi-line description goes here with
-continuations on subsequent lines
-if you like
-
-multi-line description goes here with
-continuations on subsequent lines
-if you like
-
-multi-line description goes here with
-continuations on subsequent lines
-if you like
-
-multi-line description goes here with
-continuations on subsequent lines
-if you like
-
-multi-line description goes here with
-continuations on subsequent lines
-if you like
-
-multi-line description goes here with
-continuations on subsequent lines
-if you like
 }
 \examples{
-  x <- 3 + 2
-
-  x <- 3 + 2
-
-  x <- 3 + 2
-
-  x <- 3 + 2
-
-  x <- 3 + 2
-
-  x <- 3 + 2
-
   x <- 3 + 2
 
   x <- 3 + 2

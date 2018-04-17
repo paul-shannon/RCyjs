@@ -64,7 +64,7 @@ setGeneric('setEdgeSourceArrowColorRule',   signature='obj', function(obj, attri
 
 setGeneric('layout',                 signature='obj', function(obj, strategy="random") standardGeneric('layout'))
 setGeneric('getLayoutStrategies',    signature='obj', function(obj) standardGeneric('getLayoutStrategies'))
-setGeneric('layoutSelectionInGrid', signature='obj', function(obj, x, y, w, h) standardGeneric('layoutSelectionInGrid'))
+setGeneric('layoutSelectionInGrid',  signature='obj', function(obj, x, y, w, h) standardGeneric('layoutSelectionInGrid'))
 setGeneric('layoutSelectionInGridInferAnchor', signature='obj', function(obj, w, h) standardGeneric('layoutSelectionInGridInferAnchor'))
 setGeneric('getPosition',         signature='obj', function(obj, nodeIDs=NA) standardGeneric('getPosition'))
 setGeneric('setPosition',         signature='obj', function(obj, tbl.pos) standardGeneric('setPosition'))
@@ -73,7 +73,7 @@ setGeneric('getLayout',           signature='obj', function(obj) standardGeneric
 setGeneric('saveLayout',          signature='obj', function(obj, filename) standardGeneric('saveLayout'))
 setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
 setGeneric('savePNG',             signature='obj', function(obj, filename) standardGeneric('savePNG'))
-setGeneric('saveJPG',             signature='obj', function(obj, filename, quality=1, width=1000, height=1600) standardGeneric('saveJPG'))
+setGeneric('saveJPG',             signature='obj', function(obj, filename, resolutionFactor=1) standardGeneric('saveJPG'))
 setGeneric('restoreLayout',       signature='obj', function(obj, filename) standardGeneric('restoreLayout'))
 setGeneric('setZoom',             signature='obj', function(obj, newValue) standardGeneric('setZoom'))
 setGeneric('getZoom',             signature='obj', function(obj) standardGeneric('getZoom'))
@@ -1396,8 +1396,10 @@ setMethod('getLayoutStrategies', 'RCyjs',
 setMethod('layout', 'RCyjs',
 
   function (obj, strategy="random") {
-     send(obj, list(cmd="doLayout", callback="handleResponse", status="request",
-                                  payload=strategy))
+     if(!strategy %in% getLayoutStrategies(obj))
+        stop(sprintf("unrecognized layout strategy: '%s'", strategy))
+
+     send(obj, list(cmd="doLayout", callback="handleResponse", status="request", payload=strategy))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -1757,9 +1759,7 @@ setMethod('savePNG', 'RCyjs',
 #'
 #' @param obj  an RCyjs instance
 #' @param filename  a character string
-#' @param quality   numeric between 0 and 1
-#' @param width     numeric between (say) 1000 and 10000
-#' @param height    numeric between (say) 1000 and 10000
+#' @param resolutionFactor  numeric, default 1, higher values multiply resolution beyond screen dpi
 #'
 #' @return no return value
 #'
@@ -1773,16 +1773,14 @@ setMethod('savePNG', 'RCyjs',
 #'    layout(rcy, "cose")
 #'    fit(rcy)
 #'    filename <- tempfile(fileext=".jpg")
-#'    saveJPG(rcy, filename)
+#'    saveJPG(rcy, filename, resolutionFactor)
 #'    }
 
 
 setMethod('saveJPG', 'RCyjs',
 
-  function (obj, filename, quality=1, width=1000, height=1600) {
-     payload <- list(quality=quality,
-                     width=width,
-                     height=height)
+  function (obj, filename, resolutionFactor=1) {
+     payload <- list(resolutionFactor=resolutionFactor)
      send(obj, list(cmd="getJPG", callback="handleResponse", status="request",
                                   payload=payload))
      while (!browserResponseReady(obj)){

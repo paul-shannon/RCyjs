@@ -6,19 +6,14 @@
 \alias{saveJPG}
 \title{saveJPG}
 \usage{
-\S4method{saveJPG}{RCyjs}(obj, filename, quality = 1, width = 1000,
-  height = 1600)
+\S4method{saveJPG}{RCyjs}(obj, filename, resolutionFactor = 1)
 }
 \arguments{
 \item{obj}{an RCyjs instance}
 
 \item{filename}{a character string}
 
-\item{quality}{numeric between 0 and 1}
-
-\item{width}{numeric between (say) 1000 and 10000}
-
-\item{height}{numeric between (say) 1000 and 10000}
+\item{resolutionFactor}{numeric, default 1, higher values multiply resolution beyond screen dpi}
 }
 \value{
 no return value
@@ -34,6 +29,6 @@ if(interactive()){
    layout(rcy, "cose")
    fit(rcy)
    filename <- tempfile(fileext=".jpg")
-   saveJPG(rcy, filename)
+   saveJPG(rcy, filename, resolutionFactor)
    }
 }

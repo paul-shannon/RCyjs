@@ -100859,7 +100859,7 @@ function setZoom(msg)
 function getZoom(msg)
 {
    var self = this;
-   result = self.cy.zoom();
+   var result = self.cy.zoom();
    var returnMsg = {cmd: msg.callback, status: "success", callback: "", payload: result};
    console.log(returnMsg);
    self.hub.send(returnMsg);
@@ -101436,16 +101436,13 @@ function getPNG(msg)
 function getJPG(msg)
 {
    var self = this;
-   var quality = msg.payload.quality;
-   var width = msg.payload.width;
-   var height = msg.payload.height;
-   console.log("=== getJPG");
-   var options = {full: false,
-                  quality: quality,
-                  maxWidth: width,
-                  maxHeight: height};
-     // options ignored for now
+   var resolutionFactor = msg.payload.resolutionFactor;
+   var requestedImageWidth = $(window).width() * resolutionFactor;
+
+   var options = {full: false, maxWidth: requestedImageWidth};
+    console.log(options);
    var jpg_json = JSON.stringify(self.cy.jpg(options));
+
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: jpg_json});
 
 } // getJPG
@@ -102011,15 +102008,11 @@ function setNodeAttributes(msg)
    var attributeName = msg.payload.attribute;
 
    for(var i=0; i < nodeIDs.length; i++){
-      var name = nodeIDs[i];
+      var id = nodeIDs[i];
       var newValue = msg.payload.values[i];
-      var filterString = "[name='" + name + "']";
-      //console.log("filterString: " + filterString);
-      //console.log("nodeID: " + name + "   value: " + newValue);
+      var filterString = "[id='" + id + "']";
       var dataObj = self.cy.nodes().filter(filterString).data();
       Object.defineProperty(dataObj, attributeName, {value: newValue});
-      //cy.nodes().filter(filterString).data({attributeName: value});
-      //cy.nodes().filter(filterString).data[attributeName] = value;
       } // for i
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -102037,10 +102030,10 @@ function setEdgeAttributes(msg)
    var values = msg.payload.values
 
    for(var i=0; i < sourceNodes.length; i++){
-      selectorString = "edge[source='" + sourceNodes[i] + "'][target='" + targetNodes[i] +
-                       "'][edgeType='" + edgeTypes[i] + "']";
+      var selectorString = "edge[source='" + sourceNodes[i] + "'][target='" + targetNodes[i] +
+                           "'][edgeType='" + edgeTypes[i] + "']";
 
-      //console.log(selectorString);
+      console.log(selectorString);
       var dataObj = self.cy.edges().filter(selectorString).data();
       if(dataObj != undefined){
          Object.defineProperty(dataObj, attributeName, {value: values[i]});

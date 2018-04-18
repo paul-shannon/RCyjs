@@ -347,10 +347,10 @@ test_nodeSelection <- function()
    if(!interactive())
        return(TRUE);
 
-   deleteGraph(rcy)
    count <- 20
+   set.seed(31)
    g <- createTestGraph(nodeCount=count, edgeCount=10)
-   addGraph(rcy, g)
+   setGraph(rcy, g)
 
    styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
    loadStyleFile(rcy, styleFile.1)
@@ -407,6 +407,14 @@ test_nodeSelection <- function()
    Sys.sleep(1)
    checkEquals(length(getNodes(rcy)$id), 17)
    showAll(rcy)
+
+   clearSelection(rcy)
+   checkEquals(nrow(getSelectedNodes(rcy)), 0)
+   selectNodes(rcy, "n8")
+   checkEquals(nrow(getSelectedNodes(rcy)), 1)
+   sfn(rcy)
+   checkEquals(nrow(getSelectedNodes(rcy)), 2)
+   selectFirstNeighbors(rcy)
 
 } # test_nodeSelection
 #----------------------------------------------------------------------------------------------------

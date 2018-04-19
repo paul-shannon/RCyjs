@@ -9,14 +9,14 @@ if(!exists("rcy")){
    checkEquals(length(getNodes(rcy)), 0);
    }
 
-
-PORTS=9047:9097
 #----------------------------------------------------------------------------------------------------
 runTests = function()
 {
    test_setGraph();
    test_deleteSetAddGraph()
    test_largeGraph()
+
+   test_setDefaultStyleElements()
 
    test_loadStyleFile();
    test_getJSON()
@@ -28,6 +28,8 @@ runTests = function()
    test_getLayoutStrategies()
    test_layouts()
 
+   test_fit()
+
    test_getSetPosition()
    test_saveRestoreLayout()
    test_savePNG()
@@ -35,6 +37,7 @@ runTests = function()
 
    test_zoom()
 
+   test_queryAttributes()
    test_setNodeAttributes();
    test_setEdgeAttributes();
 
@@ -51,7 +54,7 @@ runTests = function()
 } # run.tests
 #----------------------------------------------------------------------------------------------------
 # a utility: create and return simple instance, for further experimentation
-rcy.demo <- function(portRange=PORTS)
+rcy.demo <- function()
 {
    g <- simpleDemoGraph()
 
@@ -66,7 +69,7 @@ rcy.demo <- function(portRange=PORTS)
 
    setNodeLabelRule(rcy, "label");
    setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
-   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
    redraw(rcy)
    layout(rcy, "cose")
    fit(rcy, 300)
@@ -92,7 +95,7 @@ test_setGraph <- function()
    setGraph(rcy, g)
    setNodeLabelRule(rcy, "label");
    setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
-   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
    redraw(rcy)
    layout(rcy, "cola")
    fit(rcy, 100)
@@ -121,7 +124,7 @@ test_setGraphEdgesInitiallyHidden <- function()
    setGraph(rcy, g, hideEdges=TRUE)
    setNodeLabelRule(rcy, "label");
    setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
-   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
    redraw(rcy)
    layout(rcy, "cola")
    fit(rcy, 100)
@@ -152,7 +155,7 @@ test_deleteSetAddGraph <- function()
    setGraph(rcy, g)
    setNodeLabelRule(rcy, "label");
    setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
-   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
    redraw(rcy)
    layout(rcy, "cola")
    fit(rcy, 200)
@@ -191,7 +194,7 @@ test_constructorWithGraphSupplied <- function()
    checkTrue(ready(rcy2))
    setNodeLabelRule(rcy2, "label");
    setNodeSizeRule(rcy2, "count", c(0, 30, 110), c(20, 50, 100));
-   setNodeColorRule(rcy2, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   setNodeColorRule(rcy2, "count", c(0, 100), c("green", "red"), mode="interpolate")
    redraw(rcy2)
    layout(rcy2, "cola")
    Sys.sleep(1)
@@ -226,6 +229,107 @@ test_largeGraph <- function()
    Sys.sleep(1)
 
 } # test_largeGraph
+#----------------------------------------------------------------------------------------------------
+test_setDefaultStyleElements <- function()
+{
+   printf("--- test_setDefaultStyleElement")
+
+   if(!interactive())n
+       return(TRUE);
+
+   g <- createTestGraph(nodeCount=10, edgeCount=30)
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+
+   sizes <- c(0, 10, 20, 30, 40, 50, 30)
+   colors <- c("lightred", "yellow", "lightblue", "lightgreen", "cyan", "gray", "lemonchiffon")
+
+   for(size in sizes){
+      setDefaultNodeWidth(rcy, size); redraw(rcy);Sys.sleep(1)
+      } # for size
+
+   for(size in sizes){
+      setDefaultNodeHeight(rcy, size); redraw(rcy); Sys.sleep(1)
+      } # for size
+
+   for(size in sizes){
+      setDefaultNodeSize(rcy, size); redraw(rcy); Sys.sleep(1)
+      } # for size
+
+   for(color in colors){
+      setDefaultNodeColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      } # for size
+
+   shapes <- c("ellipse", "triangle", "rectangle", "roundrectangle",
+               "bottomroundrectangle","cutrectangle", "barrel",
+               "rhomboid", "diamond", "pentagon", "hexagon",
+               "concavehexagon", "heptagon", "octagon", "star", "tag", "vee",
+               "ellipse")
+
+   for(shape in shapes){
+      setDefaultNodeShape(rcy, shape); redraw(rcy);Sys.sleep(1)
+      } # for size
+
+
+
+   setDefaultNodeShape(rcy, "roundrectangle");
+   setDefaultNodeColor(rcy, "#F0F0F0")
+
+   for(color in colors){
+      setDefaultNodeFontColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      } # for size
+
+   for(fontSize in seq(1, 20, by=2)){
+      setDefaultNodeFontSize(rcy, fontSize); redraw(rcy); Sys.sleep(1)
+      }
+
+   for(width in c(0:5, 1)){
+      setDefaultNodeBorderWidth(rcy, width); redraw(rcy);Sys.sleep(1)
+      }
+
+   for(color in c(colors, "black")){
+      setDefaultNodeBorderColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      }
+
+   arrow.shapes <- c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
+                     "vee", "tee", "square", "circle", "diamond", "none")
+
+   for(shape in c(arrow.shapes, "triangle")){
+      setDefaultEdgeTargetArrowShape(rcy, shape); redraw(rcy);Sys.sleep(1)
+      }
+
+   for(color in c(colors, "black")){
+      setDefaultEdgeTargetArrowColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      }
+
+   for(shape in c(arrow.shapes, "triangle")){
+      setDefaultEdgeSourceArrowShape(rcy, shape); redraw(rcy);Sys.sleep(1)
+      }
+
+   for(color in c(colors, "black")){
+      setDefaultEdgeSourceArrowColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      }
+
+   for(color in c(colors, "black")){
+      setDefaultEdgeColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      }
+
+   for(width in c(0:5, 1)){
+      setDefaultEdgeWidth(rcy, width); redraw(rcy);Sys.sleep(1)
+      }
+
+   for(color in c(colors, "black")){
+      setDefaultEdgeLineColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      }
+
+   line.styles <- c("solid", "dotted", "dashed")
+   for(style in line.styles){
+      setDefaultEdgeLineStyle(rcy, style); redraw(rcy);Sys.sleep(1)
+      }
+
+
+} # test_setDefaultStyleElements
 #----------------------------------------------------------------------------------------------------
 test_loadStyleFile <- function(count=3)
 {
@@ -414,7 +518,7 @@ test_nodeSelection <- function()
    checkEquals(nrow(getSelectedNodes(rcy)), 1)
    sfn(rcy)
    checkEquals(nrow(getSelectedNodes(rcy)), 2)
-   selectFirstNeighbors(rcy)
+   selectFirstNeighborsOfSelectedNodes(rcy)
 
 } # test_nodeSelection
 #----------------------------------------------------------------------------------------------------
@@ -458,6 +562,35 @@ test_layouts <- function()
      } # for strategy
 
 } #  test_layouts
+#----------------------------------------------------------------------------------------------------
+# a test whose success is judge by visual inspection
+# node positions are unchanged by zoom - presumably rendered position would change
+test_fit <- function()
+{
+   printf("--- test_fit");
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "fit")
+   g <- createTestGraph(nodeCount=20, edgeCount=20)
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+
+   for(padding in c(0, 50, 100, 150, 200, 250, 0)){
+      fit(rcy, padding)
+      Sys.sleep(1)
+      }
+
+   clearSelection(rcy)
+   selectNodes(rcy, "n17")
+   for(padding in c(0, 50, 100, 150, 200, 250, 300, 400)){
+      fitSelection(rcy, padding)
+      Sys.sleep(1)
+      }
+
+
+} # test_fit
 #----------------------------------------------------------------------------------------------------
 test_getSetPosition <- function()
 {
@@ -808,6 +941,22 @@ test_compoundNodes <- function()
    fit(rcy)
 
 } # test_compoundNodes
+#----------------------------------------------------------------------------------------------------
+test_queryAttributes <- function()
+{
+   printf("--- test_queryAttributes")
+
+   if(!interactive())
+      return(TRUE);
+
+   g <- simpleDemoGraph()
+   checkEquals(sort(noaNames(g)), c("count", "label", "lfc", "type"))
+   checkEquals(noa(g, "lfc"), c(A=-3, B=0, C=3))
+
+   checkEquals(sort(edaNames(g)), c("edgeType", "misc", "score"))
+   checkEquals(eda(g, "edgeType"), c("A|B"="phosphorylates", "B|C"="synthetic lethal", "C|A"="undefined"))
+
+} # test_queryAttributes
 #----------------------------------------------------------------------------------------------------
 test_multiGraphSeparatelyVisibleEdges <- function()
 {

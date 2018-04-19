@@ -185,21 +185,22 @@ function fitSelected(msg)
    var self = this;
    var selectedNodes = self.cy.filter('node:selected');
    var padding = msg.payload;
+   var status, payload;
 
    if(selectedNodes.length == 0){
      status = "failure";
      payload = "no nodes currently selected"
      }
-  else{
-    console.log("fitSelected, with padding " + padding);
-    self.cy.fit(selectedNodes, padding)
-    status = "success";
-    payload = "";
-    }
+   else{
+     console.log("fitSelected, with padding " + padding);
+     self.cy.fit(selectedNodes, padding)
+     status = "success";
+     payload = "";
+     }
 
   self.hub.send({cmd: msg.callback, status: status, callback: "", payload: payload});
 
-} // fit
+} // fitSelected
 //----------------------------------------------------------------------------------------------------
 function setZoom(msg)
 {
@@ -1006,16 +1007,16 @@ function setNodeImage(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeSize
+} // setNodeImage
 //----------------------------------------------------------------------------------------------------
 function setDefaultNodeSize(msg)
 {
    var self = this;
-  var newSize = msg.payload;
-  self.cy.style().selector('node').css({"height": newSize});
-  self.cy.style().selector('node').css({"width": newSize});
+   var newSize = msg.payload;
+   self.cy.style().selector('node').css({"height": newSize});
+   self.cy.style().selector('node').css({"width": newSize});
 
-  self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setDefaultNodeSize
 //----------------------------------------------------------------------------------------------------

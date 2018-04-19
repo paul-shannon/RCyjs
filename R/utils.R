@@ -83,7 +83,11 @@ createTestGraph <- function(nodeCount, edgeCount)
 
    gam <- graphAM(adjMat=mtx, edgemode="directed")
 
-   as(gam, "graphNEL")
+   g <- as(gam, "graphNEL")
+   edgeDataDefaults(g, attr="edgeType") <- "testEdges"
+   nodeDataDefaults(g, attr="nodeType") <- "testNodes"
+
+   g
 
 } # createTestGraph
 #----------------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 \docType{methods}
 \name{sfn,RCyjs-method}
 \alias{sfn,RCyjs-method}
-\alias{snf}
+\alias{sfn}
 \title{sfn}
 \usage{
 \S4method{sfn}{RCyjs}(obj)
@@ -15,9 +15,15 @@
 no return value
 }
 \description{
-\code{sfn} an alias for selectFirstNeighborsOfSelectedNodes
+\code{sfn} select first neighbors of the currently selected nodes
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+   selectNodes(rcy, "A")
+   getSelectedNodes(rcy)  # just one
+   sfn()
+   getSelectedNodes(rcy)  # now three
+   }
 
 }

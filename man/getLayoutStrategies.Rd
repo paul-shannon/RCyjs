@@ -18,6 +18,10 @@ a list of character strings
 \code{getLayoutStrategies} return a list of those currently offered
 }
 \examples{
-
+if(interactive()){
+  g <- createTestGraph(nodeCount=20, edgeCount=20)
+  rcy <- RCyjs(title="layouts", graph=g)
+  strategies <- getLayoutStrategies(rcy)
+  }
 
 }

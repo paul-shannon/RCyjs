@@ -27,6 +27,13 @@ no return value
 actual node sizes are interpolated via the specified relationship of control.points node.sizes
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(title="rcyjs demo", graph=g)
+   layout(rcy, "cose")
+   fit(rcy, 100)
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   redraw(rcy)
+   }
 
 }

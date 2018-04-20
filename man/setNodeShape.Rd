@@ -13,7 +13,7 @@
 
 \item{nodeIDs}{a character string (one or more)}
 
-\item{newValue}{a character string, one of the legitimate cytoscape.js node shapes}
+\item{newValues}{a character string, one of the legitimate cytoscape.js node shapes}
 }
 \value{
 no value returned

@@ -18,6 +18,12 @@ a list of character strings
 \code{getSupportedEdgeDecoratorShapes} return a list of those currently offered
 }
 \examples{
+if(interactive()){
+  g <- createTestGraph(nodeCount=20, edgeCount=20)
+  rcy <- RCyjs(title="shapes", graph=g)
+  shapes <- getSupportedEdgeDecoratorShapes(rcy)
+  }
+
 
 
 }

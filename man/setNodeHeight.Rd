@@ -13,7 +13,7 @@
 
 \item{nodeIDs}{a character string (one or more)}
 
-\item{newValue}{a numeric, in pixels (one, or as many as there are nodeIDs)}
+\item{newValues}{a numeric, in pixels (one, or as many as there are nodeIDs)}
 }
 \value{
 no value returned

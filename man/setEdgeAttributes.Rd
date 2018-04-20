@@ -12,6 +12,8 @@
 \arguments{
 \item{obj}{an RCyjs instance}
 
+\item{attribute}{a character string}
+
 \item{sourceNodes}{vector of character strings}
 
 \item{targetNodes}{vector of character strings}
@@ -28,8 +30,4 @@ no return value
 }
 \details{
 Edges are specified by sourceNode/targetNode/edgeType triples.
-}
-\examples{
-  x <- 3 + 2
-
 }

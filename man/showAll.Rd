@@ -6,7 +6,7 @@
 \alias{showAll}
 \title{showAll}
 \usage{
-\S4method{showAll}{RCyjs}(obj, which = "both")
+\S4method{showAll}{RCyjs}(obj, which = c("both", "nodes", "edges"))
 }
 \arguments{
 \item{obj}{an RCyjs instance}

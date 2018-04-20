@@ -7,7 +7,7 @@
 noaNames(graph)
 }
 \arguments{
-\item{g}{a graphNEL}
+\item{graph}{a graphNEL}
 }
 \value{
 character strings, the names of the unique node attribute categories on the graph
@@ -16,7 +16,9 @@ character strings, the names of the unique node attribute categories on the grap
 \code{noaNames} the names of the unique node attribute categories on the graph (not their values)
 }
 \examples{
+if(interactive()){
   g <- simpleDemoGraph()
   noaNames(g)
+  }
 
 }

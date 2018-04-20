@@ -7,7 +7,9 @@
 eda(graph, edge.attribute.name)
 }
 \arguments{
-\item{g}{a graphNEL}
+\item{graph}{a graphNEL}
+
+\item{edge.attribute.name}{a character string}
 }
 \value{
 character strings, the names of the unique edge attribute categories on the graph
@@ -16,9 +18,11 @@ character strings, the names of the unique edge attribute categories on the grap
 \code{eda} retrieve the node/attribute-value pairs, for the specified node attribute category
 }
 \examples{
+if(interactive()){
   g <- simpleDemoGraph()
   edaNames(g)   # discover the attribute category names
   eda(g, "edgeType")
   eda(g, "score")
+  }
 
 }

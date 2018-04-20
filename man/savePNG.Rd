@@ -21,7 +21,7 @@ no return value
 }
 \examples{
 if(interactive()){
-   rcy <- RCyjs(title="layouts", graph=createTestGraph(nodeCount=20, edgeCount=20)
+   rcy <- RCyjs(title="layouts", graph=createTestGraph(nodeCount=20, edgeCount=20))
    style.filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
    loadStyleFile(rcy, style.filename)
    layout(rcy, "cose")

@@ -11,7 +11,7 @@
 \arguments{
 \item{obj}{an RCyjs instance}
 
-\item{newValue}{}
+\item{newValue}{numeric, in points}
 }
 \value{
 no value returned

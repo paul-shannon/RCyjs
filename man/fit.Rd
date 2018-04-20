@@ -14,17 +14,15 @@
 \item{padding}{numeric, in pixels}
 }
 \value{
-explain what the method returns
+no return value
 }
 \description{
-\code{fit} put somewhat more detailed description here
-}
-\details{
-multi-line description goes here with
-continuations on subsequent lines
-if you like
+\code{fit} zoom in (or out) to display all nodes in the current graph
 }
 \examples{
-  x <- 3 + 2
-
+if(interactive()){
+   rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+   setZoom(rcy, 0.5)   # zoom out
+   fit(rcy)
+   }
 }

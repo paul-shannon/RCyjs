@@ -91,87 +91,87 @@ createTestGraph <- function(nodeCount, edgeCount)
 
 } # createTestGraph
 #----------------------------------------------------------------------------------------------------
-biocGraphToCytoscapeJSON <- function (graph) {
-
-  igraphobj <- igraph::igraph.from.graphNEL(graph)
-
-
-  # Extract graph attributes
-  graph_attr <- graph.attributes(igraphobj)
-
-  # Extract nodes
-  node_count <- length(V(igraphobj))
-  if('name' %in% list.vertex.attributes(igraphobj)) {
-    V(igraphobj)$id <- V(igraphobj)$name
-  } else {
-    V(igraphobj)$id <-as.character(c(1:node_count))
-  }
-
-
-  nodes <- V(igraphobj)
-  nds <- list()
-
-  v_attr <- vertex.attributes(igraphobj)
-  v_names <- list.vertex.attributes(igraphobj)
-
-
-  for(i in seq_len(node_count)){   #   1:node_count) {
-    nds[[i]] <- list(data = mapAttributes(v_names, v_attr, i))
-    }
-
-  edges <- get.edgelist(igraphobj)
-  edge_count <- ecount(igraphobj)
-  e_attr <- edge.attributes(igraphobj)
-  e_names <- list.edge.attributes(igraphobj)
-
-  attr_exists <- FALSE
-  e_names_len <- 0
-  if(identical(e_names, character(0)) == FALSE) {
-    attr_exists <- TRUE
-    e_names_len <- length(e_names)
-    }
-  e_names_len <- length(e_names)
-
-  eds <- list()
-  if(edge_count > 0){
-    for(i in 1:edge_count) {
-       st <- list(source=toString(edges[i,1]), target=toString(edges[i,2]))
-
-    # Extract attributes
-     if(attr_exists) {
-       eds[[i]] <- list(data=c(st, mapAttributes(e_names, e_attr, i)))
-      } else {
-      eds[[i]] <- list(data=st)
-      }
-    }
-   } # if edge_count > 0
-
-  el <- list(nodes=nds, edges=eds)
-
-  x <- list(data = graph_attr, elements = el)
-  return (toJSON(x))
-
-} # biocGraphToCytoscapeJSON
-#----------------------------------------------------------------------------------------------------
-mapAttributes <- function(attr.names, all.attr, i)
-{
-  attr <- list()
-  cur.attr.names <- attr.names
-  attr.names.length <- length(attr.names)
-
-  for(j in 1:attr.names.length) {
-    if(is.na(all.attr[[j]][i]) == FALSE) {
-      attr <- c(attr, all.attr[[j]][i])
-      }
-    else {
-      cur.attr.names <- cur.attr.names[cur.attr.names != attr.names[j]]
-      }
-    } # for j
-
-  names(attr) <- cur.attr.names
-  return (attr)
-
-} # mapAttributes
+# biocGraphToCytoscapeJSON <- function (graph) {
+#
+#   igraphobj <- igraph::igraph.from.graphNEL(graph)
+#
+#
+#   # Extract graph attributes
+#   graph_attr <- graph.attributes(igraphobj)
+#
+#   # Extract nodes
+#   node_count <- length(V(igraphobj))
+#   if('name' %in% list.vertex.attributes(igraphobj)) {
+#     V(igraphobj)$id <- V(igraphobj)$name
+#   } else {
+#     V(igraphobj)$id <-as.character(c(1:node_count))
+#   }
+#
+#
+#   nodes <- V(igraphobj)
+#   nds <- list()
+#
+#   v_attr <- vertex.attributes(igraphobj)
+#   v_names <- list.vertex.attributes(igraphobj)
+#
+#
+#   for(i in seq_len(node_count)){   #   1:node_count) {
+#     nds[[i]] <- list(data = mapAttributes(v_names, v_attr, i))
+#     }
+#
+#   edges <- get.edgelist(igraphobj)
+#   edge_count <- ecount(igraphobj)
+#   e_attr <- edge.attributes(igraphobj)
+#   e_names <- list.edge.attributes(igraphobj)
+#
+#   attr_exists <- FALSE
+#   e_names_len <- 0
+#   if(identical(e_names, character(0)) == FALSE) {
+#     attr_exists <- TRUE
+#     e_names_len <- length(e_names)
+#     }
+#   e_names_len <- length(e_names)
+#
+#   eds <- list()
+#   if(edge_count > 0){
+#     for(i in 1:edge_count) {
+#        st <- list(source=toString(edges[i,1]), target=toString(edges[i,2]))
+#
+#     # Extract attributes
+#      if(attr_exists) {
+#        eds[[i]] <- list(data=c(st, mapAttributes(e_names, e_attr, i)))
+#       } else {
+#       eds[[i]] <- list(data=st)
+#       }
+#     }
+#    } # if edge_count > 0
+#
+#   el <- list(nodes=nds, edges=eds)
+#
+#   x <- list(data = graph_attr, elements = el)
+#   return (toJSON(x))
+#
+# } # biocGraphToCytoscapeJSON
+# #----------------------------------------------------------------------------------------------------
+# mapAttributes <- function(attr.names, all.attr, i)
+# {
+#   attr <- list()
+#   cur.attr.names <- attr.names
+#   attr.names.length <- length(attr.names)
+#
+#   for(j in 1:attr.names.length) {
+#     if(is.na(all.attr[[j]][i]) == FALSE) {
+#       attr <- c(attr, all.attr[[j]][i])
+#       }
+#     else {
+#       cur.attr.names <- cur.attr.names[cur.attr.names != attr.names[j]]
+#       }
+#     } # for j
+#
+#   names(attr) <- cur.attr.names
+#   return (attr)
+#
+# } # mapAttributes
 #----------------------------------------------------------------------------------------------------
 # the basic form
 #
@@ -196,8 +196,8 @@ mapAttributes <- function(attr.names, all.attr, i)
     edgeNames <- sub("~", "->", edgeNames)
     names(edges) <- edgeNames
 
-    noa.names <- names(nodeDataDefaults(g))
-    eda.names <- names(edgeDataDefaults(g))
+    noa.names <- names(graph::nodeDataDefaults(g))
+    eda.names <- names(graph::edgeDataDefaults(g))
     nodeCount <- length(nodes)
     edgeCount <- length(edgeNames)
 
@@ -205,15 +205,15 @@ mapAttributes <- function(attr.names, all.attr, i)
        node <- nodes[n]
        vec[i] <- '{"data": '; i <- i + 1
        nodeList <- list(id = node)
-       this.nodes.data <- nodeData(g, node)[[1]]
+       this.nodes.data <- graph::nodeData(g, node)[[1]]
        if(length(this.nodes.data) > 0)
           nodeList <- c(nodeList, this.nodes.data)
        nodeList.json <- toJSON(nodeList, auto_unbox=TRUE)
        vec[i] <- nodeList.json; i <- i + 1
-       if(all(c("xPos", "yPos") %in% names(nodeDataDefaults(g)))){
+       if(all(c("xPos", "yPos") %in% names(graph::nodeDataDefaults(g)))){
           position.markup <- sprintf(', "position": {"x": %f, "y": %f}',
-                                     nodeData(g, node, "xPos")[[1]],
-                                     nodeData(g, node, "yPos")[[1]])
+                                     graph::nodeData(g, node, "xPos")[[1]],
+                                     graph::nodeData(g, node, "yPos")[[1]])
           vec[i] <- position.markup
           i <- i + 1
           }

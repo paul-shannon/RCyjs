@@ -3,8 +3,8 @@
 \docType{methods}
 \name{setGlobalNodeBorderWidth,RCyjs-method}
 \alias{setGlobalNodeBorderWidth,RCyjs-method}
-\alias{setGlobalNodeBoderWidth}
-\title{setGlobalNodeBoderWidth}
+\alias{setGlobalNodeBorderWidth}
+\title{setGlobalNodeBorderWidth}
 \usage{
 \S4method{setGlobalNodeBorderWidth}{RCyjs}(obj, newValue)
 }
@@ -17,7 +17,7 @@
 no value returned
 }
 \description{
-\code{setGlobalNodeBoderWidth} in pixels
+\code{setGlobalNodeBorderWidth} in pixels
 }
 \examples{
 if(interactive()){

@@ -9,11 +9,11 @@
 \S4method{setNodeLabelAlignment}{RCyjs}(obj, horizontal, vertical)
 }
 \arguments{
-\item{p1}{obj an RCyjs instance}
+\item{obj}{an RCyjs instance}
 
-\item{p2}{horizontal character string}
+\item{horizontal}{character string}
 
-\item{p3}{vertical character string}
+\item{vertical}{character string}
 }
 \value{
 explain what the method returns
@@ -25,8 +25,4 @@ explain what the method returns
 multi-line description goes here with
 continuations on subsequent lines
 if you like
-}
-\examples{
-  x <- 3 + 2
-
 }

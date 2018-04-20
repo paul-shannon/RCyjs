@@ -11,7 +11,7 @@
 \arguments{
 \item{obj}{an RCyjs instance}
 
-\item{newValue}{}
+\item{newValue}{a character string, any valid CSS color name}
 }
 \value{
 no value returned

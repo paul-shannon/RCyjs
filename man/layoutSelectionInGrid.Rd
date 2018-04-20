@@ -11,26 +11,29 @@
 \arguments{
 \item{obj}{an RCyjs instance}
 
-\item{x}{numeric}
+\item{x}{numeric  this will be the top left x coordinate of the grid}
 
-\item{y}{numeric}
+\item{y}{numeric  the top right}
 
-\item{w}{numeric}
+\item{w}{numeric  width of the grid}
 
-\item{h}{numeric}
+\item{h}{numeric  height of the grid}
 }
 \value{
-explain what the method returns
+no return value
 }
 \description{
-\code{layoutSelectionInGrid} put somewhat more detailed description here
-}
-\details{
-multi-line description goes here with
-continuations on subsequent lines
-if you like
+\code{layoutSelectionInGrid} arrange selected nodes in this region
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(title="rcyjs demo", graph=g)
+   layout(rcy, "cose")
+   fit(rcy, 100)
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"));
+   selectNodes(rcy, nodes(g))
+   layoutSelectionInGrid(rcy, -1000, 10, 100, 400)
+   }
 
 }

@@ -9,6 +9,8 @@
 \S4method{loadStyleFile}{RCyjs}(obj, filename)
 }
 \arguments{
+\item{obj}{an RCyjs instance}
+
 \item{filename}{contains json in the proper cytoscape.js format}
 }
 \value{
@@ -17,16 +19,17 @@ nothing
 \description{
 \code{loadStyleFile} load a named JSON cytoscape.js style file into the browser
 }
-\details{
-Though we provide access to individual styling rules (see below) we often find
-it convenient to express all aspects of a visual style in a single JSON file
-See \link{http://js.cytoscape.org/#style}.
-}
 \examples{
-  if(interactive()){
+if(interactive()){
   rcy <- demo()
   filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
   loadStyleFile(rcy, filename)
   }
 
+}
+\references{
+\url{https://js.cytoscape.org/#style}
+
+Though we provide access to individual styling rules (see below) we often find
+it convenient to express all aspects of a visual style in a single JSON file
 }

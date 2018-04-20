@@ -15,14 +15,16 @@
 explain what the method returns
 }
 \description{
-\code{redraw} put somewhat more detailed description here
-}
-\details{
-multi-line description goes here with
-continuations on subsequent lines
-if you like
+\code{redraw} re-render the graph, using the latest style rules and assignements
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(title="rcyjs demo", graph=g)
+   layout(rcy, "cose")
+   fit(rcy, 100)
+   setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(0, 0, 0))
+   redraw(rcy)
+   }
 
 }

@@ -541,24 +541,22 @@ function setEdgeWidthRule(msg)
    var mode = msg.payload.mode;
 
    if(mode === "interpolate")
-      setEdgeWidthInterpolatingRule(msg)
+       setEdgeWidthInterpolatingRule(self, msg)
    else if (mode == "lookup")
-      setEdgeWidthLookupRule(msg)
+       setEdgeWidthLookupRule(self, msg)
    else
       self.hub.send({cmd: msg.callback, status: "error", callback: "", payload: "unknown mode: " + mode});
 
 } // setEdgeWidthRule
 //----------------------------------------------------------------------------------------------------
-function setEdgeWidthInterpolatingRule(msg)
+function setEdgeWidthInterpolatingRule(self, msg)
 {
-   var self = this;
    self.hub.send({cmd: msg.callback, status: "not yet implemented", callback: "", payload: ""});
 
 } // setEdgeWidthInterpolatingRule
 //----------------------------------------------------------------------------------------------------
-function setEdgeWidthLookupRule(msg)
+function setEdgeWidthLookupRule(self, msg)
 {
-   var self = this;
    var controllingAttribute = msg.payload.attribute;
    console.log("--- setEdgeWidthLookupRule: " + controllingAttribute);
    var states = msg.payload.controlPoints;
@@ -966,7 +964,7 @@ function hideEdges(msg)
    var self = this;
    var edgeType = msg.payload;
       // emulate this, constructed on the fly:  self.cy.edges('[edgeType="chromosome"]').hide()
-   filterString = '[edgeType="' + edgeType + '"]';
+   var filterString = '[edgeType="' + edgeType + '"]';
    console.log("filterString: " + filterString);
    self.cy.edges(filterString).hide();
 
@@ -979,7 +977,7 @@ function showEdges(msg)
    var self = this;
    var edgeType = msg.payload;
       // emulate this, constructed on the fly:  self.cy.edges('[edgeType="chromosome"]').show()
-   filterString = '[edgeType="' + edgeType + '"]';
+   var filterString = '[edgeType="' + edgeType + '"]';
    console.log("filterString: " + filterString);
    self.cy.edges(filterString).show();
 
@@ -990,7 +988,7 @@ function showEdges(msg)
 function showAll(msg)
 {
    var self = this;
-   var which = msg.payload.which
+   var which = msg.payload
 
    if(which == "both" | which == "edges"){
        self.cy.edges().show()

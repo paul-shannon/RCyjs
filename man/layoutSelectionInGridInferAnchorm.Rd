@@ -11,22 +11,29 @@
 \arguments{
 \item{obj}{an RCyjs instance}
 
-\item{x}{numeric}
+\item{w}{numeric, the width of the grid box}
 
-\item{y}{numeric}
+\item{h}{numeric, the height of the grid box}
 }
 \value{
 explain what the method returns
 }
 \description{
-\code{layoutSelectionInGridInferAnchor} put somewhat more detailed description here
+\code{layoutSelectionInGridInferAnchor} the top-most, left-most of the selected nodes is the anchor
 }
 \details{
-multi-line description goes here with
-continuations on subsequent lines
-if you like
+anchor (the top left) of the grid is the location of the topmost/leftmost node, then arrange
+all the selected nodes in a box anchored here.
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(title="rcyjs demo", graph=g)
+   layout(rcy, "cose")
+   fit(rcy, 100)
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"));
+   selectNodes(rcy, nodes(g))
+   layoutSelectionInGrid(rcy, -1000, 10, 100, 400)
+   }
 
 }

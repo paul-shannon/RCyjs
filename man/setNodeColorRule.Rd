@@ -18,7 +18,7 @@
 
 \item{colors}{the corresponding node color, one specified for each of the control.points}
 
-\item{mode}{}
+\item{mode}{a character string, either "interpolate" or "lookup"}
 }
 \value{
 no return value
@@ -32,6 +32,13 @@ in-between colors are calculated for in-between values.
 for lookup mode, in which the node attribute is a discrete string variable, simple color lookup is performed.
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(title="rcyjs demo", graph=g)
+   layout(rcy, "cose")
+   fit(rcy, 100)
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
+   redraw(rcy)
+   }
 
 }

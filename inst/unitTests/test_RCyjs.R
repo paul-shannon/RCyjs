@@ -45,12 +45,13 @@ runTests = function()
    test_setNodeLabelRule()
    test_setNodeLabelAlignment()
 
+   test_hideShowEdges()
    test_compoundNodes()
 
    #--------------------------------------------------------------------------------
    # re-enable this at end.  it writes to a new browser tab/window, hiding the above.
    #--------------------------------------------------------------------------------
-      # test_constructorWithGraphSupplied()
+    test_constructorWithGraphSupplied()
 
 } # run.tests
 #----------------------------------------------------------------------------------------------------
@@ -246,7 +247,7 @@ test_setGlobalStyleElements <- function()
    loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
 
    sizes <- c(0, 10, 20, 30, 40, 50, 30)
-   colors <- c("lightred", "yellow", "lightblue", "lightgreen", "cyan", "gray", "lemonchiffon")
+   colors <- c("pink", "yellow", "lightblue", "lightgreen", "cyan", "gray", "lemonchiffon")
 
    for(size in sizes){
       setGlobalNodeWidth(rcy, size); redraw(rcy);Sys.sleep(0.5)
@@ -549,12 +550,10 @@ test_nodeSelection <- function()
    Sys.sleep(0.5)
    checkEquals(sort(getNodes(rcy, "hidden")$id), sort(target.nodes))
    checkEquals(length(getNodes(rcy, "visible")$id), count - 3)
-   showAll(rcy)
-   Sys.sleep(0.5)
-   checkEquals(length(getNodes(rcy, "visible")$id), count)
      #-----------------------------------------------------
      # now invert selection twice, getting count each time
      #-----------------------------------------------------
+   showAll(rcy) # , which="nodes")
    invertNodeSelection(rcy)
    Sys.sleep(0.5)
    checkEquals(length(getSelectedNodes(rcy)$id), 17)
@@ -580,6 +579,7 @@ test_nodeSelection <- function()
    sfn(rcy)
    checkEquals(nrow(getSelectedNodes(rcy)), 2)
    selectFirstNeighborsOfSelectedNodes(rcy)
+   checkEquals(nrow(getSelectedNodes(rcy)), 3)
 
 } # test_nodeSelection
 #----------------------------------------------------------------------------------------------------
@@ -1023,6 +1023,32 @@ test_setEdgeAttributes <- function()
 
 } # test_setEdgeAttributes
 #----------------------------------------------------------------------------------------------------
+test_hideShowEdges <- function()
+{
+   printf("--- test_hideShowEdges")
+   if(!interactive())
+      return(TRUE)
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+   target.edge.type <- "phosphorylates"
+   checkTrue(target.edge.type %in% eda(g, "edgeType"))
+   hideEdges(rcy, target.edge.type)
+   Sys.sleep(1)
+   showEdges(rcy, target.edge.type)
+   Sys.sleep(1)
+   hideEdges(rcy, target.edge.type)
+   Sys.sleep(1)
+   showAll(rcy, which="edges")
+
+   hideAllEdges(rcy)
+   Sys.sleep(1)
+   showAll(rcy, which="edges")
+
+} # test_hideShowEdges
+#----------------------------------------------------------------------------------------------------
 test_compoundNodes <- function()
 {
    printf("--- test_compoundNodes")
@@ -1061,7 +1087,7 @@ test_queryAttributes <- function()
 
 } # test_queryAttributes
 #----------------------------------------------------------------------------------------------------
-test_multiGraphSeparatelyVisibleEdges <- function()
+deferred_test_multiGraphSeparatelyVisibleEdges <- function()
 {
    if(!interactive())
        return(TRUE);
@@ -1076,9 +1102,9 @@ test_multiGraphSeparatelyVisibleEdges <- function()
    fit(rcy, 200)
    loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
 
-} # test_multiGraphSeparatelyVisibleEdges
+} # deferred_test_multiGraphSeparatelyVisibleEdges
 #----------------------------------------------------------------------------------------------------
-test_httpAddCompoundEdgeToExistingGraph <- function()
+deferred_test_httpAddCompoundEdgeToExistingGraph <- function()
 {
    if(!interactive())
        return(TRUE);
@@ -1093,9 +1119,9 @@ test_httpAddCompoundEdgeToExistingGraph <- function()
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
 
-} # test_httpAddCompoundEdgeToExistingGraph
+} # deferred_test_httpAddCompoundEdgeToExistingGraph
 #----------------------------------------------------------------------------------------------------
-test_createStaticView <- function()
+skiptest_createStaticView <- function()
 {
   printf("--- test_createStaticView")
   rcy <- rcy.demo()
@@ -1109,8 +1135,7 @@ test_createStaticView <- function()
   writeLines(text=s.edited, "test_html")
   browseURL("test_html")
 
-} # test_createStaticView
+} # skiptest_createStaticView
 #----------------------------------------------------------------------------------------------------
-
 if(!interactive())
     runTests()

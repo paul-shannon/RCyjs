@@ -24,6 +24,14 @@ cytoscape.js offers two kinds of edge rendering - a tradeoff in richess and spee
 edge target decorations (arrows, tee, etc) are only rendered with the "bezier" style
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(title="rcyjs demo", graph=g)
+   layout(rcy, "cose")
+   fit(rcy, 100)
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+   setEdgeStyle(rcy, "bezier")
+   redraw(rcy)
+   }
 
 }

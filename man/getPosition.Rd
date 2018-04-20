@@ -3,7 +3,7 @@
 \docType{methods}
 \name{getPosition,RCyjs-method}
 \alias{getPosition,RCyjs-method}
-\alias{}
+\alias{getPosition}
 \title{getPosition}
 \usage{
 \S4method{getPosition}{RCyjs}(obj, nodeIDs = NA)
@@ -28,7 +28,5 @@ if(interactive()){
   tbl.posA <- getPosition(rcy, "A")
   }
 
-}
-\seealso{
-\code{\link{setPosition}}
+
 }

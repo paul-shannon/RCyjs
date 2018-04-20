@@ -4,27 +4,25 @@
 \name{fitSelection,RCyjs-method}
 \alias{fitSelection,RCyjs-method}
 \alias{fitSelection}
-\title{#' fitSelection}
+\title{fitSelection}
 \usage{
 \S4method{fitSelection}{RCyjs}(obj, padding = 30)
 }
 \arguments{
 \item{obj}{an RCyjs instance}
 
-\item{padding}{numeric, pixles  some text}
+\item{padding}{numeric, in pixels}
 }
 \value{
-explain what the method returns
+no return value
 }
 \description{
-\code{fitSelection} put somewhat more detailed description here
-}
-\details{
-multi-line description goes here with
-continuations on subsequent lines
-if you like
+\code{fitSelection} zoom in to include only currently selected nodes
 }
 \examples{
-  x <- 3 + 2
-
+if(interactive()){
+   rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+   selectNodes(rcy, "A")
+   fitSelection(rcy, padding=100)
+   }
 }

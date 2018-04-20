@@ -15,6 +15,8 @@ RCyjs(portRange = 16000:16100, title = "RCyjs", graph = graphNEL(),
 
 \item{title}{Used for the web browser window, "RCyjs" by default}
 
+\item{graph}{a Biocondcutor graphNEL object}
+
 \item{quiet}{A logical variable controlling verbosity during execution}
 }
 \value{

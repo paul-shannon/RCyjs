@@ -3,7 +3,7 @@
 \docType{methods}
 \name{setNodeFontSize,RCyjs-method}
 \alias{setNodeFontSize,RCyjs-method}
-\alias{setNodeFont}
+\alias{setNodeFontSize}
 \title{setNodeFontSize}
 \usage{
 \S4method{setNodeFontSize}{RCyjs}(obj, nodeIDs, newValues)
@@ -13,7 +13,7 @@
 
 \item{nodeIDs}{a character string (one or more)}
 
-\item{newValue}{a numeric, in pixels (one, or as many as there are nodeIDs)}
+\item{newValues}{a numeric, in pixels (one, or as many as there are nodeIDs)}
 }
 \value{
 no value returned

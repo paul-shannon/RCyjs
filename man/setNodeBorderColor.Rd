@@ -13,7 +13,7 @@
 
 \item{nodeIDs}{a character string (one or more)}
 
-\item{newValue}{a legal CSS color name}
+\item{newValues}{legal CSS color names (one or more)}
 }
 \value{
 no value returned

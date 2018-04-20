@@ -23,6 +23,12 @@ continuations on subsequent lines
 if you like
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   g <- simpleDemoGraph()
+   rcy <- RCyjs(title="rcyjs demo", graph=g)
+   target <- nodes(g)[1]
+   selectNodes(rcy, target)
+   deleteSelectedNodes(rcy)
+   }
 
 }

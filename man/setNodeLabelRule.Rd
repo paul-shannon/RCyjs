@@ -3,15 +3,15 @@
 \docType{methods}
 \name{setNodeLabelRule,RCyjs-method}
 \alias{setNodeLabelRule,RCyjs-method}
-\alias{setNodeLableRule}
+\alias{setNodeLabelRule}
 \title{setNodeLabelRule}
 \usage{
 \S4method{setNodeLabelRule}{RCyjs}(obj, attribute)
 }
 \arguments{
-\item{p1}{obj an RCyjs instance}
+\item{obj}{an RCyjs instance}
 
-\item{p2}{attribute a character string, the node attribute to display as label}
+\item{attribute}{a character string, the node attribute to display as label}
 }
 \value{
 explain what the method returns
@@ -25,6 +25,10 @@ continuations on subsequent lines
 if you like
 }
 \examples{
-  x <- 3 + 2
+if(interactive()){
+  g <- createTestGraph(nodeCount=20, edgeCount=20)
+  rcy <- RCyjs(title="layouts", graph=g)
+  setNodeLabelRule(rcy, "label");
+  }
 
 }

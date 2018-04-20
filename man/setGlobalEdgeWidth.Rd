@@ -11,7 +11,7 @@
 \arguments{
 \item{obj}{an RCyjs instance}
 
-\item{newValue}{}
+\item{newValue}{a numeric}
 }
 \value{
 no value returned
@@ -24,7 +24,7 @@ if(interactive()){
   g <- simpleDemoGraph()
   rcy <- RCyjs(title="setGlobalEdgeWidth", graph=g)
   layout(rcy, "cose")
-  setGlobalEdgeWidth(rcy, "1")
+  setGlobalEdgeWidth(rcy, 1)
   }
 
 }

@@ -18,6 +18,11 @@ no return value
 \code{hideAllEdges}
 }
 \examples{
-  x <- 3 + 2
-
+if(interactive()){
+  g <- simpleDemoGraph()
+  rcy <- RCyjs(title="rcyjs demo", graph=g)
+  layout(rcy, "cose")
+  hideAllEdges()
+  showAll(rcy, "edges")
+  }
 }

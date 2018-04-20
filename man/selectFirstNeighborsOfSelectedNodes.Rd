@@ -14,7 +14,16 @@
 \value{
 no return value
 }
+\description{
+\code{selectFirstNeighborsOfSelectedNodes}
+}
 \examples{
-  x <- 3 + 2
+if(interactive()){
+   rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+   selectNodes(rcy, "A")
+   getSelectedNodes(rcy)  # just one
+   selectFirstNeighborsOfSelectedNodes()
+   getSelectedNodes(rcy)  # now three
+   }
 
 }

@@ -1,16 +1,18 @@
 library (RCyjs)
 library (RUnit)
 #----------------------------------------------------------------------------------------------------
-if(!exists("rcy")){
-   title <- "rcy test"
-   rcy <- RCyjs(title=title)
-   checkTrue(ready(rcy))
-   checkEquals(getBrowserWindowTitle(rcy), title)
-   checkEquals(length(getNodes(rcy)), 0);
-   }
+if(interactive()){
+  if(!exists("rcy")){
+     title <- "rcy test"
+     rcy <- RCyjs(title=title)
+     checkTrue(ready(rcy))
+     checkEquals(getBrowserWindowTitle(rcy), title)
+     checkEquals(length(getNodes(rcy)), 0);
+     } # exists
+  } # interactive
 
 #----------------------------------------------------------------------------------------------------
-runTests = function()
+runTests <- function()
 {
    test_setGraph();
    test_deleteSetAddGraph()
@@ -853,10 +855,11 @@ test_zoom <- function()
 #----------------------------------------------------------------------------------------------------
 test_saveRestoreLayout <- function()
 {
+   printf("--- test_saveRestoreLayout");
+
    if(!interactive())
        return(TRUE);
 
-   printf("--- test_saveRestoreLayout");
 
    setBrowserWindowTitle(rcy, "restoreLayout");
    g <- simpleDemoGraph()
@@ -877,10 +880,10 @@ test_saveRestoreLayout <- function()
 #----------------------------------------------------------------------------------------------------
 test_savePNG <- function()
 {
+   printf("--- test_savePNG")
+
    if(!interactive())
        return(TRUE);
-
-   printf("--- test_savePNG")
 
    setBrowserWindowTitle(rcy, "savePNG")
    g <- createTestGraph(100, 100)
@@ -899,10 +902,10 @@ test_savePNG <- function()
 #----------------------------------------------------------------------------------------------------
 test_saveJPG <- function()
 {
+   printf("--- test_saveJPG")
+
    if(!interactive())
        return(TRUE);
-
-   printf("--- test_saveJPG")
 
    setBrowserWindowTitle(rcy, "saveJPG")
    g <- createTestGraph(100, 100)
@@ -932,10 +935,10 @@ test_saveJPG <- function()
 #----------------------------------------------------------------------------------------------------
 test_setNodeAttributes <- function()
 {
+   printf("--- test_setNodeAttributes")
+
    if(!interactive())
       return(TRUE)
-
-   printf("--- test_setNodeAttributes")
 
    setBrowserWindowTitle(rcy, "setNodeAttributes")
    g <- simpleDemoGraph()
@@ -963,10 +966,11 @@ test_setNodeAttributes <- function()
 #----------------------------------------------------------------------------------------------------
 test_setEdgeAttributes <- function()
 {
+   printf("--- test_setEdgeAttributes")
+
    if(!interactive())
       return(TRUE)
 
-   printf("--- test_setEdgeAttributes")
    setBrowserWindowTitle(rcy, "setEdgeAttributes")
    g <- simpleDemoGraph()
    setGraph(rcy, g)
@@ -1026,6 +1030,7 @@ test_setEdgeAttributes <- function()
 test_hideShowEdges <- function()
 {
    printf("--- test_hideShowEdges")
+
    if(!interactive())
       return(TRUE)
 
@@ -1052,6 +1057,9 @@ test_hideShowEdges <- function()
 test_compoundNodes <- function()
 {
    printf("--- test_compoundNodes")
+
+   if(!interactive())
+      return(TRUE)
 
    setBrowserWindowTitle(rcy, "compoundNodes")
    set.seed(17)
@@ -1124,6 +1132,10 @@ deferred_test_httpAddCompoundEdgeToExistingGraph <- function()
 skiptest_createStaticView <- function()
 {
   printf("--- test_createStaticView")
+
+   if(!interactive())
+      return(TRUE)
+
   rcy <- rcy.demo()
   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "demoStyle.js"))
   fit(rcy, 100)

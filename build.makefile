@@ -1,4 +1,4 @@
-all:  docs vig build  check biocCheck
+all:  docs vig build install check biocCheck
 
 docs:
 	R -e "devtools::document()"

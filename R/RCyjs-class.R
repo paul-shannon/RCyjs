@@ -487,6 +487,8 @@ setMethod('getEdgeCount', 'RCyjs',
 #' @param obj an RCyjs object
 #' @param which a character string:  "both" (the default), "nodes" or "edges"
 #'
+#' @return no return value
+#'
 #' @export
 #'
 #' @examples

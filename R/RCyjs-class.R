@@ -994,7 +994,7 @@ setMethod('redraw', 'RCyjs',
 setMethod("setDefaultNodeSize",  'RCyjs',
 
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeSize", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeSize", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1028,7 +1028,7 @@ setMethod("setDefaultNodeSize",  'RCyjs',
 setMethod("setDefaultNodeWidth",   'RCyjs',
 
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeWidth", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeWidth", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1450,7 +1450,7 @@ setMethod("setNodeBorderColor", "RCyjs",
 setMethod("setDefaultNodeHeight",   'RCyjs',
 
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeHeight", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeHeight", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1487,7 +1487,7 @@ setMethod("setDefaultNodeHeight",   'RCyjs',
 setMethod("setDefaultNodeColor",   'RCyjs',
 
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeColor", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1528,7 +1528,7 @@ setMethod("setDefaultNodeShape",   'RCyjs',
                "rhomboid", "diamond", "pentagon", "hexagon",
                "concavehexagon", "heptagon", "octagon", "star", "tag", "vee")){
 
-     send(obj, list(cmd="setDefaultNodeShape", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeShape", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1563,7 +1563,7 @@ setMethod("setDefaultNodeShape",   'RCyjs',
 setMethod("setDefaultNodeFontColor",   'RCyjs',
 
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeFontColor", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeFontColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1601,7 +1601,7 @@ setMethod("setDefaultNodeFontColor",   'RCyjs',
 setMethod("setDefaultNodeFontSize",  'RCyjs',
 
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeFontSize", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeFontSize", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1634,7 +1634,7 @@ setMethod("setDefaultNodeFontSize",  'RCyjs',
 setMethod("setDefaultNodeBorderWidth",  'RCyjs',
 
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeBorderWidth", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeBorderWidth", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1669,7 +1669,7 @@ setMethod("setDefaultNodeBorderWidth",  'RCyjs',
 setMethod("setDefaultNodeBorderColor",  'RCyjs',
 
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeBorderColor", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalNodeBorderColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1709,7 +1709,7 @@ setMethod("setDefaultNodeBorderColor",  'RCyjs',
 setMethod("setDefaultEdgeTargetArrowShape", "RCyjs",
   function(obj, newValue=c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
                      "vee", "tee", "square", "circle", "diamond", "none")) {
-     send(obj, list(cmd="setDefaultEdgeTargetArrowShape", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalEdgeTargetArrowShape", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1743,7 +1743,7 @@ setMethod("setDefaultEdgeTargetArrowShape", "RCyjs",
 
 setMethod("setDefaultEdgeColor", "RCyjs",
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeColor", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalEdgeColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1776,7 +1776,7 @@ setMethod("setDefaultEdgeColor", "RCyjs",
 
 setMethod("setDefaultEdgeTargetArrowColor", "RCyjs",
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeTargetArrowColor", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalEdgeTargetArrowColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1809,7 +1809,7 @@ setMethod("setDefaultEdgeTargetArrowColor", "RCyjs",
 
 setMethod("setDefaultEdgeWidth", "RCyjs",
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeWidth", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalEdgeWidth", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1842,7 +1842,7 @@ setMethod("setDefaultEdgeWidth", "RCyjs",
 
 setMethod("setDefaultEdgeLineColor", "RCyjs",
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeLineColor", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalEdgeLineColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1880,7 +1880,7 @@ setMethod("setDefaultEdgeLineColor", "RCyjs",
 
 setMethod("setDefaultEdgeLineStyle", "RCyjs",
   function (obj, newValue=c("solid", "dotted", "dashed")) {
-     send(obj, list(cmd="setDefaultEdgeLineStyle", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalEdgeLineStyle", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1914,7 +1914,7 @@ setMethod("setDefaultEdgeLineStyle", "RCyjs",
 
 setMethod("setDefaultEdgeSourceArrowColor", "RCyjs",
   function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeSourceArrowColor", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalEdgeSourceArrowColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
@@ -1953,7 +1953,7 @@ setMethod("setDefaultEdgeSourceArrowColor", "RCyjs",
 setMethod("setDefaultEdgeSourceArrowShape", "RCyjs",
   function(obj, newValue=c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
                      "vee", "tee", "square", "circle", "diamond", "none")) {
-     send(obj, list(cmd="setDefaultEdgeSourceArrowShape", callback="handleResponse", status="request",
+     send(obj, list(cmd="setGlobalEdgeSourceArrowShape", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)

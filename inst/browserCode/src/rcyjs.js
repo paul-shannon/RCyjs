@@ -131,33 +131,44 @@ function addMessageHandlers()
 
    self.hub.addMessageHandler("setNodeImage",         setNodeImage.bind(self));
 
-   self.hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeColor",  setGlobalNodeColor.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeShape",  setGlobalNodeShape.bind(self));
 
-   self.hub.addMessageHandler("setDefaultNodeSize",   setDefaultNodeSize.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeWidth",  setDefaultNodeWidth.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeHeight", setDefaultNodeHeight.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeColor",  setDefaultNodeColor.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeShape",  setDefaultNodeShape.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeFontColor", setDefaultNodeFontColor.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeFontSize", setDefaultNodeFontSize.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeBorderWidth", setDefaultNodeBorderWidth.bind(self));
-   self.hub.addMessageHandler("setDefaultNodeBorderColor", setDefaultNodeBorderColor.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeSize",   setGlobalNodeSize.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeWidth",  setGlobalNodeWidth.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeHeight", setGlobalNodeHeight.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeColor",  setGlobalNodeColor.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeShape",  setGlobalNodeShape.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeFontColor", setGlobalNodeFontColor.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeFontSize", setGlobalNodeFontSize.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeBorderWidth", setGlobalNodeBorderWidth.bind(self));
+   self.hub.addMessageHandler("setGlobalNodeBorderColor", setGlobalNodeBorderColor.bind(self));
 
-   self.hub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeTargetArrowShape", setDefaultEdgeTargetArrowShape.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeColor", setDefaultEdgeColor.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeTargetArrowColor", setDefaultEdgeTargetArrowColor.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeFontSize", setDefaultEdgeFontSize.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeWidth", setDefaultEdgeWidth.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeLineColor", setDefaultEdgeLineColor.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeFont", setDefaultEdgeFont.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeFontWeight", setDefaultEdgeFontWeight.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeTextOpacity", setDefaultEdgeTextOpacity.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeLineStyle", setDefaultEdgeLineStyle.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeOpacity", setDefaultEdgeOpacity.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeSourceArrowColor", setDefaultEdgeSourceArrowColor.bind(self));
-   self.hub.addMessageHandler("setDefaultEdgeSourceArrowShape", setDefaultEdgeSourceArrowShape.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeFontSize", setGlobalEdgeFontSize.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeTargetArrowShape", setGlobalEdgeTargetArrowShape.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeColor", setGlobalEdgeColor.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeTargetArrowColor", setGlobalEdgeTargetArrowColor.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeFontSize", setGlobalEdgeFontSize.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeWidth", setGlobalEdgeWidth.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeLineColor", setGlobalEdgeLineColor.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeFont", setGlobalEdgeFont.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeFontWeight", setGlobalEdgeFontWeight.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeTextOpacity", setGlobalEdgeTextOpacity.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeLineStyle", setGlobalEdgeLineStyle.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeOpacity", setGlobalEdgeOpacity.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeSourceArrowColor", setGlobalEdgeSourceArrowColor.bind(self));
+   self.hub.addMessageHandler("setGlobalEdgeSourceArrowShape", setGlobalEdgeSourceArrowShape.bind(self));
+
+   self.hub.addMessageHandler("setNodeWidth",   setNodeWidth.bind(self));
+   self.hub.addMessageHandler("setNodeHeight",  setNodeHeight.bind(self));
+   self.hub.addMessageHandler("setNodeSize",    setNodeSize.bind(self));
+   self.hub.addMessageHandler("setNodeColor",   setNodeColor.bind(self));
+
+   self.hub.addMessageHandler("setNodeShape",   setNodeShape.bind(self));
+   self.hub.addMessageHandler("setNodeFontColor",   setNodeFontColor.bind(self));
+   self.hub.addMessageHandler("setNodeFontSize",   setNodeFontSize.bind(self));
+   self.hub.addMessageHandler("setNodeBorderWidth",   setNodeBorderWidth.bind(self));
+   self.hub.addMessageHandler("setNodeBorderColor",   setNodeBorderColor.bind(self));
 
 } // addMessageHandlers
 //----------------------------------------------------------------------------------------------------
@@ -227,7 +238,7 @@ function setBackgroundColor(msg)
 {
    var self = this;
    var newValue = msg.payload
-   cyDiv.css({"background-color": newValue});
+   $("#cyDiv").css({"background-color": newValue});
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setZoom
@@ -742,7 +753,7 @@ function layoutSelectionInGrid(msg)
 
   var box = {x1: x, y1: y, w: w, h: h }
 
-  self.cy.filter("node:selected").layout({ name: 'grid', boundingBox: box });
+  self.cy.filter("node:selected").layout({name: 'grid', boundingBox: box}).run();
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
@@ -765,7 +776,7 @@ function layoutSelectionInGridInferAnchor(msg)
 
   var box = {x1: x, y1: y, w: w, h: h }
 
-  self.cy.filter("node:selected").layout({ name: 'grid', boundingBox: box });
+  self.cy.filter("node:selected").layout({name: 'grid', boundingBox: box}).run();
   self.cy.viewport({zoom: currentZoom, pan: currentPan});
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -829,6 +840,8 @@ function getPosition(msg)
      } // for i
 
    var nodesToSelect = self.cy.nodes(filterStrings.join());
+
+   var layout;
 
    if(allNodes)
       layout = JSON.stringify(self.cy.nodes().map(function(n){return{id: n.id(),
@@ -1009,7 +1022,7 @@ function setNodeImage(msg)
 
 } // setNodeImage
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeSize(msg)
+function setGlobalNodeSize(msg)
 {
    var self = this;
    var newSize = msg.payload;
@@ -1018,9 +1031,9 @@ function setDefaultNodeSize(msg)
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeSize
+} // setGlobalNodeSize
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeWidth(msg)
+function setGlobalNodeWidth(msg)
 {
    var self = this;
   var newSize = msg.payload;
@@ -1028,9 +1041,216 @@ function setDefaultNodeWidth(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeWidth
+} // setGlobalNodeWidth
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeHeight(msg)
+function setNodeWidth(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newSizes = msg.payload.values;
+   if(typeof(newSizes) == "number"){
+      newSizes = [newSizes];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var size = newSizes[i];
+      var selectionString = "[id='" + nodeID + "']";
+      self.cy.style().selector(selectionString).css({"width": size});
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeWidth
+//----------------------------------------------------------------------------------------------------
+function setNodeSize(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newSizes = msg.payload.values;
+   if(typeof(newSizes) == "number"){
+      newSizes = [newSizes];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var size = newSizes[i];
+      var selectionString = "[id='" + nodeID + "']";
+      self.cy.style().selector(selectionString).css({"width": size, "height": size});
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeSize
+//----------------------------------------------------------------------------------------------------
+function setNodeHeight(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newSizes = msg.payload.values;
+   if(typeof(newSizes) == "number"){
+      newSizes = [newSizes];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var size = newSizes[i];
+      var selectionString = "[id='" + nodeID + "']";
+      self.cy.style().selector(selectionString).css({"height": size});
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeHeight
+//----------------------------------------------------------------------------------------------------
+function setNodeColor(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newColors = msg.payload.values;
+   if(typeof(newColors) == "string"){
+      newColors = [newColors];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var color = newColors[i];
+      var selectionString = "[id='" + nodeID + "']";
+      self.cy.style().selector(selectionString).css({"background-color": color});
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeColor
+//----------------------------------------------------------------------------------------------------
+function setNodeShape(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newShapes = msg.payload.values;
+   if(typeof(newShapes) == "string"){
+      newShapes = [newShapes];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var shape = newShapes[i];
+      var selectionString = "[id='" + nodeID + "']";
+      self.cy.style().selector(selectionString).css({"shape": shape});
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeShape
+//----------------------------------------------------------------------------------------------------
+function setNodeBorderColor(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newColors = msg.payload.values;
+   if(typeof(newColors) == "string"){
+      newColors = [newColors];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var color = newColors[i];
+      var selectionString = "[id='" + nodeID + "']";
+      self.cy.style().selector(selectionString).css({"border-color": color});
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeBorderColor
+//----------------------------------------------------------------------------------------------------
+function setNodeFontColor(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newColors = msg.payload.values;
+   if(typeof(newColors) == "string"){
+      newColors = [newColors];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var color = newColors[i];
+      var selectionString = "[id='" + nodeID + "']";
+      self.cy.style().selector(selectionString).css({"color": color});
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeFontColor
+//----------------------------------------------------------------------------------------------------
+function setNodeFontSize(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newSizes = msg.payload.values;
+   if(typeof(newSizes) == "number"){
+      newSizes = [newSizes];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var size = newSizes[i];
+      var selectionString = "[id='" + nodeID + "']";
+       self.cy.style().selector(selectionString).css({"font-size": size})
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeFontSize
+//----------------------------------------------------------------------------------------------------
+function setNodeBorderWidth(msg)
+{
+   var self = this;
+   var nodeIDs = msg.payload.nodes;
+   if(typeof(nodeIDs) == "string"){
+      nodeIDs = [nodeIDs];
+      }
+   var newSizes = msg.payload.values;
+   if(typeof(newSizes) == "number"){
+      newSizes = [newSizes];
+      }
+
+   for(var i=0; i < nodeIDs.length; i++){
+      var nodeID = nodeIDs[i];
+      var size = newSizes[i];
+      var selectionString = "[id='" + nodeID + "']";
+      self.cy.style().selector(selectionString).css({"border-width": size});
+      }
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setNodeBorderWidth
+//----------------------------------------------------------------------------------------------------
+function setGlobalNodeHeight(msg)
 {
    var self = this;
   var newSize = msg.payload;
@@ -1038,9 +1258,9 @@ function setDefaultNodeHeight(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeHeight
+} // setGlobalNodeHeight
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeColor(msg)
+function setGlobalNodeColor(msg)
 {
    var self = this;
   var newColor = msg.payload;
@@ -1048,9 +1268,9 @@ function setDefaultNodeColor(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeColor
+} // setGlobalNodeColor
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeShape(msg)
+function setGlobalNodeShape(msg)
 {
    var self = this;
   var newShape = msg.payload;
@@ -1058,9 +1278,9 @@ function setDefaultNodeShape(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeColor
+} // setGlobalNodeColor
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeFontColor(msg)
+function setGlobalNodeFontColor(msg)
 {
    var self = this;
   var color = msg.payload;
@@ -1068,9 +1288,9 @@ function setDefaultNodeFontColor(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeFontColor
+} // setGlobalNodeFontColor
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeFontSize(msg)
+function setGlobalNodeFontSize(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1078,9 +1298,9 @@ function setDefaultNodeFontSize(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeFontSize
+} // setGlobalNodeFontSize
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeBorderWidth(msg)
+function setGlobalNodeBorderWidth(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1088,9 +1308,9 @@ function setDefaultNodeBorderWidth(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeBorderWidth
+} // setGlobalNodeBorderWidth
 //----------------------------------------------------------------------------------------------------
-function setDefaultNodeBorderColor(msg)
+function setGlobalNodeBorderColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1098,9 +1318,9 @@ function setDefaultNodeBorderColor(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultNodeBorderColor
+} // setGlobalNodeBorderColor
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeFontSize(msg)
+function setGlobalEdgeFontSize(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1108,9 +1328,9 @@ function setDefaultEdgeFontSize(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdge
+} // setGlobalEdge
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeTargetArrowShape(msg)
+function setGlobalEdgeTargetArrowShape(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1118,9 +1338,9 @@ function setDefaultEdgeTargetArrowShape(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeTargetArrowShape
+} // setGlobalEdgeTargetArrowShape
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeColor(msg)
+function setGlobalEdgeColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1128,9 +1348,9 @@ function setDefaultEdgeColor(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdge
+} // setGlobalEdge
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeTargetArrowColor(msg)
+function setGlobalEdgeTargetArrowColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1138,9 +1358,9 @@ function setDefaultEdgeTargetArrowColor(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdge
+} // setGlobalEdge
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeFontSize(msg)
+function setGlobalEdgeFontSize(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1148,9 +1368,9 @@ function setDefaultEdgeFontSize(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeFontSize
+} // setGlobalEdgeFontSize
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeWidth(msg)
+function setGlobalEdgeWidth(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1158,9 +1378,9 @@ function setDefaultEdgeWidth(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeWidth
+} // setGlobalEdgeWidth
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeLineColor(msg)
+function setGlobalEdgeLineColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1168,9 +1388,9 @@ function setDefaultEdgeLineColor(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeLineColor
+} // setGlobalEdgeLineColor
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeFont(msg)
+function setGlobalEdgeFont(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1178,9 +1398,9 @@ function setDefaultEdgeFont(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeFont
+} // setGlobalEdgeFont
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeFontWeight(msg)
+function setGlobalEdgeFontWeight(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1188,9 +1408,9 @@ function setDefaultEdgeFontWeight(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeFontWeight
+} // setGlobalEdgeFontWeight
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeTextOpacity(msg)
+function setGlobalEdgeTextOpacity(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1198,9 +1418,9 @@ function setDefaultEdgeTextOpacity(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeTextOpacity
+} // setGlobalEdgeTextOpacity
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeLineStyle(msg)
+function setGlobalEdgeLineStyle(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1208,9 +1428,9 @@ function setDefaultEdgeLineStyle(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeLineStyle
+} // setGlobalEdgeLineStyle
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeOpacity(msg)
+function setGlobalEdgeOpacity(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1218,9 +1438,9 @@ function setDefaultEdgeOpacity(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeOpacity
+} // setGlobalEdgeOpacity
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeSourceArrowColor(msg)
+function setGlobalEdgeSourceArrowColor(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1228,9 +1448,9 @@ function setDefaultEdgeSourceArrowColor(msg)
 
  hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeSourceArrowColor
+} // setGlobalEdgeSourceArrowColor
 //----------------------------------------------------------------------------------------------------
-function setDefaultEdgeSourceArrowShape(msg)
+function setGlobalEdgeSourceArrowShape(msg)
 {
    var self = this;
   var newValue = msg.payload;
@@ -1238,7 +1458,7 @@ function setDefaultEdgeSourceArrowShape(msg)
 
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
-} // setDefaultEdgeSourceArrayShape
+} // setGlobalEdgeSourceArrowShape
 //----------------------------------------------------------------------------------------------------
 function selectNodes(msg)
 {
@@ -1478,27 +1698,27 @@ function getSelectedNodes(msg)
 
 } // getSelectedNodes
 //---------------------------------------------------------------------------------------------------
-function layout(strategy)
-{
-   var self = this;
-   switch(strategy) {
-      case "random":
-         var options = {name: 'random',
-                        fit: true, // whether to fit to viewport
-                        padding: 30, // fit padding
-                        boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
-                        animate: false, // whether to transition the node positions
-                        animationDuration: 500, // duration of animation in ms if enabled
-                        ready: undefined, // callback on layoutready
-                        stop: undefined // callback on layoutstop
-                        };
-         self.cy.layout(options);
-         break;
-      default:
-         console.log("unrecognized layout strategy: " + strategy);
-      } // switch
-
-} // layout
+// function layout(strategy)
+// {
+//    var self = this;
+//    switch(strategy) {
+//       case "random":
+//          var options = {name: 'random',
+//                         fit: true, // whether to fit to viewport
+//                         padding: 30, // fit padding
+//                         boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+//                         animate: false, // whether to transition the node positions
+//                         animationDuration: 500, // duration of animation in ms if enabled
+//                         ready: undefined, // callback on layoutready
+//                         stop: undefined // callback on layoutstop
+//                         };
+//          self.cy.layout(options);
+//          break;
+//       default:
+//          console.log("unrecognized layout strategy: " + strategy);
+//       } // switch
+//
+// } // layout
 //----------------------------------------------------------------------------------------------------
 function addNode(propsJSON)
 {
@@ -1798,8 +2018,7 @@ function bindFunctionsToSelf(rcy)
 
   setNodeSizeRule.bind(rcy)
   redraw.bind(rcy)
-  layout.bind(rcy)
-
+  //layout.bind(rcy)
 
 } // bindFunctionsToSelf
 //----------------------------------------------------------------------------------------------------

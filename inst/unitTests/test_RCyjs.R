@@ -16,7 +16,8 @@ runTests = function()
    test_deleteSetAddGraph()
    test_largeGraph()
 
-   test_setDefaultStyleElements()
+   test_setGlobalStyleElements()
+   test_nodeSpecificStyling()
 
    test_loadStyleFile();
    test_getJSON()
@@ -27,8 +28,8 @@ runTests = function()
 
    test_getLayoutStrategies()
    test_layouts()
-
    test_fit()
+   test_specialLayouts()
 
    test_getSetPosition()
    test_saveRestoreLayout()
@@ -103,7 +104,7 @@ test_setGraph <- function()
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
    checkEquals(tbl.nodes$id, c("A", "B", "C"))
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
 } # test_setGraph
 #----------------------------------------------------------------------------------------------------
@@ -132,7 +133,7 @@ test_setGraphEdgesInitiallyHidden <- function()
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
    checkEquals(tbl.nodes$id, c("A", "B", "C"))
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
 } # test_setGraphEdgesInitiallyHidden
 #----------------------------------------------------------------------------------------------------
@@ -174,7 +175,7 @@ test_deleteSetAddGraph <- function()
 
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 33)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
 } # test_deleteSetAddGraph
 #----------------------------------------------------------------------------------------------------
@@ -197,7 +198,7 @@ test_constructorWithGraphSupplied <- function()
    setNodeColorRule(rcy2, "count", c(0, 100), c("green", "red"), mode="interpolate")
    redraw(rcy2)
    layout(rcy2, "cola")
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    fit(rcy2, 350)
 
    title <- "graph ctor"
@@ -207,7 +208,7 @@ test_constructorWithGraphSupplied <- function()
    tbl.nodes <- getNodes(rcy2)
    checkEquals(nrow(tbl.nodes), 3)
    checkEquals(tbl.nodes$id, c("A", "B", "C"))
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
    closeWebSocket(rcy2)
 
@@ -226,16 +227,18 @@ test_largeGraph <- function()
    addGraph(rcy, g)
    layout(rcy, "grid")
    layout(rcy, "cola")
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
 } # test_largeGraph
 #----------------------------------------------------------------------------------------------------
-test_setDefaultStyleElements <- function()
+test_setGlobalStyleElements <- function()
 {
-   printf("--- test_setDefaultStyleElement")
+   printf("--- test_setGlobalStyleElement")
 
-   if(!interactive())n
+   if(!interactive())
        return(TRUE);
+
+   setBrowserWindowTitle(rcy, "setGlobalStyleElements")
 
    g <- createTestGraph(nodeCount=10, edgeCount=30)
    setGraph(rcy, g)
@@ -246,19 +249,19 @@ test_setDefaultStyleElements <- function()
    colors <- c("lightred", "yellow", "lightblue", "lightgreen", "cyan", "gray", "lemonchiffon")
 
    for(size in sizes){
-      setDefaultNodeWidth(rcy, size); redraw(rcy);Sys.sleep(1)
+      setGlobalNodeWidth(rcy, size); redraw(rcy);Sys.sleep(0.5)
       } # for size
 
    for(size in sizes){
-      setDefaultNodeHeight(rcy, size); redraw(rcy); Sys.sleep(1)
+      setGlobalNodeHeight(rcy, size); redraw(rcy); Sys.sleep(0.5)
       } # for size
 
    for(size in sizes){
-      setDefaultNodeSize(rcy, size); redraw(rcy); Sys.sleep(1)
+      setGlobalNodeSize(rcy, size); redraw(rcy); Sys.sleep(0.5)
       } # for size
 
    for(color in colors){
-      setDefaultNodeColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      setGlobalNodeColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       } # for size
 
    shapes <- c("ellipse", "triangle", "rectangle", "roundrectangle",
@@ -268,68 +271,124 @@ test_setDefaultStyleElements <- function()
                "ellipse")
 
    for(shape in shapes){
-      setDefaultNodeShape(rcy, shape); redraw(rcy);Sys.sleep(1)
+      setGlobalNodeShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
       } # for size
 
-
-
-   setDefaultNodeShape(rcy, "roundrectangle");
-   setDefaultNodeColor(rcy, "#F0F0F0")
+   setGlobalNodeShape(rcy, "roundrectangle");
+   setGlobalNodeColor(rcy, "#F0F0F0")
+   redraw(rcy)
 
    for(color in colors){
-      setDefaultNodeFontColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      setGlobalNodeFontColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       } # for size
 
+   setGlobalNodeColor(rcy, "lightblue")
+   setGlobalNodeFontColor(rcy, "darkblue")
+   redraw(rcy);
+
    for(fontSize in seq(1, 20, by=2)){
-      setDefaultNodeFontSize(rcy, fontSize); redraw(rcy); Sys.sleep(1)
+      setGlobalNodeFontSize(rcy, fontSize); redraw(rcy); Sys.sleep(0.5)
       }
 
    for(width in c(0:5, 1)){
-      setDefaultNodeBorderWidth(rcy, width); redraw(rcy);Sys.sleep(1)
+      setGlobalNodeBorderWidth(rcy, width); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setDefaultNodeBorderColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      setGlobalNodeBorderColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    arrow.shapes <- c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
                      "vee", "tee", "square", "circle", "diamond", "none")
 
    for(shape in c(arrow.shapes, "triangle")){
-      setDefaultEdgeTargetArrowShape(rcy, shape); redraw(rcy);Sys.sleep(1)
+      setGlobalEdgeTargetArrowShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setDefaultEdgeTargetArrowColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      setGlobalEdgeTargetArrowColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(shape in c(arrow.shapes, "triangle")){
-      setDefaultEdgeSourceArrowShape(rcy, shape); redraw(rcy);Sys.sleep(1)
+      setGlobalEdgeSourceArrowShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setDefaultEdgeSourceArrowColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      setGlobalEdgeSourceArrowColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setDefaultEdgeColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      setGlobalEdgeColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(width in c(0:5, 1)){
-      setDefaultEdgeWidth(rcy, width); redraw(rcy);Sys.sleep(1)
+      setGlobalEdgeWidth(rcy, width); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setDefaultEdgeLineColor(rcy, color); redraw(rcy);Sys.sleep(1)
+      setGlobalEdgeLineColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
-   line.styles <- c("solid", "dotted", "dashed")
+   line.styles <- c("solid", "dotted", "dashed", "solid")
    for(style in line.styles){
-      setDefaultEdgeLineStyle(rcy, style); redraw(rcy);Sys.sleep(1)
+      setGlobalEdgeLineStyle(rcy, style); redraw(rcy);Sys.sleep(0.5)
       }
 
+} # test_setGlobalStyleElements
+#----------------------------------------------------------------------------------------------------
+test_nodeSpecificStyling <- function()
+{
+   printf("--- test_nodeSpecificStyling")
 
-} # test_setDefaultStyleElements
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "specificNodeStyling")
+   g <- createTestGraph(nodeCount=10, edgeCount=30)
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle1.js"))
+   setGlobalNodeBorderWidth(rcy, 1); redraw(rcy)
+   setBackgroundColor(rcy, "lemonchiffon")
+
+   sizes <- c(2, 10, 20, 30, 40, 50, 30)
+   colors <- c("pink", "yellow", "lightblue", "lightgreen", "cyan", "gray", "lemonchiffon", "lightgray")
+
+   for(size in sizes){
+      setNodeWidth(rcy, "n1", size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in sizes){
+      setNodeHeight(rcy, c("n4", "n6"), size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in sizes){
+      setNodeSize(rcy, "n1", size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(color in colors){
+      setNodeColor(rcy, "n1", color); redraw(rcy); Sys.sleep(0.25)
+      setNodeColor(rcy, c("n10", "n8"), color); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(shape in c(getSupportedNodeShapes(rcy), "ellipse")){
+      setNodeShape(rcy, c("n3", "n4"), shape); redraw(rcy); Sys.sleep(0.5);
+      }
+
+   for(color in colors){
+      setNodeFontColor(rcy, "n1", color); redraw(rcy); Sys.sleep(0.25)
+      setNodeBorderColor(rcy, c("n10", "n8"), color); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in c(0:5, 1)){
+      setNodeBorderWidth(rcy, c("n1", "n2", "n3"), size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in c(0, 1, 5, 10, 15, 20, 30, 10)){
+      setNodeFontSize(rcy, c("n1", "n2", "n3"), size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+} # test_nodeSpecificStyling
 #----------------------------------------------------------------------------------------------------
 test_loadStyleFile <- function(count=3)
 {
@@ -348,9 +407,9 @@ test_loadStyleFile <- function(count=3)
 
    for(i in 1:3){
       loadStyleFile(rcy, styleFile.1)
-      Sys.sleep(1)
+      Sys.sleep(0.5)
       loadStyleFile(rcy, styleFile.2)
-      Sys.sleep(1)
+      Sys.sleep(0.5)
       } # for i
 
 } # test_loadStyleFile
@@ -451,6 +510,8 @@ test_nodeSelection <- function()
    if(!interactive())
        return(TRUE);
 
+   setBrowserWindowTitle(rcy, "nodeSelection")
+
    count <- 20
    set.seed(31)
    g <- createTestGraph(nodeCount=count, edgeCount=10)
@@ -460,7 +521,7 @@ test_nodeSelection <- function()
    loadStyleFile(rcy, styleFile.1)
 
    layout(rcy, "cola")
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    rcy.nodes <- getNodes(rcy)$id
    checkEquals(rcy.nodes, nodes(g))
    target.nodes <- paste("n", sample(1:count, 3), sep="")
@@ -468,10 +529,10 @@ test_nodeSelection <- function()
      # select a few, get them, clear, get none
      #-------------------------------------------
    selectNodes(rcy, target.nodes)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    checkEquals(target.nodes, getSelectedNodes(rcy)$id)
    clearSelection(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    checkEquals(nrow(getSelectedNodes(rcy)), 0)
      #------------------------------------------
      # select the same few, hide them, get them,
@@ -479,36 +540,36 @@ test_nodeSelection <- function()
      # conclude with showing all
      #------------------------------------------
    selectNodes(rcy, target.nodes)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    hideSelectedNodes(rcy)
    checkEquals(length(getNodes(rcy, "hidden")$id), length(target.nodes))
    checkEquals(length(getNodes(rcy, "visible")$id), count - length(target.nodes))
    checkEquals(length(getNodes(rcy, "all")$id), count)
    checkEquals(length(getNodes(rcy)$id), count)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    checkEquals(sort(getNodes(rcy, "hidden")$id), sort(target.nodes))
    checkEquals(length(getNodes(rcy, "visible")$id), count - 3)
    showAll(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    checkEquals(length(getNodes(rcy, "visible")$id), count)
      #-----------------------------------------------------
      # now invert selection twice, getting count each time
      #-----------------------------------------------------
    invertNodeSelection(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    checkEquals(length(getSelectedNodes(rcy)$id), 17)
    invertNodeSelection(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    checkEquals(length(getSelectedNodes(rcy)$id), 3)
      #-----------------------------------------------------
      # now delete those three selected nodes.  make sure
      # they are not simply hidden, but truly gone
      #-----------------------------------------------------
    deleteSelectedNodes(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    checkEquals(length(getNodes(rcy)$id), 17)
    showAll(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
    checkEquals(length(getNodes(rcy)$id), 17)
    showAll(rcy)
 
@@ -528,6 +589,8 @@ test_getLayoutStrategies <- function()
 
    if(!interactive())
        return(TRUE);
+
+   setBrowserWindowTitle(rcy, "getLayoutStrategies")
 
    actual <- getLayoutStrategies(rcy)
 
@@ -563,6 +626,43 @@ test_layouts <- function()
 
 } #  test_layouts
 #----------------------------------------------------------------------------------------------------
+test_specialLayouts <- function()
+{
+   printf("--- test_specialLayouts")
+
+   if(!interactive())
+      return(TRUE)
+
+   set.seed(17)
+   g <- createTestGraph(nodeCount=100, edgeCount=100)
+   setGraph(rcy, g)
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle1.js"))
+   layout(rcy, "cose")
+
+   noi <- c("n1", "n7", "n21", "n22", "n31", "n42", "n44", "n48", "n51", "n52", "n74",
+            "n78", "n79", "n82", "n86", "n98", "n99")
+   selectNodes(rcy, noi)
+   layoutSelectionInGrid(rcy, -1000, 10, 100, 400)
+   fit(rcy)
+   Sys.sleep(1)
+
+   layoutSelectionInGridInferAnchor(rcy, 400, 100)
+   Sys.sleep(1)
+
+   noi <- c("n54", "n57", "n83")
+   clearSelection(rcy)
+   selectNodes(rcy, noi)
+   vAlign(rcy)
+   Sys.sleep(1)
+
+   noi <- c("n3", "n8", "n13", "n34", "n61", "n91")
+   selectNodes(rcy, noi)
+   Sys.sleep(1)
+   hAlign(rcy)
+   Sys.sleep(1)
+
+} # test_specialLayouts
+#----------------------------------------------------------------------------------------------------
 # a test whose success is judge by visual inspection
 # node positions are unchanged by zoom - presumably rendered position would change
 test_fit <- function()
@@ -579,14 +679,14 @@ test_fit <- function()
 
    for(padding in c(0, 50, 100, 150, 200, 250, 0)){
       fit(rcy, padding)
-      Sys.sleep(1)
+      Sys.sleep(0.5)
       }
 
    clearSelection(rcy)
    selectNodes(rcy, "n17")
    for(padding in c(0, 50, 100, 150, 200, 250, 300, 400)){
       fitSelection(rcy, padding)
-      Sys.sleep(1)
+      Sys.sleep(0.5)
       }
 
 
@@ -678,18 +778,19 @@ test_setNodeLabelAlignment <- function()
    g <- simpleDemoGraph()
    setGraph(rcy, g)
    layout(rcy, "cola")
-
-   title <- "setNodeSizeRule"
+   title <- "setNodeLabelAlignment"
    setBrowserWindowTitle(rcy, title)
 
-   setDefaultNodeSize(rcy, 60)
-   setDefaultNodeColor(rcy, "white")
-   setDefaultNodeBorderColor(rcy, "black")
-   setDefaultNodeBorderWidth(rcy, 1)
+   setGlobalNodeSize(rcy, 60)
+   setGlobalNodeColor(rcy, "white")
+   setGlobalNodeBorderColor(rcy, "black")
+   setGlobalNodeBorderWidth(rcy, 1)
    redraw(rcy)
 
    hValues <- c("left", "center", "right")
    vValues <- c("top",  "center", "bottom")
+
+   fit(rcy, 200)
 
    for(hValue in hValues)
       for(vValue in vValues){
@@ -703,16 +804,16 @@ test_setNodeLabelAlignment <- function()
    sizes <- seq(0, 32, 2)
 
    for(size in sizes){
-      setDefaultNodeFontSize(rcy, size)
+      setGlobalNodeFontSize(rcy, size)
       redraw(rcy)
       } # for size
 
    for(size in rev(sizes)){
-      setDefaultNodeFontSize(rcy, size)
+      setGlobalNodeFontSize(rcy, size)
       redraw(rcy)
       } # for size
 
-   setDefaultNodeFontSize(rcy, 16)
+   setGlobalNodeFontSize(rcy, 16)
    redraw(rcy)
 
 } # test_setNodeLabelAlignment
@@ -727,6 +828,8 @@ test_zoom <- function()
 
    if(!interactive())
        return(TRUE);
+
+   setBrowserWindowTitle(rcy, "zoom")
 
    g <- simpleDemoGraph()
    setGraph(rcy, g)
@@ -846,15 +949,15 @@ test_setNodeAttributes <- function()
      # originally lfc is c(-3, 0, 3)
    setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(0, 0, 0))
    redraw(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
    setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(1, 2, 3))
    redraw(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
    setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(-3, -2, -1))
    redraw(rcy)
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
 } # test_setNodeAttributes
 #----------------------------------------------------------------------------------------------------
@@ -880,7 +983,7 @@ test_setEdgeAttributes <- function()
                      values=c(0, 0, 0))
 
    redraw(rcy)  # all edges should be lightgray
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
    setEdgeAttributes(rcy, attribute="score",
                      sourceNodes=c("A", "B", "C"),
@@ -889,7 +992,7 @@ test_setEdgeAttributes <- function()
                      values=c(30, 30, 30))
 
    redraw(rcy)  # all edges should be green
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
    setEdgeAttributes(rcy, attribute="score",
                      sourceNodes=c("A", "B", "C"),
@@ -898,7 +1001,7 @@ test_setEdgeAttributes <- function()
                      values=c(-30, 0, 30))
 
    redraw(rcy)  # edges should be AB: red, BC: lightgray, CA: green
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
    setEdgeAttributes(rcy, attribute="score",
                      sourceNodes=c("A", "B", "C"),
@@ -907,7 +1010,7 @@ test_setEdgeAttributes <- function()
                      values=c(30, -30, 0))
 
    redraw(rcy)  # edges should be AB: red, BC: lightgray, CA: green
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
    setEdgeAttributes(rcy, attribute="score",
                      sourceNodes=c("A", "B", "C"),
@@ -916,7 +1019,7 @@ test_setEdgeAttributes <- function()
                      values=c(0, 30, -30))
 
    redraw(rcy)  # edges should be AB: red, BC: lightgray, CA: green
-   Sys.sleep(1)
+   Sys.sleep(0.5)
 
 } # test_setEdgeAttributes
 #----------------------------------------------------------------------------------------------------
@@ -936,9 +1039,9 @@ test_compoundNodes <- function()
 
    setNodeLabelAlignment(rcy, "center", "top")
 
-   layout(rcy, "cola")
    redraw(rcy)
    fit(rcy)
+   layout(rcy, "cola")
 
 } # test_compoundNodes
 #----------------------------------------------------------------------------------------------------

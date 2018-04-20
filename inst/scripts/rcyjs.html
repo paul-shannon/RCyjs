@@ -1660,20 +1660,13 @@ return{
 //----------------------------------------------------------------------------------------------------
 }); // RCyjsModule
 
-console.log("rcyjs.html 1");
 hub = BrowserViz();
-console.log("rcyjs.html 2");
 rcy = RCyjsModule();
-console.log("rcyjs.html 3");
 rcy.setHub(hub);
-console.log("rcyjs.html 4");
 rcy.addMessageHandlers();
-console.log("rcyjs.html 5");
 
 hub.addOnDocumentReadyFunction(rcy.initUI);
-console.log("rcyjs.html 6");
 hub.start();
-console.log("rcyjs.html 7");
 
 </script>
 </script>

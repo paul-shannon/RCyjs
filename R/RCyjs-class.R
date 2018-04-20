@@ -1,234 +1,401 @@
-#----------------------------------------------------------------------------------------------------
-cyjsBrowserFile <- system.file(package="RCyjs", "scripts", "rcyjs.html")
-printf <- function(...) print(noquote(sprintf(...)))
-#----------------------------------------------------------------------------------------------------
-.RCyjs <- setClass ("RCyjsClass",
+#' @importFrom methods new is as
+#' @import BiocGenerics
+#' @import httpuv
+#' @import BrowserViz
+#' @import graph
+#' @importFrom utils write.table
+#' @importFrom base64enc base64decode
+#'
+#' @name RCyjs-class
+#' @rdname RCyjs-class
+#' @exportClass RCyjs
+
+.RCyjs <- setClass ("RCyjs",
                     representation = representation(graph="graph"),
-                    contains = "BrowserVizClass",
-                    prototype = prototype (uri="http://localhost", 9000)
+                    contains = "BrowserVizClass"
                     )
 
 #----------------------------------------------------------------------------------------------------
-setGeneric('setGraph',            signature='obj', function(obj, graph, hideEdges=FALSE) standardGeneric ('setGraph'))
+# built (cd inst/browserCode; make) with npm and webpack, this html+javascript file has all of the
+# browser-side code
+cyjsBrowserFile <- system.file(package="RCyjs", "browserCode", "dist", "rcyjs.html")
+#----------------------------------------------------------------------------------------------------
+printf <- function(...) print(noquote(sprintf(...)))
+#----------------------------------------------------------------------------------------------------
+setGeneric('setGraph',            signature='obj', function(obj, graph) standardGeneric ('setGraph'))
 setGeneric('addGraph',            signature='obj', function(obj, graph) standardGeneric ('addGraph'))
-setGeneric('httpAddGraph',        signature='obj', function(obj, graph) standardGeneric ('httpAddGraph'))
-setGeneric('httpAddJsonGraphFromFile', signature='obj', function(obj, jsonFileName) standardGeneric ('httpAddJsonGraphFromFile'))
-setGeneric('httpSetStyle',        signature='obj', function(obj, filename) standardGeneric ('httpSetStyle'))
+setGeneric('deleteGraph',         signature='obj', function(obj) standardGeneric ('deleteGraph'))
+setGeneric('loadStyleFile',       signature='obj', function(obj, filename) standardGeneric ('loadStyleFile'))
+setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
+setGeneric('addGraphFromFile',    signature='obj', function(obj, jsonFileName) standardGeneric ('addGraphFromFile'))
 
 setGeneric('getNodeCount',        signature='obj', function(obj) standardGeneric ('getNodeCount'))
 setGeneric('getEdgeCount',        signature='obj', function(obj) standardGeneric ('getEdgeCount'))
-setGeneric('getNodes',            signature='obj', function(obj) standardGeneric ('getNodes'))
-
-setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, nodes, values) standardGeneric('setNodeAttributes'))
-setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values) standardGeneric('setEdgeAttributes'))
+setGeneric('getNodes',            signature='obj', function(obj, which="all") standardGeneric ('getNodes'))
 
 setGeneric('getSelectedNodes',    signature='obj', function(obj) standardGeneric ('getSelectedNodes'))
-setGeneric('clearSelection',      signature='obj', function(obj) standardGeneric ('clearSelection'))
+setGeneric('clearSelection',      signature='obj', function(obj, which="both") standardGeneric ('clearSelection'))
 setGeneric('invertNodeSelection', signature='obj', function(obj) standardGeneric ('invertNodeSelection'))
 setGeneric('hideSelectedNodes',   signature='obj', function(obj) standardGeneric ('hideSelectedNodes'))
 setGeneric('deleteSelectedNodes', signature='obj', function(obj) standardGeneric ('deleteSelectedNodes'))
 setGeneric('redraw',              signature='obj', function(obj) standardGeneric ('redraw'))
+
+
+setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, nodes, values) standardGeneric('setNodeAttributes'))
+setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values) standardGeneric('setEdgeAttributes'))
+
+
+setGeneric("setGlobalNodeSize",  signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeSize'))
+setGeneric("setGlobalNodeWidth", signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeWidth'))
+setGeneric("setGlobalNodeHeight", signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeHeight'))
+setGeneric("setGlobalNodeColor", signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeColor'))
+setGeneric("setGlobalNodeShape", signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeShape'))
+setGeneric("setGlobalNodeFontColor", signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeFontColor'))
+setGeneric("setGlobalNodeFontSize", signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeFontSize'))
+setGeneric("setGlobalNodeBorderWidth", signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeBorderWidth'))
+setGeneric("setGlobalNodeBorderColor", signature='obj', function(obj, newValue) standardGeneric('setGlobalNodeBorderColor'))
+
+
+setGeneric("setGlobalEdgeFontSize", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeFontSize"))
+setGeneric("setGlobalEdgeTargetArrowShape", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeTargetArrowShape"))
+setGeneric("setGlobalEdgeColor", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeColor"))
+setGeneric("setGlobalEdgeTargetArrowColor", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeTargetArrowColor"))
+setGeneric("setGlobalEdgeFontSize", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeFontSize"))
+setGeneric("setGlobalEdgeWidth", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeWidth"))
+setGeneric("setGlobalEdgeLineColor", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeLineColor"))
+setGeneric("setGlobalEdgeFont", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeFont"))
+setGeneric("setGlobalEdgeFontWeight", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeFontWeight"))
+setGeneric("setGlobalEdgeTextOpacity", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeTextOpacity"))
+setGeneric("setGlobalEdgeLineStyle", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeLineStyle"))
+setGeneric("setGlobalEdgeOpacity", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeOpacity"))
+setGeneric("setGlobalEdgeSourceArrowColor", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeSourceArrowColor"))
+setGeneric("setGlobalEdgeSourceArrowShape", signature="obj", function(obj, newValue) standardGeneric("setGlobalEdgeSourceArrowShape"))
+
+
+setGeneric("setNodeSize",  signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeSize'))
+setGeneric("setNodeWidth", signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeWidth'))
+setGeneric("setNodeHeight", signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeHeight'))
+setGeneric("setNodeColor", signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeColor'))
+setGeneric("setNodeShape", signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeShape'))
+setGeneric("setNodeFontColor", signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeFontColor'))
+setGeneric("setNodeFontSize", signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeFontSize'))
+setGeneric("setNodeBorderWidth", signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeBorderWidth'))
+setGeneric("setNodeBorderColor", signature='obj', function(obj, nodeIDs, newValues) standardGeneric('setNodeBorderColor'))
+
 setGeneric('setNodeLabelRule',    signature='obj', function(obj, attribute) standardGeneric ('setNodeLabelRule'))
 setGeneric('setNodeLabelAlignment',  signature='obj', function(obj, horizontal, vertical) standardGeneric ('setNodeLabelAlignment'))
 setGeneric('setNodeSizeRule',     signature='obj', function(obj, attribute, control.points, node.sizes) standardGeneric('setNodeSizeRule'))
 setGeneric('setNodeColorRule',    signature='obj', function(obj, attribute, control.points, colors, mode) standardGeneric('setNodeColorRule'))
-setGeneric('setNodeShapeRule',    signature='obj', function(obj, attribute, control.points, node.shapes) standardGeneric('setNodeShapeRule'))
-
 setGeneric('setEdgeStyle',        signature='obj', function(obj, mode) standardGeneric('setEdgeStyle'))
-setGeneric('setEdgeColorRule',    signature='obj', function(obj, attribute, control.points, colors, mode) standardGeneric('setEdgeColorRule'))
-setGeneric('setEdgeWidthRule',    signature='obj', function(obj, attribute, control.points, widths, mode) standardGeneric('setEdgeWidthRule'))
 
-setGeneric('setEdgeTargetArrowShapeRule',   signature='obj', function(obj, attribute, control.points, shapes) standardGeneric('setEdgeTargetArrowShapeRule'))
-setGeneric('setEdgeTargetArrowColorRule',   signature='obj', function(obj, attribute, control.points, colors, mode) standardGeneric('setEdgeTargetArrowColorRule'))
-
-setGeneric('setEdgeSourceArrowShapeRule',   signature='obj', function(obj, attribute, control.points, shapes) standardGeneric('setEdgeSourceArrowShapeRule'))
-setGeneric('setEdgeSourceArrowColorRule',   signature='obj', function(obj, attribute, control.points, colors, mode) standardGeneric('setEdgeSourceArrowColorRule'))
-
-setGeneric('layout',              signature='obj', function(obj, strategy) standardGeneric('layout'))
-setGeneric('layoutStrategies',    signature='obj', function(obj) standardGeneric('layoutStrategies'))
-setGeneric('layoutSelectionInGrid', signature='obj', function(obj, x, y, w, h) standardGeneric('layoutSelectionInGrid'))
+setGeneric('layout',                 signature='obj', function(obj, strategy="random") standardGeneric('layout'))
+setGeneric('getSupportedNodeShapes',  signature='obj', function(obj) standardGeneric('getSupportedNodeShapes'))
+setGeneric('getSupportedEdgeDecoratorShapes',  signature='obj', function(obj) standardGeneric('getSupportedEdgeDecoratorShapes'))
+setGeneric('getLayoutStrategies',    signature='obj', function(obj) standardGeneric('getLayoutStrategies'))
+setGeneric('layoutSelectionInGrid',  signature='obj', function(obj, x, y, w, h) standardGeneric('layoutSelectionInGrid'))
 setGeneric('layoutSelectionInGridInferAnchor', signature='obj', function(obj, w, h) standardGeneric('layoutSelectionInGridInferAnchor'))
 setGeneric('getPosition',         signature='obj', function(obj, nodeIDs=NA) standardGeneric('getPosition'))
 setGeneric('setPosition',         signature='obj', function(obj, tbl.pos) standardGeneric('setPosition'))
 setGeneric('getNodeSize',         signature='obj', function(obj, nodeIDs=NA) standardGeneric('getNodeSize'))
-setGeneric('getLayout',           signature='obj', function(obj) standardGeneric('getLayout'))
 setGeneric('saveLayout',          signature='obj', function(obj, filename) standardGeneric('saveLayout'))
 setGeneric('getJSON',             signature='obj', function(obj) standardGeneric('getJSON'))
 setGeneric('savePNG',             signature='obj', function(obj, filename) standardGeneric('savePNG'))
+setGeneric('saveJPG',             signature='obj', function(obj, filename, resolutionFactor=1) standardGeneric('saveJPG'))
+#setGeneric('saveAsWebPage',       signature='obj', function(obj, filename) standardGeneric('saveAsWebPage'))
 setGeneric('restoreLayout',       signature='obj', function(obj, filename) standardGeneric('restoreLayout'))
 setGeneric('setZoom',             signature='obj', function(obj, newValue) standardGeneric('setZoom'))
 setGeneric('getZoom',             signature='obj', function(obj) standardGeneric('getZoom'))
 setGeneric('setBackgroundColor',  signature='obj', function(obj, newValue) standardGeneric ('setBackgroundColor'))
 setGeneric('fit',                 signature='obj', function(obj, padding=30) standardGeneric('fit'))
-setGeneric('fitContent',          signature='obj', function(obj, padding=30) standardGeneric('fitContent'))
-setGeneric('fitSelectedContent',  signature='obj', function(obj, padding=30) standardGeneric('fitSelectedContent'))
+setGeneric('fitSelection',        signature='obj', function(obj, padding=30) standardGeneric('fitSelection'))
 setGeneric('selectNodes',         signature='obj', function(obj, nodeIDs) standardGeneric('selectNodes'))
 setGeneric('sfn',                 signature='obj', function(obj) standardGeneric('sfn'))
+setGeneric('selectFirstNeighborsOfSelectedNodes',  signature='obj', function(obj) standardGeneric('selectFirstNeighborsOfSelectedNodes'))
 
 setGeneric('hideAllEdges',        signature='obj', function(obj) standardGeneric('hideAllEdges'))
-setGeneric('showAllEdges',        signature='obj', function(obj) standardGeneric('showAllEdges'))
-setGeneric('showAll',             signature='obj', function(obj) standardGeneric('showAll'))
+setGeneric('showAll',             signature='obj', function(obj, which="both") standardGeneric('showAll'))
 setGeneric('hideEdges',           signature='obj', function(obj, edgeType) standardGeneric('hideEdges'))
 setGeneric('showEdges',           signature='obj', function(obj, edgeType) standardGeneric('showEdges'))
 setGeneric('vAlign',              signature='obj', function(obj) standardGeneric('vAlign'))
 setGeneric('hAlign',              signature='obj', function(obj) standardGeneric('hAlign'))
 
-setGeneric("setNodeImage", signature='obj', function(obj, imageURLs) standardGeneric('setNodeImage'))
-
-setGeneric("setDefaultNodeSize",  signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeSize'))
-setGeneric("setDefaultNodeWidth", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeWidth'))
-setGeneric("setDefaultNodeHeight", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeHeight'))
-setGeneric("setDefaultNodeColor", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeColor'))
-setGeneric("setDefaultNodeShape", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeShape'))
-setGeneric("setDefaultNodeFontColor", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeFontColor'))
-setGeneric("setDefaultNodeFontSize", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeFontSize'))
-setGeneric("setDefaultNodeBorderWidth", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeBorderWidth'))
-setGeneric("setDefaultNodeBorderColor", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeBorderColor'))
-
-
-setGeneric("setDefaultEdgeFontSize", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeFontSize"))
-setGeneric("setDefaultEdgeTargetArrowShape", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeTargetArrowShape"))
-setGeneric("setDefaultEdgeColor", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeColor"))
-setGeneric("setDefaultEdgeTargetArrowColor", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeTargetArrowColor"))
-setGeneric("setDefaultEdgeFontSize", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeFontSize"))
-setGeneric("setDefaultEdgeWidth", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeWidth"))
-setGeneric("setDefaultEdgeLineColor", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeLineColor"))
-setGeneric("setDefaultEdgeFont", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeFont"))
-setGeneric("setDefaultEdgeFontWeight", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeFontWeight"))
-setGeneric("setDefaultEdgeTextOpacity", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeTextOpacity"))
-setGeneric("setDefaultEdgeLineStyle", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeLineStyle"))
-setGeneric("setDefaultEdgeOpacity", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeOpacity"))
-setGeneric("setDefaultEdgeSourceArrowColor", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeSourceArrowColor"))
-setGeneric("setDefaultEdgeSourceArrowShape", signature="obj", function(obj, newValue) standardGeneric("setDefaultEdgeSourceArrowShape"))
+#setGeneric("setNodeImage", signature='obj', function(obj, imageURLs) standardGeneric('setNodeImage'))
 
 #----------------------------------------------------------------------------------------------------
+#' Create an RCyjs object
+#'
+#' @description
+#' The RCyjs class provides an R interface to cytoscape.js, a rich, interactive, full-featured, javascript
+#' network (graph) library.  One constructs an RCyjs instance on a specified port (default 9000),
+#' the browser code is loaded, and a websocket connection opened.
+#'
+#' @rdname RCyjs-class
+#'
+#' @param portRange The constructor looks for a free websocket port in this range.  16000:16100 by default
+#' @param title Used for the web browser window, "RCyjs" by default
+#' @param graph a Biocondcutor graphNEL object
+#' @param quiet A logical variable controlling verbosity during execution
+#'
+#' @return An object of the RCyjs class
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   setNodeLabelRule(rcy, "label");
+#'   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+#'   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+#'   redraw(rcy)
+#'   layout(rcy, "cose")
+#'   }
+#'
+#----------------------------------------------------------------------------------------------------
 # constructor
-RCyjs = function(portRange, host="localhost", title="RCyjs", graph=graphNEL(), hideEdges=FALSE, quiet=TRUE)
+RCyjs = function(portRange=16000:16100, title="RCyjs", graph=graphNEL(), quiet=TRUE)
 {
-
-  obj <- .RCyjs(BrowserViz(portRange, host, title, quiet, browserFile=cyjsBrowserFile,
-                           httpQueryProcessingFunction=myQP),
-                graph=graph)
-
-
-  print(1)
-  #while (!browserResponseReady(obj)){
-  #    Sys.sleep(.1)
-  #    printf("still waiting on browserResponseReady ")
-  #    }
-  # if(!quiet) {
-  #    message(sprintf("BrowserViz ctor called from RCyjs ctor got browser response"))
-  #    print(getBrowserResponse(obj))
-  #    }
-
-  #printf("RCyjs ctor sleeping 3 before call to setGraph")
-  # Sys.sleep(3);
-  print(2)
-   setGraph(obj, graphNEL(), hideEdges=hideEdges)
-  print(3)
-
-   if(!quiet)
-      printf("loading graph with %d nodes", length(nodes(graph)))
+   obj <- .RCyjs(BrowserViz(portRange, title, quiet, browserFile=cyjsBrowserFile,
+                            httpQueryProcessingFunction=myQP),
+                 graph=graph)
 
 
-  print(4)
-   httpAddGraph(obj, graph)
-  print(5)
-   layout(obj, "random")
-  print(6)
+   if(length(nodes(graph)) > 0){
+      setGraph(obj, graph)
+      if(!quiet)
+         printf("loading graph with %d nodes", length(nodes(graph)))
+      layout(obj, "random")
+      } # if graph
+
 
    if(!quiet)
      message(sprintf("RCyjs ctor about to retrun RCyjs object"))
 
-   # setGraph(obj, graph, hideEdges=hideEdges)
+   setBrowserWindowTitle(obj, title)
 
-  print(7)
    obj
 
 } # RCyjs: constructor
 #----------------------------------------------------------------------------------------------------
-setMethod('setGraph', 'RCyjsClass',
-
-  function (obj, graph, hideEdges=FALSE) {
-     g.json <- as.character(biocGraphToCytoscapeJSON(graph))
-     #printf("RCyjs.setGraph sending g.json with %d chars", nchar(g.json))
-
-     send(obj, list(cmd="setGraph", callback="handleResponse", status="request",
-                    payload=list(graph=g.json, hideEdges=hideEdges)))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     getBrowserResponse(obj);
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('addGraph', 'RCyjsClass',
-
-  function (obj, graph) {
-     printf("RCyjs::addGraph");
-     print(graph)
-     g.json <- as.character(biocGraphToCytoscapeJSON(graph))
-     printf("about to send g.json: %d chars", nchar(g.json));
-     send(obj, list(cmd="addGraph", callback="handleResponse", status="request",
-                    payload=g.json))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     printf("browserResponseReady")
-     getBrowserResponse(obj);
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('httpAddGraph', 'RCyjsClass',
+#' setGraph
+#'
+#' \code{setGraph} Establish a new graph in RCyjs, removing any previous graph
+#'
+#' This method will remove any previous graph in the browser, adding
+#' a new one.  Setting visual properties and performing layout must follow.
+#'
+#' @rdname setGraph
+#' @aliases setGraph
+#'
+#' @param obj  RCyjs instance
+#' @param graph  a graphNEL
+#'
+#' @return nothing
+#'
+#' @seealso\code{\link{addGraph}}
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   sampleGraph <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo")
+#'   setGraph(rcy, sampleGraph)
+#'   }
+#'
+setMethod('setGraph', 'RCyjs',
 
   function (obj, graph) {
-     printf("RCyjs::httpAddGraph");
-     print(graph)
-     g.json <- paste("network = ", as.character(biocGraphToCytoscapeJSON(graph)))
-     filename <- "g.json"
-     write(g.json, file=filename)
-     send(obj, list(cmd="httpAddGraph", callback="handleResponse", status="request",
-                    payload=filename))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     printf("browserResponseReady")
-     getBrowserResponse(obj);
+     x <- deleteGraph(obj)
+     x <- addGraph(obj, graph)
+     invisible(getBrowserResponse(obj))
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('httpAddJsonGraphFromFile', 'RCyjsClass',
-
-  function (obj, jsonFileName) {
-     printf("RCyjs::httpAddJsonFileGraph");
-     send(obj, list(cmd="httpAddGraph", callback="handleResponse", status="request",
-                    payload=jsonFileName))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     printf("browserResponseReady")
-     getBrowserResponse(obj);
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('httpSetStyle', 'RCyjsClass',
-
-  function (obj, filename) {
-     printf("RCyjs::httpSetStyle");
-     send(obj, list(cmd="httpSetStyle", callback="handleResponse", status="request",
-                    payload=filename))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     printf("browserResponseReady")
-     getBrowserResponse(obj);
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('getNodes', 'RCyjsClass',
+#' deleteGraph
+#'
+#' \code{deleteGraph} Remove all nodes and edges, the elements of the current graph.
+#'
+#' This method will remove any previous graph in the browser
+#'
+#' @rdname deleteGraph
+#' @aliases deleteGraph
+#'
+#' @param obj  RCyjs instance
+#'
+#' @return nothing
+#'
+#' @seealso \code{\link{addGraph}} \code{\link{setGraph}}
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   sampleGraph <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=sampleGraph)
+#'   deletetGraph(rcy)
+#'   }
+#'
+setMethod('deleteGraph', 'RCyjs',
 
   function (obj) {
-     send(obj, list(cmd="getNodes", callback="handleResponse", status="request", payload=""))
+     send(obj, list(cmd="deleteGraph", callback="handleResponse", status="request", payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj))
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' addGraph
+#'
+#' \code{addGraph} send these nodes and edges (with attributes) to RCyjs for display
+#'
+#' This version transmits a graph (nodes, edges and attributes) to the browser
+#' by writing the data to a file, and sending that filename to be read in the
+#' browser by javascript.
+#'
+#' @rdname addGraph
+#' @aliases addGraph
+#'
+#' @param obj  an RCyjs instance
+#' @param graph a graphNEL
+#'
+#' @return nothing
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   g <- simpleDemoGraph()
+#'   setGraph(rcy, g)
+#'   }
+#'
+
+setMethod('addGraph', 'RCyjs',
+
+  function (obj, graph) {
+     g.json <- paste("network = ", .graphToJSON(graph))
+     temp.filename <- tempfile(fileext=".json")
+     write(g.json, file=temp.filename)
+     payload <- list(filename=temp.filename)
+     send(obj, list(cmd="addGraph", callback="handleResponse", status="request", payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' addGraphFromFile
+#'
+#' \code{addGraphFromFile} add graph from specified file, which contains a cytoscape.js JSON graph
+#'
+#' More description
+#'
+#' @rdname addGraphFromFile
+#' @aliases addGraphFromFile
+#'
+#' @param obj an RCyjs instance
+#' @param jsonFileName path to the file
+#'
+#' @return nothin
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   filename <- system.file(package="RCyjs", "extdata", "sampleGraph.json")
+#'   addGraphFromFile(rcy, filename)
+#'   layout(rcy, "cose")
+#'   fit(rcy, 200)
+#'   }
+#'
+
+setMethod('addGraphFromFile', 'RCyjs',
+
+  function (obj, jsonFileName) {
+     payload <- list(filename=jsonFileName)
+     send(obj, list(cmd="addGraph", callback="handleResponse", status="request", payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     #printf("browserResponseReady")
+     getBrowserResponse(obj);
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' loadStyleFile
+#'
+#' \code{loadStyleFile} load a named JSON cytoscape.js style file into the browser
+#'
+#' @references \url{https://js.cytoscape.org/#style}
+#'
+#' Though we provide access to individual styling rules (see below) we often find
+#' it convenient to express all aspects of a visual style in a single JSON file
+#'
+#' @rdname loadStyleFile
+#' @aliases loadStyleFile
+#'
+#' @param obj an RCyjs instance
+#' @param filename contains json in the proper cytoscape.js format
+#'
+#' @return nothing
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   rcy <- demo()
+#'   filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+#'   loadStyleFile(rcy, filename)
+#'   }
+#'
+
+setMethod('loadStyleFile', 'RCyjs',
+
+  function (obj, filename) {
+     send(obj, list(cmd="loadStyleFile", callback="handleResponse", status="request",
+                    payload=filename))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     #printf("browserResponseReady")
+     getBrowserResponse(obj);
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' getNodes
+#'
+#' \code{getNodes} returns a data.frame, one row per node, providing id and (if present) name and
+#' label columns
+#'
+#' Every node is guaranteed to have an "id" attribute.  Becuase "name" and "label" are commonly
+#' used as well, they are returned as columns in the data.frame if present
+#'
+#' @rdname getNodes
+#' @aliases getNodes
+#'
+#' @param obj an RCyjs instance
+#' @param which a character string, either "all", "visible" or "hidden"
+#'
+#' @return a data.frame with at least and "id" column
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getNodes(rcy)
+#'    }
+#'
+
+setMethod('getNodes', 'RCyjs',
+
+  function (obj, which) {
+     stopifnot(which %in% c("all", "visible", "hidden"))
+     payload <- list(which=which)
+     send(obj, list(cmd="getNodes", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -240,7 +407,27 @@ setMethod('getNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getNodeCount', 'RCyjsClass',
+#' getNodeCount
+#'
+#' \code{getNodeCount} the number of nodes in the current cytoscape.js graph
+#'
+#' @rdname getNodeCount
+#' @aliases getNodeCount
+#'
+#' @param obj RCyjs instance
+#'
+#' @return numeric count
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getNodeCount(rcy)
+#'    }
+#'
+
+setMethod('getNodeCount', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getNodeCount", callback="handleResponse", status="request", payload=""))
@@ -255,7 +442,27 @@ setMethod('getNodeCount', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getEdgeCount', 'RCyjsClass',
+#' getEdgeCount
+#'
+#' \code{getEdgeCount} the number of edges in the current cytoscape.js graph
+#'
+#' @rdname getEdgeCount
+#' @aliases getEdgeCount
+#'
+#' @param obj RCyjs instance
+#'
+#' @return numeric count
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getEdgeCount(rcy)
+#'    }
+#'
+
+setMethod('getEdgeCount', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getEdgeCount", callback="handleResponse", status="request", payload=""))
@@ -270,11 +477,33 @@ setMethod('getEdgeCount', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('clearSelection', 'RCyjsClass',
+#' clearSelection
+#'
+#' \code{clearSelection} deselect all selected nodes, all selected edges, or both
+#'
+#' @rdname clearSelection
+#' @aliases clearSelection
+#'
+#' @param obj an RCyjs object
+#' @param which a character string:  "both" (the default), "nodes" or "edges"
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    selectNodes(rcy, c("A", "B"))
+#'    clearSelection(rcy)
+#'    }
+#'
 
-  function (obj) {
+setMethod('clearSelection', 'RCyjs',
+
+  function (obj, which="both") {
+     stopifnot(which %in% c("both", "nodes", "edges"))
+     payload <- list(which=which)
      send(obj, list(cmd="clearSelection", callback="handleResponse", status="request",
-                                  payload=""))
+                    payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -282,7 +511,28 @@ setMethod('clearSelection', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getSelectedNodes', 'RCyjsClass',
+#' getSelectedNodes
+#'
+#' \code{getSelectedNodes} get the selected nodes
+#'
+#' @rdname getSelectedNodes
+#' @aliases getSelectedNodes
+#'
+#' @param obj an RCyjs instance
+#'
+#' @return a data.frame with (at least) an id column
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    nodes.to.select <- getNodes(rcy)$id
+#'    selectNodes(rcy, nodes.to.select)
+#'    }
+#'
+
+setMethod('getSelectedNodes', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getSelectedNodes", callback="handleResponse", status="request",
@@ -291,14 +541,41 @@ setMethod('getSelectedNodes', 'RCyjsClass',
         Sys.sleep(.1)
         }
      result <- getBrowserResponse(obj)
-     if(nchar(result) > 0)
-       return(fromJSON(getBrowserResponse(obj)))
+     if(nchar(result) > 0){
+        result <- fromJSON(getBrowserResponse(obj))
+        if(!is.data.frame(result))  # always empty, indicates no selected nodes
+          result <- data.frame()
+        return(result)
+        }
      else
        return("")
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('invertNodeSelection', 'RCyjsClass',
+#' invertNodeSelection
+#'
+#' \code{invertNodeSelection} deselect all selected nodes, select all previously unselected nodes
+#'
+#' @rdname invertNodeSelection
+#' @aliases invertNodeSelection
+#'
+#' @param obj an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    target <- nodes(g)[1]
+#'    selectNodes(rcy, target)
+#'    invertNodeSelection(rcy)
+#'    }
+#'
+
+setMethod('invertNodeSelection', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="invertNodeSelection", callback="handleResponse", status="request",
@@ -314,7 +591,36 @@ setMethod('invertNodeSelection', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('hideSelectedNodes', 'RCyjsClass',
+#' hideSelectedNodes
+#'
+#' \code{hideSelectedNodes} hide selected nodes from view
+#'
+#' The hidden nodes are not deleted from the graph
+#'
+#' @rdname hideSelectedNodes
+#' @aliases hideSelectedNodes
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    target <- nodes(g)[1]
+#'    selectNodes(rcy, target)
+#'    hideSelectedNodes(rcy)
+#'    getNodes(rcy, "hidden")
+#'    getNodes(rcy, "visible")
+#'    showAll(rcy, which="nodes")
+#'    }
+#'
+#' @seealso \code{\link{showAll}}
+
+setMethod('hideSelectedNodes', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="hideSelectedNodes", callback="handleResponse", status="request",
@@ -330,7 +636,34 @@ setMethod('hideSelectedNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('deleteSelectedNodes', 'RCyjsClass',
+#' deleteSelectedNodes
+#'
+#' \code{deleteSelectedNodes} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname deleteSelectedNodes
+#' @aliases deleteSelectedNodes
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    target <- nodes(g)[1]
+#'    selectNodes(rcy, target)
+#'    deleteSelectedNodes(rcy)
+#'    }
+#'
+
+setMethod('deleteSelectedNodes', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="deleteSelectedNodes", callback="handleResponse", status="request",
@@ -345,8 +678,175 @@ setMethod('deleteSelectedNodes', 'RCyjsClass',
        return("")
      })
 
+
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeAttributes', 'RCyjsClass',
+#' setNodeSizeRule
+#'
+#' \code{setNodeSizeRule} control node size via values of the specified attribute
+#'
+#' actual node sizes are interpolated via the specified relationship of control.points node.sizes
+#'
+#' @rdname setNodeSizeRule
+#' @aliases setNodeSizeRule
+#'
+#' @param obj an RCyjs instance
+#' @param attribute a character string, the node attribute category whose value controls size
+#' @param control.points a list of values of the attribute
+#' @param node.sizes the corresponding node size, one specified for each of the control.points
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+#'    redraw(rcy)
+#'    }
+#'
+
+setMethod('setNodeSizeRule', 'RCyjs',
+
+  function (obj, attribute, control.points, node.sizes) {
+     payload <- list(attribute=attribute,
+                     controlPoints=control.points,
+                     nodeSizes=node.sizes)
+     send(obj, list(cmd="setNodeSizeRule", callback="handleResponse", status="request",
+                                  payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));  # the empty string.
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeColorRule
+#'
+#' \code{setNodeColorRule} control node color via values of the specified attribute
+#'
+#' for interpolate mode, in which the node attribute should be a continusously varying numerical quantity
+#' in-between colors are calculated for in-between values.
+#' for lookup mode, in which the node attribute is a discrete string variable, simple color lookup is performed.
+#'
+#' @rdname setNodeColorRule
+#' @aliases setNodeColorRule
+#'
+#' @param obj an RCyjs instance
+#' @param attribute a character string, the node attribute category whose value controls color
+#' @param control.points a list of all possible values of the attribute
+#' @param colors the corresponding node color, one specified for each of the control.points
+#' @param mode a character string, either "interpolate" or "lookup"
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
+#'    redraw(rcy)
+#'    }
+#'
+setMethod('setNodeColorRule', 'RCyjs',
+
+  function (obj, attribute, control.points, colors, mode=c("interpolate", "lookup")) {
+
+     payload <- list(attribute=attribute,
+                     controlPoints=control.points,
+                     nodeColors=colors,
+                     mode=mode)
+     send(obj, list(cmd="setNodeColorRule", callback="handleResponse", status="request",
+                                  payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));  # the empty string.
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setEdgeStyle
+#'
+#' \code{setEdgeStyle} plain & fast (haystack) vs fancy & slower (bezier)
+#'
+#' cytoscape.js offers two kinds of edge rendering - a tradeoff in richess and speed
+#' edge target decorations (arrows, tee, etc) are only rendered with the "bezier" style
+#'
+#' @rdname setEdgeStyle
+#' @aliases setEdgeStyle
+#'
+#' @param obj an RCyjs instance
+#' @param mode  a character string, either "bezier" or "haystack"
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+#'    setEdgeStyle(rcy, "bezier")
+#'    redraw(rcy)
+#'    }
+#'
+setMethod('setEdgeStyle', 'RCyjs',
+
+  function (obj, mode=c("bezier", "haystack")) {
+
+     payload <- mode
+     send(obj, list(cmd="setEdgeStyle", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));  # the empty string.
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeAttributes
+#'
+#' \code{setNodeAttributes} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname setNodeAttributes
+#' @aliases setNodeAttributes
+#'
+#' @param obj  an RCyjs instance
+#' @param attribute a character string
+#' @param nodes  character strings - node ids
+#' @param values scalar values, all of one type (all numeric, or all character, or all integer, ...)
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(0, 0, 0))
+#'    redraw(rcy)
+#'    }
+#'
+#'
+
+setMethod('setNodeAttributes', 'RCyjs',
 
    function(obj, attribute, nodes, values){
 
@@ -370,10 +870,41 @@ setMethod('setNodeAttributes', 'RCyjsClass',
      }) # setNodeAttributes
 
 #------------------------------------------------------------------------------------------------------------------------
-# when implemented, this will probably resolved to this javascript, for instance
-#cy.edges("edge[source='Crem'][target='Hk2'][edgeType='undefined']").data({"score": 3})
+#' setEdgeAttributes
+#'
+#' \code{setEdgeAttributes} on the graph in the browse
+#'
+#' Edges are specified by sourceNode/targetNode/edgeType triples.
+#'
+#' @rdname setEdgeAttributes
+#' @aliases setEdgeAttributes
+#'
+#' @param obj  an RCyjs instance
+#' @param attribute a character string
+#' @param sourceNodes vector of character strings
+#' @param targetNodes  vector of character strings
+#' @param edgeTypes vector of character strings
+#' @param values  vector of character strings
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"));
+#'    setEdgeAttributes(rcy, attribute="score",
+#'                      sourceNodes=c("A", "B", "C"),
+#'                      targetNodes=c("B", "C", "A"),
+#'                      edgeTypes=c("phosphorylates", "synthetic lethal", "undefined"),
+#'                      values=c(0, 0, 0))
+#'
 
-setMethod('setEdgeAttributes', 'RCyjsClass',
+setMethod('setEdgeAttributes', 'RCyjs',
 
    function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values){
      if (length (sourceNodes) == 0)
@@ -398,7 +929,33 @@ setMethod('setEdgeAttributes', 'RCyjsClass',
      }) # setEdgeAttributes
 
 #------------------------------------------------------------------------------------------------------------------------
-setMethod('redraw', 'RCyjsClass',
+#' redraw
+#'
+#' \code{redraw} re-render the graph, using the latest style rules and assignements
+#'
+#' @rdname redraw
+#' @aliases redraw
+#'
+#' @param obj an RCyjs instance
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(0, 0, 0))
+#'    redraw(rcy)
+#'    }
+#'
+
+
+
+setMethod('redraw', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="redraw", callback="handleResponse", status="request",
@@ -410,7 +967,1026 @@ setMethod('redraw', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeLabelRule', 'RCyjsClass',
+#' setGlobalNodeSize
+#'
+#' \code{setGlobalNodeSize} set all nodes to the same specifed size, in pixels
+#'
+#' @rdname setGlobalNodeSize
+#' @aliases setGlobalNodeSize
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a numeric, in pixels
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodesSize", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeSize(rcy, 80)
+#'   }
+#'
+setMethod("setGlobalNodeSize",  'RCyjs',
+
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalNodeSize", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalNodeWidth
+#'
+#' \code{setGlobalNodeWidth} set all nodes to the same specifed width, in pixels
+#'
+#' @rdname setGlobalNodeWidth
+#' @aliases setGlobalNodeWidth
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a numeric, in pixels
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodesWidth", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeWidth(rcy, 80)
+#'   }
+#'
+setMethod("setGlobalNodeWidth",   'RCyjs',
+
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalNodeWidth", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeWidth
+#'
+#' \code{setNodeWidth} set the specified nodes to the specifed widths, in pixels
+#'
+#' @rdname setNodeWidth
+#' @aliases setNodeWidth
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues a numeric, in pixels (one, or as many as there are nodeIDs)
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodesWidth", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeWidth(rcy, 80)
+#'   }
+#'
+setMethod("setNodeWidth",   'RCyjs',
+
+  function (obj, nodeIDs, newValues) {
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeWidth", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeHeight
+#'
+#' \code{setNodeHeight} set the specified nodes to the specifed heights, in pixels
+#'
+#' @rdname setNodeHeight
+#' @aliases setNodeHeight
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues a numeric, in pixels (one, or as many as there are nodeIDs)
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodesHeight", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeHeight(rcy, 80)
+#'   }
+#'
+setMethod("setNodeHeight",   'RCyjs',
+
+  function (obj, nodeIDs, newValues) {
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeHeight", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeSize
+#'
+#' \code{setNodeSize} set the specified nodes to the specifed sizes, in pixels
+#'
+#' @rdname setNodeSize
+#' @aliases setNodeSize
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues a numeric, in pixels (one, or as many as there are nodeIDs)
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodesSize", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeSize(rcy, 80)
+#'   }
+#'
+setMethod("setNodeSize",   'RCyjs',
+
+  function (obj, nodeIDs, newValues) {
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeSize", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeColor
+#'
+#' \code{setNodeColor} set the specified nodes to the specifed color
+#'
+#' @rdname setNodeColor
+#' @aliases setNodeColor
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues a character string, legal CSS color names (one or more)
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodeColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeColor(rcy, 80)
+#'   }
+#'
+setMethod("setNodeColor",   'RCyjs',
+
+  function (obj, nodeIDs, newValues) {
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeColor", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeShape
+#'
+#' \code{setNodeShape} set the specified nodes to specifed shapes
+#'
+#' @rdname setNodeShape
+#' @aliases setNodeShape
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues a character string, one of the legitimate cytoscape.js node shapes
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodeShape", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeShape(rcy, 80)
+#'   }
+#'
+setMethod("setNodeShape", "RCyjs",
+
+  function (obj, nodeIDs, newValues) {
+
+     if(!(all(newValues %in% getSupportedNodeShapes(obj))))
+        stop(sprintf("unrecognized shapes: %s",
+                     paste(setdiff(newValues, getSupportedNodeShapes(obj)), collapse=",")))
+
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeShape", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeFontColor
+#'
+#' \code{setNodeFontColor} set the specified nodes to the same specifed node font color
+#'
+#' @rdname setNodeFontColor
+#' @aliases setNodeFontColor
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues a character string, a legal CSS color name (one or more)
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodeFontColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeFontColor(rcy, "red")
+#'   }
+#'
+setMethod("setNodeFontColor", "RCyjs",
+
+   function (obj, nodeIDs, newValues) {
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeFontColor", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeFontSize
+#'
+#' \code{setNodeFontSize} set the specified nodes to the same specifed node font size
+#'
+#' @rdname setNodeFontSize
+#' @aliases setNodeFontSize
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues a numeric, in pixels (one, or as many as there are nodeIDs)
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodeFontSize", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeFontSize(rcy, 5)
+#'   }
+#'
+setMethod("setNodeFontSize", "RCyjs",
+
+  function (obj, nodeIDs, newValues) {
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeFontSize", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeBorderWidth
+#'
+#' \code{setNodeBorderWidth} set the specified nodes to the same specifed node border width, in pixels
+#'
+#' @rdname setNodeBorderWidth
+#' @aliases setNodeBorderWidth
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues numeric, in pixels (one, or as many as there are nodeIDs)
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodeBorderWidth", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeBorderWidth(rcy, 3)
+#'   }
+#'
+setMethod("setNodeBorderWidth", "RCyjs",
+
+
+  function (obj, nodeIDs, newValues) {
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeBorderWidth", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeBorderColor
+#'
+#' \code{setNodeBorderColor} set the specified nodes to the specifed node border color
+#'
+#' @rdname setNodeBorderColor
+#' @aliases setNodeBorderColor
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a character string (one or more)
+#' @param newValues legal CSS color names (one or more)
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setNodeBorderColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setNodeBorderColor(rcy, "green")
+#'   }
+#'
+setMethod("setNodeBorderColor", "RCyjs",
+
+
+  function (obj, nodeIDs, newValues) {
+       # allow for many nodes, 1 value - in an unnuanced way
+     node.count <- length(nodeIDs)
+     value.count <- length(newValues)
+     if(value.count < node.count)
+        newValues <- rep(newValues[1], node.count)
+
+     payload <- list(nodes=nodeIDs, values=newValues)
+     send(obj, list(cmd="setNodeBorderColor", callback="handleResponse", status="request",
+                    payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalNodeHeight
+#'
+#' \code{setGlobalNodeHeight} set all nodes to the same specifed width, in pixels
+#'
+#' @rdname setGlobalNodeHeight
+#' @aliases setGlobalNodeHeight
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a numeric, in pixels
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodeHeight", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeHeight(rcy, 80)
+#'   }
+#'
+setMethod("setGlobalNodeHeight",   'RCyjs',
+
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalNodeHeight", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+#----------------------------------------------------------------------------------------------------
+#' setGlobalNodeColor
+#'
+#' \code{setGlobalNodeColor} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname setGlobalNodeColor
+#' @aliases setGlobalNodeColor
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, any valid CSS color name
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodeColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeColor(rcy, "lightblue")
+#'   }
+#'
+setMethod("setGlobalNodeColor",   'RCyjs',
+
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalNodeColor", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalNodeShape
+#'
+#' \code{setGlobalNodeShape} change the shape of all nodes
+#'
+#' @rdname setGlobalNodeShape
+#' @aliases setGlobalNodeShape
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, one of "ellipse", "triangle", "rectangle", "roundrectangle",
+#'                             "bottomroundrectangle","cutrectangle", "barrel",
+#'                             "rhomboid", "diamond", "pentagon", "hexagon",
+#'                             "concavehexagon", "heptagon", "octagon", "star", "tag", "vee"
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodeShape", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeShape(rcy, "barrel")
+#'   }
+#'
+
+setMethod("setGlobalNodeShape",   'RCyjs',
+
+  function (obj, newValue=c("ellipse", "triangle", "rectangle", "roundrectangle",
+               "bottomroundrectangle","cutrectangle", "barrel",
+               "rhomboid", "diamond", "pentagon", "hexagon",
+               "concavehexagon", "heptagon", "octagon", "star", "tag", "vee")){
+
+     send(obj, list(cmd="setGlobalNodeShape", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalNodeFontColor
+#'
+#' \code{setGlobalNodeFontColor}
+#'
+#' @rdname setGlobalNodeFontColor
+#' @aliases setGlobalNodeFontColor
+#'
+#' @param obj an RCyjs instance
+#' @param newValue any CSS color
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodeColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeFontColor(rcy, "red")
+#'   }
+#'
+
+setMethod("setGlobalNodeFontColor",   'RCyjs',
+
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalNodeFontColor", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+#----------------------------------------------------------------------------------------------------
+#' setGlobalNodeFontSize
+#'
+#' \code{setGlobalNodeFontSize} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname setGlobalNodeFontSize
+#' @aliases setGlobalNodeFontSize
+#'
+#' @param obj an RCyjs instance
+#' @param newValue numeric, in points
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodeFontSize", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeFontSize(rcy, 8)
+#'   }
+#'
+
+setMethod("setGlobalNodeFontSize",  'RCyjs',
+
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalNodeFontSize", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+#----------------------------------------------------------------------------------------------------
+#' setGlobalNodeBorderWidth
+#'
+#' \code{setGlobalNodeBorderWidth} in pixels
+#'
+#' @rdname setGlobalNodeBorderWidth
+#' @aliases setGlobalNodeBorderWidth
+#'
+#' @param obj an RCyjs instance
+#' @param newValue numeric, in pixels
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodeBorderWidth", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeBorderWidth(rcy, 2)
+#'   }
+
+setMethod("setGlobalNodeBorderWidth",  'RCyjs',
+
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalNodeBorderWidth", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     getBrowserResponse(obj);
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalNodeBorderColor
+#'
+#' \code{setGlobalNodeBorderColor} put somewhat more detailed description here
+#'
+#' @rdname setGlobalNodeBorderColor
+#' @aliases setGlobalNodeBorderColor
+#'
+#' @param obj an RCyjs instance
+#' @param newValue any CSS color
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodeBorderColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeBorderColor(rcy, "red")
+#'   }
+#'
+
+setMethod("setGlobalNodeBorderColor",  'RCyjs',
+
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalNodeBorderColor", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     getBrowserResponse(obj);
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalEdgeTargetArrowShape
+#'
+#' \code{setGlobalEdgeTargetArrowShape} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname setGlobalEdgeTargetArrowShape
+#' @aliases setGlobalEdgeTargetArrowShape
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, one of "triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
+#'                     "vee", "tee", "square", "circle", "diamond", "none"
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalEdgeTargetArrowShape", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalEdgeTargetArrowShape(rcy, "tee")
+#'   }
+#'
+
+setMethod("setGlobalEdgeTargetArrowShape", "RCyjs",
+  function(obj, newValue=c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
+                     "vee", "tee", "square", "circle", "diamond", "none")) {
+     send(obj, list(cmd="setGlobalEdgeTargetArrowShape", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+  })
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalEdgeColor
+#'
+#' \code{setGlobalEdgeColor}
+#'
+#' @rdname setGlobalEdgeColor
+#' @aliases setGlobalEdgeColor
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, any valid CSS color
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalNodeColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalNodeFontColor(rcy, "red")
+#'   }
+#'
+
+setMethod("setGlobalEdgeColor", "RCyjs",
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalEdgeColor", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+#----------------------------------------------------------------------------------------------------
+#' setGlobalEdgeTargetArrowColor
+#'
+#' \code{setGlobalEdgeTargetArrowColor}
+#'
+#' @rdname setGlobalEdgeTargetArrowColor
+#' @aliases setGlobalEdgeTargetArrowColor
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, and valid CSS color
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalEdgeTargetArrowColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalEdgeTargetArrowColor(rcy, "red")
+#'   }
+#'
+
+setMethod("setGlobalEdgeTargetArrowColor", "RCyjs",
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalEdgeTargetArrowColor", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+#----------------------------------------------------------------------------------------------------
+#' setGlobalEdgeWidth
+#'
+#' \code{setGlobalEdgeWidth} in pixels
+#'
+#' @rdname setGlobalEdgeWidth
+#' @aliases setGlobalEdgeWidth
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a numeric
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalEdgeWidth", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalEdgeWidth(rcy, 1)
+#'   }
+#'
+
+setMethod("setGlobalEdgeWidth", "RCyjs",
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalEdgeWidth", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+     })
+#----------------------------------------------------------------------------------------------------
+#' setGlobalEdgeLineColor
+#'
+#' \code{setGlobalEdgeLineColor}
+#'
+#' @rdname setGlobalEdgeLineColor
+#' @aliases setGlobalEdgeLineColor
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, and valid CSS color
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalEdgeLineColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalEdgeLineColor(rcy, "red")
+#'   }
+#'
+
+setMethod("setGlobalEdgeLineColor", "RCyjs",
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalEdgeLineColor", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
+  })
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalEdgeLineStyle
+#'
+#' \code{setGlobalEdgeLineStyle} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname setGlobalEdgeLineStyle
+#' @aliases setGlobalEdgeLineStyle
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, one of "solid", "dotted", or "dashed"
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalEdgeLineStyle", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalEdgeLineColor(rcy, "dashed")
+#'   }
+#'
+
+setMethod("setGlobalEdgeLineStyle", "RCyjs",
+  function (obj, newValue=c("solid", "dotted", "dashed")) {
+     send(obj, list(cmd="setGlobalEdgeLineStyle", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setGlobalEdgeSourceArrowColor
+#'
+#' \code{setGlobalEdgeSourceArrowColor}
+#'
+#' @rdname setGlobalEdgeSourceArrowColor
+#' @aliases setGlobalEdgeSourceArrowColor
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, and valid CSS color
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalEdgeSourceArrowColor", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalEdgeSourceArrowColor(rcy, "red")
+#'   }
+#'
+
+setMethod("setGlobalEdgeSourceArrowColor", "RCyjs",
+  function (obj, newValue) {
+     send(obj, list(cmd="setGlobalEdgeSourceArrowColor", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+     })
+#----------------------------------------------------------------------------------------------------
+#' setGlobalEdgeSourceArrowShape
+#'
+#' \code{setGlobalEdgeSourceArrowShape} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname setGlobalEdgeSourceArrowShape
+#' @aliases setGlobalEdgeSourceArrowShape
+#'
+#' @param obj an RCyjs instance
+#' @param newValue a character string, one of "triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
+#'                     "vee", "tee", "square", "circle", "diamond", "none"
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setGlobalEdgeSourceArrowShape", graph=g)
+#'   layout(rcy, "cose")
+#'   setGlobalEdgeSourceArrowShape(rcy, "tee")
+#'   }
+#'
+
+setMethod("setGlobalEdgeSourceArrowShape", "RCyjs",
+  function(obj, newValue=c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
+                     "vee", "tee", "square", "circle", "diamond", "none")) {
+     send(obj, list(cmd="setGlobalEdgeSourceArrowShape", callback="handleResponse", status="request",
+                    payload=newValue))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));    # the empty string
+  })
+
+#----------------------------------------------------------------------------------------------------
+#' setNodeLabelRule
+#'
+#' \code{setNodeLabelRule} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname setNodeLabelRule
+#' @aliases setNodeLabelRule
+#'
+#' @param obj an RCyjs instance
+#' @param attribute a character string, the node attribute to display as label
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- createTestGraph(nodeCount=20, edgeCount=20)
+#'   rcy <- RCyjs(title="layouts", graph=g)
+#'   setNodeLabelRule(rcy, "label");
+#'   }
+#'
+
+setMethod('setNodeLabelRule', 'RCyjs',
 
   function (obj, attribute) {
      send(obj, list(cmd="setNodeLabelRule", callback="handleResponse", status="request",
@@ -422,7 +1998,35 @@ setMethod('setNodeLabelRule', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeLabelAlignment', 'RCyjsClass',
+#' setNodelLabelAlignment
+#'
+#' \code{setNodeLabelAlignment} put somewhat more detailed description here
+#'
+#' multi-line description goes here with
+#' continuations on subsequent lines
+#' if you like
+#'
+#' @rdname setNodeLabelAlignment
+#' @aliases setNodeLabelAlignment
+#'
+#' @param obj an RCyjs instance
+#' @param horizontal character string
+#' @param vertical character string
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"));
+#'    setNodeLabelAlignment(rcy, "center", "top")
+
+setMethod('setNodeLabelAlignment', 'RCyjs',
 
   function (obj, horizontal, vertical) {
      stopifnot(vertical %in% c("top", "center", "bottom"))
@@ -437,227 +2041,163 @@ setMethod('setNodeLabelAlignment', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeImage', 'RCyjsClass',
-
-  function (obj, imageURLs) {
-     recognizedNodes <- intersect(names(imageURLs), nodes(obj@graph))
-     printf("setNodeImage: %d/%d node names (ids) recognized", length(recognizedNodes),
-            length(nodes(obj@graph)))
-     send(obj, list(cmd="setNodeImage", callback="handleResponse", status="request",
-                                  payload=imageURLs))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
+## #' setNodeImage
+# #'
+# #' \code{setNodeImage} put somewhat more detailed description here
+# #'
+# #' multi-line description goes here with
+# #' continuations on subsequent lines
+# #' if you like
+# #'
+# #' @rdname setNodeImage
+# #' @aliases setNodeImage
+# #'
+# #' @param obj an RCyjs instance
+# #' @param imageURLs  a vector of character strings
+# #'
+# #' @return explain what the method returns
+# #'
+# #' @export
+# #'
+# #' @examples
+# #'   x <- 3 + 2
+# #'
+#
+# setMethod('setNodeImage', 'RCyjs',
+#
+#   function (obj, imageURLs) {
+#      recognizedNodes <- intersect(names(imageURLs), nodes(obj@graph))
+#      send(obj, list(cmd="setNodeImage", callback="handleResponse", status="request",
+#                                   payload=imageURLs))
+#      while (!browserResponseReady(obj)){
+#         Sys.sleep(.1)
+#         }
+#      invisible(getBrowserResponse(obj));  # the empty string.
+#      })
+#
+#----------------------------------------------------------------------------------------------------
+#' getSupportedNodeShapes
+#'
+#' \code{getSupportedNodeShapes} return a list of those currently offered
+#'
+#' @rdname getSupportedNodeShapes
+#' @aliases getSupportedNodeShapes
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return a list of character strings
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- createTestGraph(nodeCount=20, edgeCount=20)
+#'   rcy <- RCyjs(title="shapes", graph=g)
+#'   shapes <- getSupportedNodeShapes(rcy)
+#'   }
+#'
+setMethod('getSupportedNodeShapes',  "RCyjs",
+          function(obj){
+             c("ellipse", "triangle", "rectangle", "roundrectangle",
+               "bottomroundrectangle","cutrectangle", "barrel",
+               "rhomboid", "diamond", "pentagon", "hexagon",
+               "concavehexagon", "heptagon", "octagon", "star", "tag", "vee")
+          })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeSizeRule', 'RCyjsClass',
-
-  function (obj, attribute, control.points, node.sizes) {
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     nodeSizes=node.sizes)
-     send(obj, list(cmd="setNodeSizeRule", callback="handleResponse", status="request",
-                                  payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('setNodeColorRule', 'RCyjsClass',
-
-  function (obj, attribute, control.points, colors, mode="interpolate") {
-
-     if (!mode %in% c ('interpolate', 'lookup')) {
-       write("Error! RCyjs:setNodeColorRule.  mode must be 'interpolate' (the default) or 'lookup'.", stderr ())
-       return ()
-       }
-
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     nodeColors=colors,
-                     mode=mode)
-     send(obj, list(cmd="setNodeColorRule", callback="handleResponse", status="request",
-                                  payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
+#' getSupportedEdgeDecoratorShapes
+#'
+#' \code{getSupportedEdgeDecoratorShapes} return a list of those currently offered
+#'
+#' @rdname getSupportedEdgeDecoratorShapes
+#' @aliases getSupportedEdgeDecoratorShapes
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return a list of character strings
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- createTestGraph(nodeCount=20, edgeCount=20)
+#'   rcy <- RCyjs(title="shapes", graph=g)
+#'   shapes <- getSupportedEdgeDecoratorShapes(rcy)
+#'   }
+#'
+#'
+#'
+setMethod('getSupportedEdgeDecoratorShapes',  "RCyjs",
+          function(obj){
+             c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
+               "vee", "tee", "square", "circle", "diamond", "none")
+          })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setNodeShapeRule', 'RCyjsClass',
+#' getLayoutStrategies
+#'
+#' \code{getLayoutStrategies} return a list of those currently offered
+#'
+#' @rdname getLayoutStrategies
+#' @aliases getLayoutStrategies
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return a list of character strings
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- createTestGraph(nodeCount=20, edgeCount=20)
+#'   rcy <- RCyjs(title="layouts", graph=g)
+#'   strategies <- getLayoutStrategies(rcy)
+#'   }
+#'
 
-  function (obj, attribute, control.points, node.shapes) {
-
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     nodeShapes=node.shapes,
-                     mode=mode)
-     send(obj, list(cmd="setNodeShapeRule", callback="handleResponse", status="request",
-                                  payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('setEdgeStyle', 'RCyjsClass',
-
-  function (obj, mode) {
-
-     payload <- mode
-     send(obj, list(cmd="setEdgeStyle", callback="handleResponse", status="request",
-                    payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('setEdgeColorRule', 'RCyjsClass',
-
-  function (obj, attribute, control.points, colors, mode="interpolate") {
-
-     if (!mode %in% c ('interpolate', 'lookup')) {
-       write("Error! RCyjs:setEdgeColorRule.  mode must be 'interpolate' (the default) or 'lookup'.", stderr ())
-       return ()
-       }
-
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     edgeColors=colors,
-                     mode=mode)
-     send(obj, list(cmd="setEdgeColorRule", callback="handleResponse", status="request",
-                     payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('setEdgeWidthRule', 'RCyjsClass',
-
-  function (obj, attribute, control.points, widths, mode="interpolate") {
-
-     if (!mode %in% c ('interpolate', 'lookup')) {
-       write("Error! RCyjs:setEdgeWidthRule.  mode must be 'interpolate' (the default) or 'lookup'.", stderr ())
-       return ()
-       }
-
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     widths=widths,
-                     mode=mode)
-     send(obj, list(cmd="setEdgeWidthRule", callback="handleResponse", status="request",
-                     payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('setEdgeTargetArrowShapeRule', 'RCyjsClass',
-
-  function (obj, attribute, control.points, shapes) {
-
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     edgeShapes=shapes)
-     send(obj, list(cmd="setEdgeTargetArrowShapeRule", callback="handleResponse", status="request",
-                     payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('setEdgeSourceArrowShapeRule', 'RCyjsClass',
-
-  function (obj, attribute, control.points, shapes) {
-
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     edgeShapes=shapes,
-                     mode=mode)
-     send(obj, list(cmd="setEdgeSourceArrowShapeRule", callback="handleResponse", status="request",
-                     payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('setEdgeTargetArrowColorRule', 'RCyjsClass',
-
-  function (obj, attribute, control.points, colors, mode="interpolate") {
-
-     if (!mode %in% c ('interpolate', 'lookup')) {
-       write("Error! RCyjs:setEdgeTargetArrowColorRule.  mode must be 'interpolate' (the default) or 'lookup'.", stderr ())
-       return ()
-       }
-
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     colors=colors,
-                     mode=mode)
-     send(obj, list(cmd="setEdgeTargetArrowColorRule", callback="handleResponse", status="request",
-                     payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('setEdgeSourceArrowColorRule', 'RCyjsClass',
-
-  function (obj, attribute, control.points, colors, mode="interpolate") {
-
-     if (!mode %in% c ('interpolate', 'lookup')) {
-       write("Error! RCyjs:setEdgeSourceArrowColorRule.  mode must be 'interpolate' (the default) or 'lookup'.", stderr ())
-       return ()
-       }
-
-     payload <- list(attribute=attribute,
-                     controlPoints=control.points,
-                     colors=colors,
-                     mode=mode)
-     send(obj, list(cmd="setEdgeSourceArrowColorRule", callback="handleResponse", status="request",
-                     payload=payload))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));  # the empty string.
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('layoutStrategies', 'RCyjsClass',
+setMethod('getLayoutStrategies', 'RCyjs',
 
   function (obj) {
-     send(obj, list(cmd="layoutStrategies", callback="handleResponse", status="request",
-                                  payload=""))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     getBrowserResponse(obj)
+     builtinStrategies = c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
+     extensionStrategies = c("cola", "dagre", "cose-bilkent")
+     return(sort(c(builtinStrategies, extensionStrategies)))
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('layout', 'RCyjsClass',
+#' layout
+#'
+#' \code{layout} apply a layout algorithm to the current grap
+#'
+#' @rdname layout
+#' @aliases layout
+#'
+#' @param obj  an RCyjs instance
+#' @param strategy  a character string, one of the supported algorithms
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- createTestGraph(nodeCount=20, edgeCount=20)
+#'   rcy <- RCyjs(title="layouts", graph=g)
+#'   strategies <- getLayoutStrategies(rcy)
+#'   for(strategy in stategies){
+#'      layout(rcy, strategy)
+#'      Sys.sleep(1)
+#'      }
+#'   }
+#'
+#' @seealso \code{\link{getLayoutStrategies}}
+
+setMethod('layout', 'RCyjs',
 
   function (obj, strategy="random") {
-     send(obj, list(cmd="doLayout", callback="handleResponse", status="request",
-                                  payload=strategy))
+     if(!strategy %in% getLayoutStrategies(obj))
+        stop(sprintf("unrecognized layout strategy: '%s'", strategy))
+
+     send(obj, list(cmd="doLayout", callback="handleResponse", status="request", payload=strategy))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -665,7 +2205,36 @@ setMethod('layout', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('layoutSelectionInGrid', 'RCyjsClass',
+#' layoutSelectionInGrid
+#'
+#' \code{layoutSelectionInGrid} arrange selected nodes in this region
+#'
+#' @rdname layoutSelectionInGrid
+#' @aliases layoutSelectionInGrid
+#'
+#' @param obj an RCyjs instance
+#' @param x  numeric  this will be the top left x coordinate of the grid
+#' @param y  numeric  the top right
+#' @param w  numeric  width of the grid
+#' @param h  numeric  height of the grid
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"));
+#'    selectNodes(rcy, nodes(g))
+#'    layoutSelectionInGrid(rcy, -1000, 10, 100, 400)
+#'    }
+#'
+
+setMethod('layoutSelectionInGrid', 'RCyjs',
 
    function(obj, x, y, w, h){
      payload <- list(x=x, y=y, w=w, h=h)
@@ -679,8 +2248,37 @@ setMethod('layoutSelectionInGrid', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-# anchor (the top left) of the grid is the location of the topmost/leftmost node
-setMethod('layoutSelectionInGridInferAnchor', 'RCyjsClass',
+#' layoutSelectionInGridInferAnchor
+#'
+#' \code{layoutSelectionInGridInferAnchor} the top-most, left-most of the selected nodes is the anchor
+#'
+#' anchor (the top left) of the grid is the location of the topmost/leftmost node, then arrange
+#' all the selected nodes in a box anchored here.
+#'
+#' @rdname layoutSelectionInGridInferAnchorm
+#' @aliases layoutSelectionInGridInferAnchor
+#'
+#' @param obj  an RCyjs instance
+#' @param w  numeric, the width of the grid box
+#' @param h  numeric, the height of the grid box
+#'
+#' @return explain what the method returns
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    layout(rcy, "cose")
+#'    fit(rcy, 100)
+#'    loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"));
+#'    selectNodes(rcy, nodes(g))
+#'    layoutSelectionInGrid(rcy, -1000, 10, 100, 400)
+#'    }
+#'
+
+setMethod('layoutSelectionInGridInferAnchor', 'RCyjs',
 
    function(obj, w, h){
      payload <- list(w=w, h=h)
@@ -694,7 +2292,32 @@ setMethod('layoutSelectionInGridInferAnchor', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getPosition', 'RCyjsClass',
+#' getPosition
+#'
+#' \code{getPosition} for all or specified nodes
+#'
+#' @rdname getPosition
+#' @aliases getPosition
+#'
+#' @param obj an RCyjs instance
+#' @param nodeIDs a vector of character strings, default NA
+#'
+#' @return a data.frame with "id", "x" and "y" columns
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="getPosition", graph=g)
+#'   layout(rcy, "cose")
+#'   tbl.pos <- getPosition(rcy)
+#'   tbl.posA <- getPosition(rcy, "A")
+#'   }
+#'
+#'
+
+setMethod('getPosition', 'RCyjs',
 
   function (obj, nodeIDs=NA) {
      if(all(is.na(nodeIDs)))
@@ -708,7 +2331,35 @@ setMethod('getPosition', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setPosition', 'RCyjsClass',
+#' setPosition
+#'
+#' \code{setPosition} of nodes by their id
+#'
+#' @rdname setPosition
+#' @aliases setPosition
+#'
+#' @param obj  an RCyjs instance
+#' @param tbl.pos a data.frame with three columns: id, x, y
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="getPosition", graph=g)
+#'   layout(rcy, "cose")
+#'   tbl.pos <- getPosition(rcy)
+#'     # shift all the nodes to the right
+#'   tbl.pos$x <- tbl.pos$x + 50
+#'   setPosition(rcy, tbl.pos)
+#'   }
+#'
+#' @seealso \code{\link{getPosition}}
+#'
+
+setMethod('setPosition', 'RCyjs',
 
   function (obj, tbl.pos) {
      send(obj, list(cmd="setPosition", callback="handleResponse", status="request", payload=tbl.pos))
@@ -719,32 +2370,37 @@ setMethod('setPosition', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getNodeSize', 'RCyjsClass',
+#' saveLayout
+#'
+#' \code{saveLayout} to a named file
+#'
+#' All node positions are saved to a functionally opaque RData object,
+#' in a file whose name you supply.  These files are used by
+#' restoreLayout.
+#'
+#' @rdname saveLayout
+#' @aliases saveLayout
+#'
+#' @param obj a RCyjs instance
+#' @param filename "layout.RData" by default
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    layout(rcy, "grid")
+#'    saveLayout(rcy, filename="gridLayout.RData")
+#'    layout(rcy, "circle")
+#'    restoreLayout(rcy, "gridLayout.RData")
+#'    }
+#'
+#' @seealso\code{\link{restoreLayout}}
+#'
 
-  function (obj, nodeIDs=NA) {
-     if(all(is.na(nodeIDs)))
-        nodeIDs <- ""
-     send(obj, list(cmd="getNodeSize", callback="handleResponse", status="request", payload=nodeIDs))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     fromJSON(getBrowserResponse(obj))
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('getLayout', 'RCyjsClass',
-
-  function (obj) {
-     send(obj, list(cmd="getLayout", callback="handleResponse", status="request",
-                                  payload=""))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     fromJSON(getBrowserResponse(obj))
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('saveLayout', 'RCyjsClass',
+setMethod('saveLayout', 'RCyjs',
 
   function (obj, filename="layout.RData") {
      tbl.layout <- getPosition(obj)
@@ -752,21 +2408,69 @@ setMethod('saveLayout', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('restoreLayout', 'RCyjsClass',
+#' restoreLayout
+#'
+#' \code{restoreLayout} restore a previously-saved layout
+#'
+#' @rdname restoreLayout
+#' @aliases restoreLayout
+#'
+#' @param obj an RCyjs instance
+#' @param filename  a character string, default "layout.RData"
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    layout(rcy, "grid")
+#'    saveLayout(rcy, filename="gridLayout.RData")
+#'    layout(rcy, "circle")
+#'    restoreLayout(rcy, "gridLayout.RData")
+#'    }
+#'
+#' @seealso\code{\link{saveLayout}}
+
+
+setMethod('restoreLayout', 'RCyjs',
 
   function (obj, filename="layout.RData") {
      tbl.layout <- NA
+     stopifnot(file.exists(filename))
      load(filename)
      if(!all(is.na(tbl.layout)))
         x <- setPosition(obj, tbl.layout)
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getJSON', 'RCyjsClass',
+#' getJSON
+#'
+#' \code{getJSON} a JSON string from the browser, describing the graph in cytoscape.js terms
+#'
+#' @rdname getJSON
+#' @aliases getJSON
+#'
+#' @param obj an RCyjs instance
+#'
+#' @return a JSON string
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    sampleGraph <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="getJSON", graph=sampleGraph)
+#'    s <- getJSON(rcy)
+#'    s.asList <- fromJSON(s)  # easier to inspect if you wish toa
+#'    }
+#'
+
+setMethod('getJSON', 'RCyjs',
 
   function (obj) {
-     send(obj, list(cmd="getJSON", callback="handleResponse", status="request",
-                                  payload=""))
+     send(obj, list(cmd="getJSON", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -774,7 +2478,33 @@ setMethod('getJSON', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('savePNG', 'RCyjsClass',
+#' savePNG
+#'
+#' \code{savePNG} write current cytoscape view, at current resolution, to a PNG file.
+#'
+#' @rdname savePNG
+#' @aliases savePNG
+#'
+#' @param obj  an RCyjs instance
+#' @param filename  a character string
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="layouts", graph=createTestGraph(nodeCount=20, edgeCount=20))
+#'    style.filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+#'    loadStyleFile(rcy, style.filename)
+#'    layout(rcy, "cose")
+#'    fit(rcy)
+#'    filename <- tempfile(fileext=".png")
+#'    savePNG(rcy, filename)
+#'    }
+
+
+setMethod('savePNG', 'RCyjs',
 
   function (obj, filename) {
      send(obj, list(cmd="getPNG", callback="handleResponse", status="request",
@@ -794,42 +2524,229 @@ setMethod('savePNG', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-noaNames = function (graph)
+#' saveJPG
+#'
+#' \code{saveJPG} write current cytoscape view, at current resolution, to a JPG file.
+#'
+#' @rdname saveJPG
+#' @aliases saveJPG
+#'
+#' @param obj  an RCyjs instance
+#' @param filename  a character string
+#' @param resolutionFactor  numeric, default 1, higher values multiply resolution beyond screen dpi
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="layouts", graph=createTestGraph(nodeCount=20, edgeCount=20))
+#'    style.filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+#'    loadStyleFile(rcy, style.filename)
+#'    layout(rcy, "cose")
+#'    fit(rcy)
+#'    filename <- tempfile(fileext=".jpg")
+#'    saveJPG(rcy, filename, resolutionFactor)
+#'    }
+
+setMethod('saveJPG', 'RCyjs',
+
+  function (obj, filename, resolutionFactor=1) {
+     payload <- list(resolutionFactor=resolutionFactor)
+     send(obj, list(cmd="getJPG", callback="handleResponse", status="request",
+                                  payload=payload))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     jpg <- getBrowserResponse(obj)
+     jpg.parsed <- fromJSON(jpg)
+     substr(jpg.parsed, 1, 30) # [1] "data:image/jpg;base64,iVBORw0K"
+     nchar(jpg.parsed)  # [1] 768714
+     jpg.parsed.headless <- substr(jpg.parsed, 23, nchar(jpg.parsed))  # chop off the uri header
+     jpg.parsed.binary <- base64decode(jpg.parsed.headless)
+     conn <- file(filename, "wb")
+     writeBin(jpg.parsed.binary, conn)
+     close(conn)
+     })
+
+#----------------------------------------------------------------------------------------------------
+## #' saveAsWebPage
+## #'
+## #' \code{saveAsWebPage} write current cytoscape graph and style to a standalone webpage
+## #'
+## #' @rdname saveAsWebPage
+## #' @aliases saveAsWebPage
+## #'
+## #' @param obj  an RCyjs instance
+## #' @param filename  a character string
+## #'
+## #' @return no return value
+## #'
+## #' @export
+## #'
+## #' @examples
+## #' if(interactive()){
+## #'    rcy <- RCyjs(title="layouts", graph=createTestGraph(nodeCount=20, edgeCount=20))
+## #'    style.filename <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+## #'    loadStyleFile(rcy, style.filename)
+## #'    layout(rcy, "cose")
+## #'    fit(rcy)
+## #'    filename <- tempfile(fileext=".html")
+## #'    saveAsWebPage(rcy, filename)
+## #'    }
+##
+## setMethod('saveAsWebPage', 'RCyjs',
+##
+##   function (obj, filename) {
+##      payload <- list(resolutionFactor=resolutionFactor)
+##      send(obj, list(cmd="getJPG", callback="handleResponse", status="request",
+##                                   payload=payload))
+##      while (!browserResponseReady(obj)){
+##         Sys.sleep(.1)
+##         }
+##      jpg <- getBrowserResponse(obj)
+##      jpg.parsed <- fromJSON(jpg)
+##      substr(jpg.parsed, 1, 30) # [1] "data:image/jpg;base64,iVBORw0K"
+##      nchar(jpg.parsed)  # [1] 768714
+##      jpg.parsed.headless <- substr(jpg.parsed, 23, nchar(jpg.parsed))  # chop off the uri header
+##      jpg.parsed.binary <- base64decode(jpg.parsed.headless)
+##      conn <- file(filename, "wb")
+##      writeBin(jpg.parsed.binary, conn)
+##      close(conn)
+##      })
+##
+#----------------------------------------------------------------------------------------------------
+#' noaNames
+#'
+#' \code{noaNames} the names of the unique node attribute categories on the graph (not their values)
+#'
+#' @rdname noaNames
+#' @aliases noaNames
+#'
+#' @param graph a graphNEL
+#'
+#' @return character strings, the names of the unique node attribute categories on the graph
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   noaNames(g)
+#'   }
+#'
+noaNames <- function (graph)
 {
-  return (names (nodeDataDefaults (graph)))
+  return(names(nodeDataDefaults(graph)))
 }
 #------------------------------------------------------------------------------------------------------------------------
-edaNames = function (graph)
+#' edaNames
+#'
+#' \code{edaNames} the names of the unique edge attribute categories on the graph (not their values)
+#'
+#' @rdname edaNames
+#' @aliases edaNames
+#'
+#' @param graph a graphNEL
+#'
+#' @return character strings, the names of the unique edge attribute categories on the graph
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   edaNames(g)
+#'   }
+#'
+edaNames <- function (graph)
 {
-  return (names (edgeDataDefaults (graph)))
+  return (names(edgeDataDefaults (graph)))
 }
 #------------------------------------------------------------------------------------------------------------------------
-noa = function (graph, node.attribute.name)
+#' noa
+#'
+#' \code{noa} retrieve the node/attribute-value pairs, for the specified node attribute category
+#'
+#' @rdname noa
+#' @aliases noa
+#'
+#' @param graph a graphNEL
+#' @param node.attribute.name a character string
+#'
+#' @return character strings, the names of the unique edge attribute categories on the graph
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   noa(g, "lfc")
+#'    }
+#'
+noa <- function (graph, node.attribute.name)
 {
-  if (!node.attribute.name %in% noaNames (graph))
+  if (!node.attribute.name %in% noaNames(graph))
     return (NA)
 
-  return (unlist (nodeData (graph, attr=node.attribute.name)))
+  return(unlist(nodeData (graph, attr=node.attribute.name)))
 
 } # noa
 #------------------------------------------------------------------------------------------------------------------------
-eda = function (graph, edge.attribute.name)
+#' eda
+#'
+#' \code{eda} retrieve the node/attribute-value pairs, for the specified node attribute category
+#'
+#' @rdname eda
+#' @aliases eda
+#'
+#' @param graph a graphNEL
+#' @param edge.attribute.name a character string
+#'
+#' @return character strings, the names of the unique edge attribute categories on the graph
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   edaNames(g)   # discover the attribute category names
+#'   eda(g, "edgeType")
+#'   eda(g, "score")
+#'   }
+#'
+eda <- function(graph, edge.attribute.name)
 {
   if (!edge.attribute.name %in% edaNames (graph))
     return (NA)
 
-  return (unlist (edgeData (graph, attr=edge.attribute.name)))
+  return(unlist(edgeData(graph, attr=edge.attribute.name)))
 
 } # eda
 #------------------------------------------------------------------------------------------------------------------------
-setMethod('fit', 'RCyjsClass',
+#' fit
+#'
+#' \code{fit} zoom in (or out) to display all nodes in the current graph
+#'
+#' @rdname fit
+#' @aliases fit
+#'
+#' @param obj  an RCyjs instance
+#' @param padding  numeric, in pixels
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    setZoom(rcy, 0.5)   # zoom out
+#'    fit(rcy)
+#'    }
 
-  function (obj, padding=30) {
-     fitContent(obj, padding);
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod('fitContent', 'RCyjsClass',
+setMethod('fit', 'RCyjs',
 
   function (obj, padding=30) {
      send(obj, list(cmd="fit", callback="handleResponse", status="request", payload=padding))
@@ -840,7 +2757,30 @@ setMethod('fitContent', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('fitSelectedContent', 'RCyjsClass',
+#' fitSelection
+#'
+#' \code{fitSelection} zoom in to include only currently selected nodes
+#'
+#' @rdname fitSelection
+#' @aliases fitSelection
+#'
+#' @param obj an RCyjs instance
+#' @param padding numeric, in pixels
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    selectNodes(rcy, "A")
+#'    fitSelection(rcy, padding=100)
+#'    }
+
+
+
+setMethod('fitSelection', 'RCyjs',
 
   function (obj, padding=30) {
      send(obj, list(cmd="fitSelected", callback="handleResponse", status="request", payload=padding))
@@ -851,7 +2791,28 @@ setMethod('fitSelectedContent', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('selectNodes', 'RCyjsClass',
+#' selectNodes
+#'
+#' \code{selectNodes} by node id
+#'
+#' @rdname selectNodes
+#' @aliases selectNodes
+#'
+#' @param obj  an RCyjs instance
+#' @param nodeIDs character strings
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    selectNodes(rcy, c("A", "B"))
+#'    }
+#'
+
+setMethod('selectNodes', 'RCyjs',
 
   function (obj, nodeIDs) {
      send(obj, list(cmd="selectNodes", callback="handleResponse", status="request",
@@ -863,7 +2824,29 @@ setMethod('selectNodes', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('sfn', 'RCyjsClass',
+#' selectFirstNeighborsOfSelectedNodes
+#'
+#' \code{selectFirstNeighborsOfSelectedNodes}
+#'
+#' @rdname selectFirstNeighborsOfSelectedNodes
+#' @aliases selectFirstNeighborsOfSelectedNodes
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    selectNodes(rcy, "A")
+#'    getSelectedNodes(rcy)  # just one
+#'    selectFirstNeighborsOfSelectedNodes()
+#'    getSelectedNodes(rcy)  # now three
+#'    }
+#'
+setMethod('selectFirstNeighborsOfSelectedNodes', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="sfn", callback="handleResponse", status="request", payload=""))
@@ -874,7 +2857,59 @@ setMethod('sfn', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('hideAllEdges', 'RCyjsClass',
+#' sfn
+#'
+#' \code{sfn} select first neighbors of the currently selected nodes
+#'
+#' @rdname sfn
+#' @aliases sfn
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    selectNodes(rcy, "A")
+#'    getSelectedNodes(rcy)  # just one
+#'    sfn()
+#'    getSelectedNodes(rcy)  # now three
+#'    }
+#'
+setMethod('sfn', 'RCyjs',
+
+  function (obj) {
+     selectFirstNeighborsOfSelectedNodes(obj)
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' hideAllEdges
+#'
+#' \code{hideAllEdges}
+#'
+#' @rdname hideAllEdges
+#' @aliases hideAllEdges
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   layout(rcy, "cose")
+#'   hideAllEdges()
+#'   showAll(rcy, "edges")
+#'   }
+
+
+setMethod('hideAllEdges', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="hideAllEdges", callback="handleResponse", status="request",
@@ -886,11 +2921,36 @@ setMethod('hideAllEdges', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('showAllEdges', 'RCyjsClass',
+#' showAll
+#'
+#' \code{showAll} show any hidden objects: nodes, edges, or both
+#'
+#' @rdname showAll
+#' @aliases showAll
+#'
+#' @param obj an RCyjs instance
+#' @param which a character string, either "nodes", "edges" or "both"
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   layout(rcy, "cose")
+#'   selectNodes(rcy, getNodes(rcy)$id)
+#'   hideSelectedNodes(rcy)
+#'   showAll(rcy, "nodes")
+#'   }
+#'
 
-  function (obj) {
-     send(obj, list(cmd="showAllEdges", callback="handleResponse", status="request",
-                    payload=""))
+setMethod('showAll', 'RCyjs',
+
+  function (obj, which=c("both", "nodes", "edges")) {
+     payload <- match.arg(which)
+     send(obj, list(cmd="showAll", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
@@ -898,18 +2958,35 @@ setMethod('showAllEdges', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('showAll', 'RCyjsClass',
+#' hideEdges
+#'
+#' \code{hideEdges} hide all edges of the specified type
+#'
+#' edgeType is a crucial feature for RCyjs.  We assume it is an attribute found
+#' on every edge in every graph.
+#'
+#' @rdname hideEdges
+#' @aliases hideEdges
+#'
+#' @param obj an RCyjs instance
+#' @param edgeType  a character string
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getNodes(rcy)
+#'    edaNames(rcy)        # includes "edgeType"
+#'    eda(rcy, "edgeType")  # includes "phosphorylates"
+#'    hideEdges(rcy, edgeType="phosphorylates")
+#'    showEdges(rcy, edgeType="phosphorylates")
+#'    }
 
-  function (obj) {
-     send(obj, list(cmd="showAll", callback="handleResponse", status="request", payload=""))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
 
-#----------------------------------------------------------------------------------------------------
-setMethod('hideEdges', 'RCyjsClass',
+setMethod('hideEdges', 'RCyjs',
 
   function (obj, edgeType) {
      send(obj, list(cmd="hideEdges", callback="handleResponse", status="request",
@@ -921,7 +2998,35 @@ setMethod('hideEdges', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('showEdges', 'RCyjsClass',
+#' showEdges
+#'
+#' \code{showEdges} if hidden, edges of the specified type will be made visible
+#'
+#' edgeType is a crucial feature for RCyjs.  We assume it is an attribute found
+#' on every edge in every graph.
+#'
+#' @rdname showEdges
+#' @aliases showEdges
+#'
+#' @param obj an RCyjs instance
+#' @param edgeType  a character string
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getNodes(rcy)
+#'    edaNames(rcy)        # includes "edgeType"
+#'    eda(rcy, "edgeType")  # includes "phosphorylates"
+#'    hideEdges(rcy, edgeType="phosphorylates")
+#'    showEdges(rcy, edgeType="phosphorylates")
+#'    }
+#'
+
+setMethod('showEdges', 'RCyjs',
 
   function (obj, edgeType) {
      send(obj, list(cmd="showEdges", callback="handleResponse", status="request",
@@ -933,7 +3038,30 @@ setMethod('showEdges', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('getZoom', 'RCyjsClass',
+#' getZoom
+#'
+#' \code{getZoom} learn the zoom level of the current display
+#'
+#' @rdname getZoom
+#' @aliases getZoom
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    getZoom(rcy)
+#'    Sys.sleep(1)
+#'    setZoom(rcy, 5)
+#'    getZoom(rcy)
+#'    }
+#'
+
+setMethod('getZoom', 'RCyjs',
 
   function (obj) {
      send(obj, list(cmd="getZoom", callback="handleResponse", status="request",
@@ -941,11 +3069,34 @@ setMethod('getZoom', 'RCyjsClass',
      while (!browserResponseReady(obj)){
         Sys.sleep(.1)
         }
-     invisible(getBrowserResponse(obj));    # the empty string
+     getBrowserResponse(obj)
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setZoom', 'RCyjsClass',
+#' setZoom
+#'
+#' \code{setZoom} zoom in or out
+#'
+#' @rdname setZoom
+#' @aliases setZoom
+#'
+#' @param obj  an RCyjs instance
+#' @param newValue  numeric, typically be 0.1 (zoomed way out, nodes are small) and 10 (zoomed way in, nodes are large)
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    setZoom(rcy, 0.2)
+#'    Sys.sleep(1)
+#'    setZoom(rcy, 5)
+#'    }
+#'
+
+setMethod('setZoom', 'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setZoom", callback="handleResponse", status="request",
@@ -957,7 +3108,29 @@ setMethod('setZoom', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod('setBackgroundColor', 'RCyjsClass',
+#' setBackgroundColor
+#'
+#' \code{setBackgroundColor} of the entire cytoscape.js div
+#'
+#' @rdname setBackgroundColor
+#' @aliases setBackgroundColor
+#'
+#' @param obj  an RCyjs instance
+#' @param newValue  a character string, any valid CSS color
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    rcy <- RCyjs(title="rcyjs demo", graph=simpleDemoGraph())
+#'    setBackgroundColor(rcy, "lightblue")
+#'    }
+
+#'
+
+setMethod('setBackgroundColor', 'RCyjs',
 
   function (obj, newValue) {
      send(obj, list(cmd="setBackgroundColor", callback="handleResponse", status="request",
@@ -969,253 +3142,65 @@ setMethod('setBackgroundColor', 'RCyjsClass',
      })
 
 #----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeSize",  'RCyjsClass',
+#' vAlign
+#'
+#' \code{vAlign} vertically align selected nodes
+#'
+#' The shared x coordinate will be the mean of the x coordinates of selected nodes.
+#' The y coordinates are preserved.
+#'
+#' @rdname vAlign
+#' @aliases vAlign
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   layout(rcy, "cose")
+#'   selectNodes(rcy, nodes(g)[1:2])
+#'   vAlign(rcy)
+#'   }
+#'
 
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeSize", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeWidth",   'RCyjsClass',
-
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeWidth", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeHeight",   'RCyjsClass',
-
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeHeight", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeColor",   'RCyjsClass',
-
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeColor", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeShape",   'RCyjsClass',
-
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeShape", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeFontColor",   'RCyjsClass',
-
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeFontColor", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeFontSize",  'RCyjsClass',
-
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeFontSize", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeBorderWidth",  'RCyjsClass',
-
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeBorderWidth", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     getBrowserResponse(obj);
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultNodeBorderColor",  'RCyjsClass',
-
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeBorderColor", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     getBrowserResponse(obj);
-     })
-
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeFontSize", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultNodeFontSize", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeTargetArrowShape", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeTargetArrowShape", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeColor", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeColor", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeTargetArrowColor", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeTargetArrowColor", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeFontSize", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeFontSize", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeWidth", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeWidth", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeLineColor", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeLineColor", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeFont", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeFont", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeFontWeight", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeFontWeight", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeTextOpacity", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeTextOpacity", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeLineStyle", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeLineStyle", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeOpacity", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeOpacity", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeSourceArrowColor", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeSourceArrowColor", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("setDefaultEdgeSourceArrowShape", "RCyjsClass",
-  function (obj, newValue) {
-     send(obj, list(cmd="setDefaultEdgeSourceArrowShape", callback="handleResponse", status="request",
-                    payload=newValue))
-     while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
-        }
-     invisible(getBrowserResponse(obj));    # the empty string
-     })
-#----------------------------------------------------------------------------------------------------
-setMethod("vAlign", "RCyjsClass",
+setMethod("vAlign", "RCyjs",
    function(obj) {
      .alignSelectedNodes(obj, "vertical")
      })
 #------------------------------------------------------------------------------------------------------------------------
-setMethod("hAlign", "RCyjsClass",
+#' hAlign
+#'
+#' \code{hAlign} horizontally align selected nodes
+#'
+#' The shared y coordinate will be the mean of the y coordinates of selected nodes.
+#' The x coordinates are preserved.
+#'
+#' @rdname hAlign
+#' @aliases hAlign
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'   layout(rcy, "cose")
+#'   selectNodes(rcy, nodes(g)[1:2])
+#'   hAlign(rcy)
+#'   }
+#'
+#'
+
+setMethod("hAlign", "RCyjs",
    function(obj) {
      .alignSelectedNodes(obj, "horizontal")
      })
@@ -1242,7 +3227,7 @@ setMethod("hAlign", "RCyjsClass",
 #------------------------------------------------------------------------------------------------------------------------
 myQP <- function(queryString)
 {
-   printf("=== RCYjs-class::myQP");
+   #printf("=== RCYjs-class::myQP");
    #print(queryString)
      # for reasons not quite clear, the query string comes in with extra characters
      # following the expected filename:
@@ -1270,11 +3255,11 @@ myQP <- function(queryString)
 
    stopifnot(file.exists(filename))
 
-   printf("--- about to scan %s", filename);
+   #printf("--- about to scan %s", filename);
       # reconstitute linefeeds though collapsing file into one string, so json
       # structure is intact, and any "//" comment tokens only affect one line
    text <- paste(scan(filename, what=character(0), sep="\n", quiet=TRUE), collapse="\n")
-   printf("%d chars read from %s", nchar(text), filename);
+   #printf("%d chars read from %s", nchar(text), filename);
 
    return(text);
 

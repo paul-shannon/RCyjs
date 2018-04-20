@@ -1,227 +1,92 @@
 library (RCyjs)
 library (RUnit)
 #----------------------------------------------------------------------------------------------------
-colors <- list(green="rgb(0,255,0)",
-               white="rgb(255,255,255)",
-               red="rgb(255,0,0)",
-               blue="rgb(0,0,255)",
-               black="rgb(0,0,0)",
-               darkGreen="rgb(0,200,0)",
-               darkerGreen="rgb(0,120,0)",
-               darkRed="rgb(221,0,0)",
-               darkerRed="rgb(170,0,0)",
-               purple="rgb(221,221,0)",
-               darkBlue="rgb(0,0,170)",
-               darkerBlue="rgb(0,0,136)",
-               lightGray="rgb(230,230,230)")
+if(!exists("rcy")){
+   title <- "rcy test"
+   rcy <- RCyjs(title=title)
+   checkTrue(ready(rcy))
+   checkEquals(getBrowserWindowTitle(rcy), title)
+   checkEquals(length(getNodes(rcy)), 0);
+   }
 
-shapes = c("ellipse", "triangle", "pentagon", "hexagon", "heptagon", "octagon", "star",
-           "rectangle", "roundrectangle")
-
-
-PORTS=9047:9097
 #----------------------------------------------------------------------------------------------------
 runTests = function()
 {
-   test.constructorNoGraph();
-   #test.biocGraphToCytoscapeJSON();
-   test.constructorWithGraph();
-   test.setBackgroundColor();
+   test_setGraph();
+   test_deleteSetAddGraph()
+   test_largeGraph()
 
-   test.setNodeDefaults()
-   test.setEdgeDefaults()
+   test_setGlobalStyleElements()
+   test_nodeSpecificStyling()
 
-   test.setNodeLabelRule()
-   test.setNodeLabelAlignment()
-   test.setNodeSizeRule()
-   test.setNodeColorRule()
-   test.setNodeShapeRule()
+   test_loadStyleFile();
+   test_getJSON()
+   test_addGraphFromFile()
 
-   test.setEdgeColorRule()
-   test.setEdgeWidthRule()
+   test_getCounts()
+   test_nodeSelection()
 
-   test.setEdgeArrowLookupRules()  # both color and shape, source and target
+   test_getLayoutStrategies()
+   test_layouts()
+   test_fit()
+   test_specialLayouts()
 
-   test.nodeSelection()
+   test_getSetPosition()
+   test_saveRestoreLayout()
+   test_savePNG()
+   test_saveJPG()
 
-   test.layoutStrategies()
-   test.layouts()
+   test_zoom()
 
-   test.getSetPosition()
-   test.getNodeSize()
-   test.saveRestoreLayout()
+   test_queryAttributes()
+   test_setNodeAttributes();
+   test_setEdgeAttributes();
 
-   test.getJSON()
+   test_setNodeLabelRule()
+   test_setNodeLabelAlignment()
 
-   test.setGraph();
-   test.zoom()
-   #test.bigGraph()
+   test_hideShowEdges()
+   test_compoundNodes()
 
-   test.setNodeAttributes();
-   test.setEdgeAttributes();
-
-   test.compoundNodes();
-   test.setNodeImage();
-
-   test.httpSetStyle();
-   test.httpAddGraphToExistingGraph()
-   test.httpAddGraphToEmptyGraph()
-   test.httpAddCompoundEdgeToExistingGraph()
-   test.httpAddJsonGraphFromFile()
-   test.savePNG()
+   #--------------------------------------------------------------------------------
+   # re-enable this at end.  it writes to a new browser tab/window, hiding the above.
+   #--------------------------------------------------------------------------------
+    test_constructorWithGraphSupplied()
 
 } # run.tests
 #----------------------------------------------------------------------------------------------------
 # a utility: create and return simple instance, for further experimentation
-demo <- function(portRange=PORTS)
+rcy.demo <- function()
 {
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=portRange, quiet=TRUE, graph=g, hideEdges=FALSE);
 
    checkTrue(ready(rcy))
-
-   title <- "demo"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
+   setGraph(rcy, g)
+   setBrowserWindowTitle(rcy, "rcy.demo")
+   checkEquals(getBrowserWindowTitle(rcy), "rcy.demo")
 
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
-   checkEquals(tbl.nodes$name, c("A", "B", "C"))
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
 
    setNodeLabelRule(rcy, "label");
    setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
-   setNodeColorRule(rcy, "count", c(0, 100), c(colors$green, colors$red), mode="interpolate")
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
    redraw(rcy)
    layout(rcy, "cose")
+   fit(rcy, 300)
 
    rcy
 
-} # demo
+} # rcy.demo
 #----------------------------------------------------------------------------------------------------
-test.constructorNoGraph <- function()
+test_setGraph <- function()
 {
-   print("--- test.constructor")
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE);
-   checkTrue(ready(rcy))
+   printf("--- test_setGraph")
 
-   title <- "no graph ctor"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
+   if(!interactive())
+       return(TRUE);
 
-   checkEquals(length(getNodes(rcy)), 0);
-   closeWebSocket(rcy)
-
-} # test.constructorNoGraph
-#----------------------------------------------------------------------------------------------------
-test.constructorWithGraph <- function()
-{
-   print("--- test.constructorWithGraph");
-
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-
-   title <- "graph ctor"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-
-   tbl.nodes <- getNodes(rcy)
-   checkEquals(nrow(tbl.nodes), 3)
-   checkEquals(tbl.nodes$name, c("A", "B", "C"))
-
-      # our nodes have
-   checkEquals(colnames(tbl.nodes), c("id", "name"))
-   checkEquals(tbl.nodes$id, c ("A", "B", "C"))
-   checkEquals(tbl.nodes$name, c ("A", "B", "C"))
-
-   closeWebSocket(rcy)
-
-} #  test.constructorWithGraph
-#----------------------------------------------------------------------------------------------------
-#test.biocGraphToCytoscapeJSON <- function()
-#{
-#   print("--- test.biocGraphToCytoscapeJSON")
-#   g <- simpleDemoGraph()
-#   g.json <- biocGraphToCytoscapeJSON(g)
-#
-#      # check this by converting from JSON back to R, and inspecting the fields
-#   g2 <- fromJSON(g.json)
-#
-#      # two standard sections
-#   checkEquals(names(g2), c("data", "elements"))
-#
-#      # data is for overall graph attributes: selection, name, ...
-#      # we have none here
-#   checkEquals(length(g2$data), 0)
-#
-#     # elements are nodes and edges
-#   checkEquals(names(g2$elements), c("nodes", "edges"))
-#
-#     # the attributes for each node
-#   tbl.nodes <- g2$elements$nodes$data;
-#   checkEquals(colnames(tbl.nodes), c("name", "type", "lfc", "label", "count", "id"))
-#   checkEquals(tbl.nodes$name,  c("A", "B", "C"))
-#   checkEquals(tbl.nodes$type,  c("kinase", "transcription factor", "glycoprotein"))
-#   checkEquals(tbl.nodes$count, c(2, 30, 100))
-#
-#     # now the edges
-#   tbl.edges <- g2$elements$edges$data
-#   checkEquals(sort(names(tbl.edges)), c("edgeType", "misc", "score", "source", "target"))
-#
-#     # check the network structure
-#   checkEquals(tbl.edges$source, c("A", "B", "C"))
-#   checkEquals(tbl.edges$target, c("B", "C", "A"))
-#
-#   checkEquals(tbl.edges$score,  c(35, -12, 0))
-#   checkEquals(tbl.edges$edgeType,  c("phosphorylates", "synthetic lethal", "undefined"))
-#
-#} # test.biocGraphToCytoscapeJSON
-##----------------------------------------------------------------------------------------------------
-#test.biocGraphToCytoscapeJSON.RJSONIO.version <- function()
-#{
-#   print("--- test.biocGraphToCytoscapeJSON.RJSONIO.version")
-#   g <- simpleDemoGraph()
-#   g.json <- biocGraphToCytoscapeJSON(g)
-#
-#      # check this by converting from JSON back to R, and inspecting the fields
-#   g2 <- fromJSON(g.json)
-#
-#      # two standard sections
-#   checkEquals(names(g2), c("data", "elements"))
-#
-#      # data is for overall graph attributes: selection, name, ...
-#      # we have none here
-#   checkEquals(length(g2$data), 0)
-#
-#     # elements are nodes and edges
-#   checkEquals(names(g2$elements), c("nodes", "edges"))
-#
-#     # the attributes for each node
-#   checkEquals(sort(names(g2$elements$nodes[[1]]$data)), c("count", "id", "label", "lfc", "name", "type"))
-#
-#     # check a few of them
-#   checkEquals(unlist(lapply(g2$elements$nodes, function(node) return(node$data$name))),
-#               c("A", "B", "C"))
-#   checkEquals(unlist(lapply(g2$elements$nodes, function(node) return(node$data$id))),
-#               c("A", "B", "C"))
-#   checkEquals(unlist(lapply(g2$elements$nodes, function(node) return(node$data$type))),
-#               c("kinase", "transcription factor", "glycoprotein"))
-#
-#     # now the edges
-#   checkEquals(sort(names(g2$elements$edges[[1]]$data)), c("edgeType", "misc", "score", "source", "target"))
-#
-#     # check the network structure
-#   checkEquals(unlist(lapply(g2$elements$edges, function(edge) return(edge$data$source))), c("A","B","C"))
-#   checkEquals(unlist(lapply(g2$elements$edges, function(edge) return(edge$data$target))), c("B","C","A"))
-#   checkEquals(unlist(lapply(g2$elements$edges, function(edge) return(edge$data$edgeType))),
-#               c("phosphorylates", "synthetic lethal", "undefined"))
-#
-#} # test.biocGraphToCytoscapeJSON.RJSONIO.version
-#----------------------------------------------------------------------------------------------------
-test.setGraph <- function()
-{
-   print("--- test.setGraph")
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE);
    checkTrue(ready(rcy))
 
    title <- "setGraph"
@@ -230,20 +95,661 @@ test.setGraph <- function()
 
    g <- simpleDemoGraph()
    setGraph(rcy, g)
+   setNodeLabelRule(rcy, "label");
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
+   redraw(rcy)
+   layout(rcy, "cola")
+   fit(rcy, 100)
 
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
-   checkEquals(tbl.nodes$name, c("A", "B", "C"))
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
+   Sys.sleep(0.5)
 
-   closeWebSocket(rcy)
-
-} # test.setGraph
+} # test_setGraph
 #----------------------------------------------------------------------------------------------------
-test.setNodeLabelRule <- function()
+test_setGraphEdgesInitiallyHidden <- function()
 {
-   print("--- test.setNodeLabelRule")
+   printf("--- test_setGraphEdgesInitiallyHidden")
+
+   if(!interactive())
+       return(TRUE);
+
+   checkTrue(ready(rcy))
+
+   title <- "setGraphEdgesInitiallyHidden"
+   setBrowserWindowTitle(rcy, title)
+   checkEquals(getBrowserWindowTitle(rcy), title)
+
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
+   setGraph(rcy, g, hideEdges=TRUE)
+   setNodeLabelRule(rcy, "label");
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
+   redraw(rcy)
+   layout(rcy, "cola")
+   fit(rcy, 100)
+
+   tbl.nodes <- getNodes(rcy)
+   checkEquals(nrow(tbl.nodes), 3)
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
+   Sys.sleep(0.5)
+
+} # test_setGraphEdgesInitiallyHidden
+#----------------------------------------------------------------------------------------------------
+test_deleteSetAddGraph <- function()
+{
+   printf("--- test_deleteSetAddGraph")
+
+   if(!interactive())
+       return(TRUE);
+
+   checkTrue(ready(rcy))
+
+   title <- "deleteSedAddGraph"
+   setBrowserWindowTitle(rcy, title)
+   checkEquals(getBrowserWindowTitle(rcy), title)
+
+   deleteGraph(rcy)
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   setNodeLabelRule(rcy, "label");
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
+   redraw(rcy)
+   layout(rcy, "cola")
+   fit(rcy, 200)
+
+   g2 <- createTestGraph(nodeCount=10, edgeCount=4)
+   addGraph(rcy, g2)
+   layout(rcy, "cola")
+
+   g3 <- createTestGraph(10, 10)
+   addGraph(rcy, g3)
+   layout(rcy, "cola")
+
+   g4 <- createTestGraph(30, 20)
+   addGraph(rcy, g4)
+   layout(rcy, "cola")
+
+   tbl.nodes <- getNodes(rcy)
+   checkEquals(nrow(tbl.nodes), 33)
+   Sys.sleep(0.5)
+
+} # test_deleteSetAddGraph
+#----------------------------------------------------------------------------------------------------
+# to keep tests simple, this file creates an rcy object with an empty graph, at global scope, when
+# the file is read (sourced, loaded).  this test, unlike all the others, creates its own new RCyjs
+# object, to ensure that we can construct one with a graph, without difficulty or error
+test_constructorWithGraphSupplied <- function()
+{
+   printf("--- test_constructorWithGraphSupplied");
+
+   if(!interactive())
+       return(TRUE);
+
+   g <- simpleDemoGraph()
+
+   rcy2 <- RCyjs(graph=g, title="constructorWithGraphSupplied");
+   checkTrue(ready(rcy2))
+   setNodeLabelRule(rcy2, "label");
+   setNodeSizeRule(rcy2, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy2, "count", c(0, 100), c("green", "red"), mode="interpolate")
+   redraw(rcy2)
+   layout(rcy2, "cola")
+   Sys.sleep(0.5)
+   fit(rcy2, 350)
+
+   title <- "graph ctor"
+   setBrowserWindowTitle(rcy2, title)
+   checkEquals(getBrowserWindowTitle(rcy2), title)
+
+   tbl.nodes <- getNodes(rcy2)
+   checkEquals(nrow(tbl.nodes), 3)
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
+   Sys.sleep(0.5)
+
+   closeWebSocket(rcy2)
+
+} #  test_constructorWithGraphSupplied
+#----------------------------------------------------------------------------------------------------
+test_largeGraph <- function()
+{
+   printf("--- test_largeGraph")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "largeGraph")
+   deleteGraph(rcy)
+   g <- createTestGraph(nodeCount=1000, edgeCount=1200)
+   addGraph(rcy, g)
+   layout(rcy, "grid")
+   layout(rcy, "cola")
+   Sys.sleep(0.5)
+
+} # test_largeGraph
+#----------------------------------------------------------------------------------------------------
+test_setGlobalStyleElements <- function()
+{
+   printf("--- test_setGlobalStyleElement")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "setGlobalStyleElements")
+
+   g <- createTestGraph(nodeCount=10, edgeCount=30)
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+
+   sizes <- c(0, 10, 20, 30, 40, 50, 30)
+   colors <- c("pink", "yellow", "lightblue", "lightgreen", "cyan", "gray", "lemonchiffon")
+
+   for(size in sizes){
+      setGlobalNodeWidth(rcy, size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in sizes){
+      setGlobalNodeHeight(rcy, size); redraw(rcy); Sys.sleep(0.5)
+      } # for size
+
+   for(size in sizes){
+      setGlobalNodeSize(rcy, size); redraw(rcy); Sys.sleep(0.5)
+      } # for size
+
+   for(color in colors){
+      setGlobalNodeColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   shapes <- c("ellipse", "triangle", "rectangle", "roundrectangle",
+               "bottomroundrectangle","cutrectangle", "barrel",
+               "rhomboid", "diamond", "pentagon", "hexagon",
+               "concavehexagon", "heptagon", "octagon", "star", "tag", "vee",
+               "ellipse")
+
+   for(shape in shapes){
+      setGlobalNodeShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   setGlobalNodeShape(rcy, "roundrectangle");
+   setGlobalNodeColor(rcy, "#F0F0F0")
+   redraw(rcy)
+
+   for(color in colors){
+      setGlobalNodeFontColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   setGlobalNodeColor(rcy, "lightblue")
+   setGlobalNodeFontColor(rcy, "darkblue")
+   redraw(rcy);
+
+   for(fontSize in seq(1, 20, by=2)){
+      setGlobalNodeFontSize(rcy, fontSize); redraw(rcy); Sys.sleep(0.5)
+      }
+
+   for(width in c(0:5, 1)){
+      setGlobalNodeBorderWidth(rcy, width); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   for(color in c(colors, "black")){
+      setGlobalNodeBorderColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   arrow.shapes <- c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
+                     "vee", "tee", "square", "circle", "diamond", "none")
+
+   for(shape in c(arrow.shapes, "triangle")){
+      setGlobalEdgeTargetArrowShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   for(color in c(colors, "black")){
+      setGlobalEdgeTargetArrowColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   for(shape in c(arrow.shapes, "triangle")){
+      setGlobalEdgeSourceArrowShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   for(color in c(colors, "black")){
+      setGlobalEdgeSourceArrowColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   for(color in c(colors, "black")){
+      setGlobalEdgeColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   for(width in c(0:5, 1)){
+      setGlobalEdgeWidth(rcy, width); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   for(color in c(colors, "black")){
+      setGlobalEdgeLineColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      }
+
+   line.styles <- c("solid", "dotted", "dashed", "solid")
+   for(style in line.styles){
+      setGlobalEdgeLineStyle(rcy, style); redraw(rcy);Sys.sleep(0.5)
+      }
+
+} # test_setGlobalStyleElements
+#----------------------------------------------------------------------------------------------------
+test_nodeSpecificStyling <- function()
+{
+   printf("--- test_nodeSpecificStyling")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "specificNodeStyling")
+   g <- createTestGraph(nodeCount=10, edgeCount=30)
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle1.js"))
+   setGlobalNodeBorderWidth(rcy, 1); redraw(rcy)
+   setBackgroundColor(rcy, "lemonchiffon")
+
+   sizes <- c(2, 10, 20, 30, 40, 50, 30)
+   colors <- c("pink", "yellow", "lightblue", "lightgreen", "cyan", "gray", "lemonchiffon", "lightgray")
+
+   for(size in sizes){
+      setNodeWidth(rcy, "n1", size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in sizes){
+      setNodeHeight(rcy, c("n4", "n6"), size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in sizes){
+      setNodeSize(rcy, "n1", size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(color in colors){
+      setNodeColor(rcy, "n1", color); redraw(rcy); Sys.sleep(0.25)
+      setNodeColor(rcy, c("n10", "n8"), color); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(shape in c(getSupportedNodeShapes(rcy), "ellipse")){
+      setNodeShape(rcy, c("n3", "n4"), shape); redraw(rcy); Sys.sleep(0.5);
+      }
+
+   for(color in colors){
+      setNodeFontColor(rcy, "n1", color); redraw(rcy); Sys.sleep(0.25)
+      setNodeBorderColor(rcy, c("n10", "n8"), color); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in c(0:5, 1)){
+      setNodeBorderWidth(rcy, c("n1", "n2", "n3"), size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+   for(size in c(0, 1, 5, 10, 15, 20, 30, 10)){
+      setNodeFontSize(rcy, c("n1", "n2", "n3"), size); redraw(rcy);Sys.sleep(0.5)
+      } # for size
+
+} # test_nodeSpecificStyling
+#----------------------------------------------------------------------------------------------------
+test_loadStyleFile <- function(count=3)
+{
+   printf("--- test_loadStyleFile")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "loadStyleFile")
+
+   setGraph(rcy, simpleDemoGraph())
+   layout(rcy, "cola")
+   selectNodes(rcy, c("A", "B"))
+   styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+   styleFile.2 <- system.file(package="RCyjs", "extdata", "sampleStyle2.js");
+
+   for(i in 1:3){
+      loadStyleFile(rcy, styleFile.1)
+      Sys.sleep(0.5)
+      loadStyleFile(rcy, styleFile.2)
+      Sys.sleep(0.5)
+      } # for i
+
+} # test_loadStyleFile
+#----------------------------------------------------------------------------------------------------
+test_getJSON <- function()
+{
+   printf("--- test_getJSON")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "getJSON")
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+   loadStyleFile(rcy, styleFile.1)
+   layout(rcy, "cola")
+
+   json <- getJSON(rcy)
+   checkTrue(nchar(json) > 2000)
+   x <- fromJSON(json)
+
+   checkEquals(sort(names(x)), sort(c("elements", "style", "zoomingEnabled", "userZoomingEnabled",
+                                      "zoom", "minZoom", "maxZoom", "panningEnabled", "userPanningEnabled",
+                                      "pan", "boxSelectionEnabled", "renderer")))
+   tbl.nodes <- x$elements$nodes$data
+   checkEquals(nrow(tbl.nodes), 3)
+   checkEquals(tbl.nodes$id, c("A", "B", "C"))
+
+   tbl.edges <- x$elements$edges$data
+   checkEquals(nrow(tbl.edges), 3)
+   checkEquals(tbl.edges$id, c("A->B", "B->C", "C->A"))
+
+} # test_getJSON
+#----------------------------------------------------------------------------------------------------
+test_addGraphFromFile <- function()
+{
+   printf("--- test_addGraphFromFile")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "addGraphFromFile");
+
+   deleteGraph(rcy)
+   g <- createTestGraph(nodeCount=10, edgeCount=30)
+   addGraph(rcy, g)
+   layout(rcy, "cola")
+   tbl.nodes.0 <- getNodes(rcy)
+   g <- getJSON(rcy)
+   temp.filename <- tempfile(fileext=".json")
+   write(g, file=temp.filename)
+   deleteGraph(rcy)
+   addGraphFromFile(rcy, temp.filename)
+   layout(rcy, "cola")
+   tbl.nodes.1 <- getNodes(rcy)
+
+   checkEquals(sort(tbl.nodes.0$id), sort(tbl.nodes.1$id))
+
+} # test_addGraphFromFile
+#----------------------------------------------------------------------------------------------------
+test_getCounts <- function()
+{
+   printf("--- test_getCounts")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "getCounts");
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   checkEquals(getNodeCount(rcy), length(nodes(g)))
+   checkEquals(getEdgeCount(rcy), length(edgeNames(g)))
+
+   nodesRequested <- 10
+   edgesRequested <- 15
+   g2 <- createTestGraph(nodeCount=nodesRequested, edgeCount=edgesRequested)
+   setGraph(rcy, g2)
+   layout(rcy, "cola")
+      # createTestGraph cannot always return as many edges as requested
+      # the edge possiblities may be used up before the full complement
+      # is achieved.   so only expect as many edges in rcy as there are in R
+   checkEquals(getEdgeCount(rcy), length(edgeNames(g2)))
+
+   addGraph(rcy, g)
+   layout(rcy, "cola")
+   checkEquals(getNodeCount(rcy), 13)
+   checkEquals(getEdgeCount(rcy), length(edgeNames(g2)) + length(edgeNames(g)))
+
+} # test_getCounts
+#----------------------------------------------------------------------------------------------------
+test_nodeSelection <- function()
+{
+   printf("--- test_nodeSelection")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "nodeSelection")
+
+   count <- 20
+   set.seed(31)
+   g <- createTestGraph(nodeCount=count, edgeCount=10)
+   setGraph(rcy, g)
+
+   styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+   loadStyleFile(rcy, styleFile.1)
+
+   layout(rcy, "cola")
+   Sys.sleep(0.5)
+   rcy.nodes <- getNodes(rcy)$id
+   checkEquals(rcy.nodes, nodes(g))
+   target.nodes <- paste("n", sample(1:count, 3), sep="")
+     #--------------------------------------------
+     # select a few, get them, clear, get none
+     #-------------------------------------------
+   selectNodes(rcy, target.nodes)
+   Sys.sleep(0.5)
+   checkEquals(target.nodes, getSelectedNodes(rcy)$id)
+   clearSelection(rcy)
+   Sys.sleep(0.5)
+   checkEquals(nrow(getSelectedNodes(rcy)), 0)
+     #------------------------------------------
+     # select the same few, hide them, get them,
+     # check count of remaining visible nodes
+     # conclude with showing all
+     #------------------------------------------
+   selectNodes(rcy, target.nodes)
+   Sys.sleep(0.5)
+   hideSelectedNodes(rcy)
+   checkEquals(length(getNodes(rcy, "hidden")$id), length(target.nodes))
+   checkEquals(length(getNodes(rcy, "visible")$id), count - length(target.nodes))
+   checkEquals(length(getNodes(rcy, "all")$id), count)
+   checkEquals(length(getNodes(rcy)$id), count)
+   Sys.sleep(0.5)
+   checkEquals(sort(getNodes(rcy, "hidden")$id), sort(target.nodes))
+   checkEquals(length(getNodes(rcy, "visible")$id), count - 3)
+     #-----------------------------------------------------
+     # now invert selection twice, getting count each time
+     #-----------------------------------------------------
+   showAll(rcy) # , which="nodes")
+   invertNodeSelection(rcy)
+   Sys.sleep(0.5)
+   checkEquals(length(getSelectedNodes(rcy)$id), 17)
+   invertNodeSelection(rcy)
+   Sys.sleep(0.5)
+   checkEquals(length(getSelectedNodes(rcy)$id), 3)
+     #-----------------------------------------------------
+     # now delete those three selected nodes.  make sure
+     # they are not simply hidden, but truly gone
+     #-----------------------------------------------------
+   deleteSelectedNodes(rcy)
+   Sys.sleep(0.5)
+   checkEquals(length(getNodes(rcy)$id), 17)
+   showAll(rcy)
+   Sys.sleep(0.5)
+   checkEquals(length(getNodes(rcy)$id), 17)
+   showAll(rcy)
+
+   clearSelection(rcy)
+   checkEquals(nrow(getSelectedNodes(rcy)), 0)
+   selectNodes(rcy, "n8")
+   checkEquals(nrow(getSelectedNodes(rcy)), 1)
+   sfn(rcy)
+   checkEquals(nrow(getSelectedNodes(rcy)), 2)
+   selectFirstNeighborsOfSelectedNodes(rcy)
+   checkEquals(nrow(getSelectedNodes(rcy)), 3)
+
+} # test_nodeSelection
+#----------------------------------------------------------------------------------------------------
+test_getLayoutStrategies <- function()
+{
+   printf("--- test_getLayoutStrategies")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "getLayoutStrategies")
+
+   actual <- getLayoutStrategies(rcy)
+
+   expected.builtin.strategies <- c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
+   expected.extension.strategies <- c("cola", "dagre", "cose-bilkent")
+
+   checkTrue(all(expected.builtin.strategies %in% actual))
+   checkTrue(all(expected.extension.strategies %in% actual))
+
+} # test_getLayoutStrategies
+#----------------------------------------------------------------------------------------------------
+test_layouts <- function()
+{
+   printf("--- test_layouts")
+
+   if(!interactive())
+       return(TRUE);
+
+   g <- createTestGraph(nodeCount=20, edgeCount=20)
+   setGraph(rcy, g)
+
+   styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+   loadStyleFile(rcy, styleFile.1)
+
+   fit(rcy)
+   redraw(rcy)
+   layout.strategies <- getLayoutStrategies(rcy)
+   for(strategy in layout.strategies){
+     setBrowserWindowTitle(rcy, strategy)
+     layout(rcy, strategy)
+     Sys.sleep(2)
+     } # for strategy
+
+} #  test_layouts
+#----------------------------------------------------------------------------------------------------
+test_specialLayouts <- function()
+{
+   printf("--- test_specialLayouts")
+
+   if(!interactive())
+      return(TRUE)
+
+   set.seed(17)
+   g <- createTestGraph(nodeCount=100, edgeCount=100)
+   setGraph(rcy, g)
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle1.js"))
+   layout(rcy, "cose")
+
+   noi <- c("n1", "n7", "n21", "n22", "n31", "n42", "n44", "n48", "n51", "n52", "n74",
+            "n78", "n79", "n82", "n86", "n98", "n99")
+   selectNodes(rcy, noi)
+   layoutSelectionInGrid(rcy, -1000, 10, 100, 400)
+   fit(rcy)
+   Sys.sleep(1)
+
+   layoutSelectionInGridInferAnchor(rcy, 400, 100)
+   Sys.sleep(1)
+
+   noi <- c("n54", "n57", "n83")
+   clearSelection(rcy)
+   selectNodes(rcy, noi)
+   vAlign(rcy)
+   Sys.sleep(1)
+
+   noi <- c("n3", "n8", "n13", "n34", "n61", "n91")
+   selectNodes(rcy, noi)
+   Sys.sleep(1)
+   hAlign(rcy)
+   Sys.sleep(1)
+
+} # test_specialLayouts
+#----------------------------------------------------------------------------------------------------
+# a test whose success is judge by visual inspection
+# node positions are unchanged by zoom - presumably rendered position would change
+test_fit <- function()
+{
+   printf("--- test_fit");
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "fit")
+   g <- createTestGraph(nodeCount=20, edgeCount=20)
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+
+   for(padding in c(0, 50, 100, 150, 200, 250, 0)){
+      fit(rcy, padding)
+      Sys.sleep(0.5)
+      }
+
+   clearSelection(rcy)
+   selectNodes(rcy, "n17")
+   for(padding in c(0, 50, 100, 150, 200, 250, 300, 400)){
+      fitSelection(rcy, padding)
+      Sys.sleep(0.5)
+      }
+
+
+} # test_fit
+#----------------------------------------------------------------------------------------------------
+test_getSetPosition <- function()
+{
+   printf("--- test_getSetPosition");
+
+   if(!interactive())
+       return(TRUE);
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   setBrowserWindowTitle(rcy, "getSetPosition");
+   setNodeLabelRule(rcy, "label");
+   layout(rcy, "cola")
+   fit(rcy, padding=150)
+   redraw(rcy)
+
+   tbl <- getPosition(rcy, "A")
+   checkEquals(nrow(tbl), 1)
+   checkEquals(colnames(tbl), c("id", "x", "y"))
+   checkEquals(tbl[1, "id"], "A")
+
+      # now get positions of all
+   tbl <- getPosition(rcy)
+   checkEquals(nrow(tbl), 3)
+   checkEquals(colnames(tbl), c("id", "x", "y"))
+   checkEquals(tbl$id, nodes(g))
+   checkTrue(all(is.numeric(tbl$x)))
+   checkTrue(all(is.numeric(tbl$y)))
+
+   tbl2 <- tbl
+   tbl2[, 2:3] <- tbl2[, 2:3] + 50
+
+     # move all 3 nodes
+   for(i in 1:2){
+      setPosition(rcy, tbl2)
+      Sys.sleep(0.5)
+      setPosition(rcy, tbl)
+      Sys.sleep(0.5)
+      } # for i
+
+     # move jut Gene A
+   for(i in 1:2){
+      setPosition(rcy, tbl2[1,])
+      Sys.sleep(0.5)
+      setPosition(rcy, tbl[1,])
+      Sys.sleep(0.5)
+      } # for i
+
+} # test_getSetPosition
+#----------------------------------------------------------------------------------------------------
+test_setNodeLabelRule <- function()
+{
+   printf("--- test_setNodeLabelRule")
+
+   if(!interactive())
+       return(TRUE);
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
    checkTrue(ready(rcy))
 
    title <- "setNodeLabelRule"
@@ -260,28 +766,31 @@ test.setNodeLabelRule <- function()
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
 
-   closeWebSocket(rcy)
-
-} # test.setNodeLabelRule
+} # test_setNodeLabelRule
 #----------------------------------------------------------------------------------------------------
-test.setNodeLabelAlignment <- function()
+test_setNodeLabelAlignment <- function()
 {
-   print("--- test.setNodeLabelRule")
+   printf("--- test_setNodeLabelRule")
+
+   if(!interactive())
+       return(TRUE);
+
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   title <- "setNodeSizeRule"
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   title <- "setNodeLabelAlignment"
    setBrowserWindowTitle(rcy, title)
 
-   setDefaultNodeSize(rcy, 60)
-   setDefaultNodeColor(rcy, "white")
-   setDefaultNodeBorderColor(rcy, "black")
-   setDefaultNodeBorderWidth(rcy, 1)
+   setGlobalNodeSize(rcy, 60)
+   setGlobalNodeColor(rcy, "white")
+   setGlobalNodeBorderColor(rcy, "black")
+   setGlobalNodeBorderWidth(rcy, 1)
    redraw(rcy)
 
    hValues <- c("left", "center", "right")
    vValues <- c("top",  "center", "bottom")
+
+   fit(rcy, 200)
 
    for(hValue in hValues)
       for(vValue in vValues){
@@ -295,945 +804,338 @@ test.setNodeLabelAlignment <- function()
    sizes <- seq(0, 32, 2)
 
    for(size in sizes){
-      setDefaultNodeFontSize(rcy, size)
+      setGlobalNodeFontSize(rcy, size)
       redraw(rcy)
       } # for size
 
    for(size in rev(sizes)){
-      setDefaultNodeFontSize(rcy, size)
+      setGlobalNodeFontSize(rcy, size)
       redraw(rcy)
       } # for size
 
-   setDefaultNodeFontSize(rcy, 16)
+   setGlobalNodeFontSize(rcy, 16)
    redraw(rcy)
 
-   closeWebSocket(rcy)
-
-} # test.setNodeLabelAlignment
-#----------------------------------------------------------------------------------------------------
-test.setNodeSizeRule <- function()
-{
-   print("--- test.setNodeLabelRule")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-
-   title <- "setNodeSizeRule"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-
-     # the count attribute:  A:2, B: 30, C: 100
-   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(50, 200, 500));
-   redraw(rcy)
-   closeWebSocket(rcy)
-
-} # test.setNodeSizeRule
-#----------------------------------------------------------------------------------------------------
-test.setNodeColorRule <- function()
-{
-   print("--- test.setNodeLabelRule")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-
-   title <- "setNodeColorRule"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-
-     # the count attribute:  A:2, B: 30, C: 100
-   setNodeColorRule(rcy, "lfc", c(-3, 0, 3), c(colors$green, colors$white, colors$red), mode="interpolate")
-   redraw(rcy)
-
-   setNodeColorRule(rcy, "type",
-                    c("kinase", "transcription factor", "glycoprotein"),
-                    c(colors$blue, colors$red, colors$green), mode="lookup")
-   redraw(rcy)
-   Sys.sleep(1)
-
-   setNodeColorRule(rcy, "count", c(-10, 100), c(colors$white, colors$green), mode="interpolate")
-   redraw(rcy)
-
-   Sys.sleep(1)
-
-   closeWebSocket(rcy)
-
-} # test.setNodeColorRule
-#----------------------------------------------------------------------------------------------------
-test.setNodeShapeRule <- function()
-{
-   print("--- test.setNodeLabelRule")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "type");
-
-   title <- "setNodeShapeRule"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-
-      # shapes are discrete entities, unlike color or size, which are continuous
-      # so no mode parameter (lookup or interpolate) is needed
-   setNodeShapeRule(rcy, "type",
-                    c("kinase", "transcription factor", "glycoprotein"),
-                    c("triangle", "roundrectangle", "star"))
-
-   redraw(rcy)
-
-   closeWebSocket(rcy)
-
-} # test.setNodeShapeRule
-#----------------------------------------------------------------------------------------------------
-test.nodeSelection <- function()
-{
-   print("--- test.nodeSelection")
-   rcy <- demo()
-
-   checkEquals(length(getSelectedNodes(rcy)), 0)
-
-   tbl.nodes <- getNodes(rcy)
-   checkEquals(tbl.nodes$name, c("A", "B", "C"))
-
-   selectNodes(rcy, "B")
-   checkEquals(nrow(getSelectedNodes(rcy)), 1)
-   clearSelection(rcy)
-   checkEquals(length(getSelectedNodes(rcy)), 0)
-
-   closeWebSocket(rcy)
-
-} # test.nodeSelection
-#----------------------------------------------------------------------------------------------------
-test.layoutStrategies <- function()
-{
-   print("--- test.layoutStrategies")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   title <- "layoutStrategies"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-   layout.strategies <- layoutStrategies(rcy)
-   expected.strategies <- c("breadthfirst", "circle", "concentric", "cose", "grid", "random")
-   checkTrue(all(expected.strategies %in% layout.strategies))
-   closeWebSocket(rcy)
-
-} # test.layoutStrategies
-#----------------------------------------------------------------------------------------------------
-test.layouts <- function()
-{
-   print("--- test.layouts")
-
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   title <- "layouts"
-   setBrowserWindowTitle(rcy, title)
-   layout.strategies <- layoutStrategies(rcy)
-   for(strategy in layout.strategies){
-     layout(rcy, strategy)
-     Sys.sleep(0.5)
-     } # for strategy
-
-   closeWebSocket(rcy)
-
-} #  test.layouts
+} # test_setNodeLabelAlignment
 #----------------------------------------------------------------------------------------------------
 # there is some non-deterministic behavior here, the exploration of which is deferred.
 # numbers don't have quite the values arithmetic suggests.  sometimes the final zoom is larger than
 # the initial zoom.
 # this works predictably & reliably at the R command prompt, but
-test.zoom <- function()
+test_zoom <- function()
 {
-   print("--- test.zoom")
-   rcy <- demo()
+   printf("--- test_zoom")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "zoom")
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+   loadStyleFile(rcy, styleFile.1)
+   layout(rcy, "cola")
+   fit(rcy)
 
    initial.zoom = getZoom(rcy);
    loops = 8
 
    for(i in 1:loops){
       setZoom(rcy, 0.5 * getZoom(rcy))
-      #redraw(rcy)
-      #printf("new zoom: %f", getZoom(rcy))
       } # for i
-
 
     for(i in 1:(loops)){
       setZoom(rcy, 2.0 * getZoom(rcy))
-      #redraw(rcy)
-      #printf("new zoom: %f", getZoom(rcy))
-      #Sys.sleep(0.1)
       } # for i
 
-    closeWebSocket(rcy)
-
-} # test.zoom
+} # test_zoom
 #----------------------------------------------------------------------------------------------------
-test.bigGraph <- function()
-{
-   print("--- test.bigGraph");
-
-    # 1000 nodes, 0 edges:     2 seconds
-    # 1000 nodes, 1000 edges: 15 seconds
-    # 1000 nodes, 2000 edges: 45 seconds
-
-   nodeCount = 1000
-   edgeCount = 1000
-
-   g <- createTestGraph(nodeCount=nodeCount, edgeCount=edgeCount)
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   title <- "bigGraph"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-
-   tbl.nodes <- getNodes(rcy)
-   checkEquals(nrow(tbl.nodes), nodeCount)
-
-   #layout(rcy, "grid")
-   #layout(rcy, "cose")
-   closeWebSocket(rcy)
-
-} #  test.bigGraph
-#----------------------------------------------------------------------------------------------------
-test.setEdgeColorRule <- function()
-{
-   print("--- test.setEdgeColorRule");
-
-   g <- simpleDemoGraph()
-   checkEquals(sort(edaNames(g)), c("edgeType", "misc", "score"))
-   checkEquals(eda(g, "edgeType"), c("A|B"="phosphorylates",
-                                     "B|C"="synthetic lethal",
-                                     "C|A"="undefined"))
-
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-   title <- "setEdgeColorRule"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-
-     # invoke lookup (direct assignment) rule on edgeType
-   setEdgeColorRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c(colors$red, colors$green, colors$blue), mode="lookup")
-   redraw(rcy)
-
-   Sys.sleep(1)
-
-    # A|B   35
-    # B|C  -12
-    # C|A    0
-
-      # now do interpoloate.  there should be one very faint red line, one faint one
-      # and one which is quite strong.
-
-   setEdgeColorRule(rcy, "score", c(-15, 50), c(colors$white, colors$red), mode="interpolate")
-   redraw(rcy)
-
-   Sys.sleep(1)
-
-   closeWebSocket(rcy)
-
-} # test.setEdgeColorRule
-#----------------------------------------------------------------------------------------------------
-test.setEdgeWidthRule <- function()
-{
-   print("--- test.setEdgeWidthRule")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "setEdgeWidthRule");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-      # first the lookup width rule, based on discrete variable edgeType
-   setEdgeWidthRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c(2, 5, 10), mode="lookup")
-
-    redraw(rcy)
-
-      # now the interpolate rule,  based on continuou variable edgeType
-
-   setEdgeWidthRule(rcy, "score", c(-15, 50), c(2, 10), mode="interpolate")
-   redraw(rcy)
-   closeWebSocket(rcy)
-
-} # test.setEdgeWidthRule
-#----------------------------------------------------------------------------------------------------
-test.setEdgeArrowLookupRules <- function()
-{
-   print("--- test.setEdgeArrowLookupRules")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "setEdgeTargetArrowhRule");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   setEdgeColorRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c(colors$red, colors$green, colors$blue), mode="lookup")
-   redraw(rcy)
-
-   setEdgeTargetArrowShapeRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c("tee", "triangle", "none"))
-   redraw(rcy)
-
-   setEdgeTargetArrowColorRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c("black", "red", "green"),
-                    mode="lookup")
-
-   setEdgeSourceArrowShapeRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c("tee", "triangle", "none"))
-   redraw(rcy)
-
-   setEdgeSourceArrowColorRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c("red", "black", "green"),
-                    mode="lookup")
-   redraw(rcy)
-   closeWebSocket(rcy)
-
-} # test.setEdgeArrowLookupRules
-#----------------------------------------------------------------------------------------------------
-test.setEdgeTargetArrowColorRule <- function()
-{
-   print("--- test.setEdgeTargetArrowColorRule")
-   g <- simpleDemoGraph()
-   checkEquals(sort(edaNames(g)), c("edgeType", "misc", "score"))
-   checkEquals(eda(g, "edgeType"), c("A|B"="phosphorylates",
-                                     "B|C"="synthetic lethal",
-                                     "C|A"="undefined"))
-
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-   title <- "setEdgeTargetArrowColorRule"
-   setBrowserWindowTitle(rcy, title)
-   checkEquals(getBrowserWindowTitle(rcy), title)
-
-     # invoke lookup (direct assignment) rule on edgeType
-   setEdgeTargetArrowColorRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c(colors$red, colors$green, colors$blue), mode="lookup")
-   redraw(rcy)
-
-   Sys.sleep(1)
-
-    # A|B   35
-    # B|C  -12
-    # C|A    0
-
-      # now do interpoloate.  there should be one very faint red line, one faint one
-      # and one which is quite strong.
-
-   setEdgeTargetArrowColorRule(rcy, "score", c(-15, 50), c(colors$white, colors$red), mode="interpolate")
-   redraw(rcy)
-
-   Sys.sleep(1)
-
-   closeWebSocket(rcy)
-
-} # test.setEdgeTargetArrowColorRule
-#----------------------------------------------------------------------------------------------------
-test.setEdgeSourceArrowShapeRule <- function()
-{
-   print("--- test.setEdgeSourceArrowShapeRule")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "setEdgeSourceArrowhRule");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   setEdgeSourceArrowShapeRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c("none", "tee", "triangle"))
-
-   closeWebSocket(rcy)
-
-} # test.setEdgeSourceArrowShapeRule
-#----------------------------------------------------------------------------------------------------
-test.setEdgeSourceArrowColorRule <- function()
-{
-   print("--- test.setEdgeSourceArrowColorRule")
-   g <- simpleDemoGraph()
-   checkEquals(sort(edaNames(g)), c("edgeType", "misc", "score"))
-   checkEquals(eda(g, "edgeType"), c("A|B"="phosphorylates",
-                                     "B|C"="synthetic lethal",
-                                     "C|A"="undefined"))
-
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-   title <- "setEdgeSourceArrowColorRule"
-   setBrowserWindowTitle(rcy, title)
-
-     # invoke lookup (direct assignment) rule on edgeType
-   setEdgeSourceArrowColorRule(rcy, "edgeType",
-                    c("phosphorylates", "synthetic lethal", "undefined"),
-                    c(colors$red, colors$green, colors$blue), mode="lookup")
-   redraw(rcy)
-
-   Sys.sleep(1)
-
-    # A|B   35
-    # B|C  -12
-    # C|A    0
-
-      # now do interpoloate.  there should be one very faint red line, one faint one
-      # and one which is quite strong.
-
-   setEdgeSourceArrowColorRule(rcy, "score", c(-15, 50), c(colors$white, colors$red), mode="interpolate")
-   redraw(rcy)
-
-   Sys.sleep(1)
-
-   closeWebSocket(rcy)
-
-} # test.setEdgeSourceArrowColorRule
-#----------------------------------------------------------------------------------------------------
-test.getSetPosition <- function()
-{
-   print("--- test.getSetPosition");
-
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "getSetPosition");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   tbl <- getPosition(rcy, "A")
-   checkEquals(nrow(tbl), 1)
-   checkEquals(colnames(tbl), c("id", "x", "y"))
-   checkEquals(tbl[1, "id"], "A")
-
-      # now get positions of all
-   tbl <- getPosition(rcy)
-   checkEquals(nrow(tbl), 3)
-   checkEquals(colnames(tbl), c("id", "x", "y"))
-   checkEquals(tbl$id, nodes(g))
-   checkTrue(all(is.integer(tbl$x)))
-   checkTrue(all(is.integer(tbl$y)))
-
-   tbl2 <- tbl
-   tbl2[, 2:3] <- tbl2[, 2:3] + 50
-
-   for(i in 1:2){
-      setPosition(rcy, tbl2)
-      Sys.sleep(0.5)
-      setPosition(rcy, tbl)
-      Sys.sleep(0.5)
-      } # for i
-
-   for(i in 1:2){
-      setPosition(rcy, tbl2[1,])
-      Sys.sleep(0.5)
-      setPosition(rcy, tbl[1,])
-      Sys.sleep(0.5)
-      } # for i
-
-   closeWebSocket(rcy)
-
-} # test.getSetPosition
-#----------------------------------------------------------------------------------------------------
-test.getNodeSize <- function()
-{
-   print("--- test.getNodeSize");
-
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "getNodeSize");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-   tbl.size <- getNodeSize(rcy)
-   checkEquals(dim(tbl.size), c(3, 3))
-   checkEquals(colnames(tbl.size), c("id", "width", "height"))
-   checkEquals(tbl.size$id, c("A", "B", "C"))
-     # all dimeneions are 30px
-   checkEquals(unique(as.character(as.matrix(tbl.size[, c("width", "height")]))), "30px")
-
-   tbl.sizeA <- getNodeSize(rcy, "A")
-   checkEquals(dim(tbl.sizeA), c(1,3))
-   checkEquals(as.list(tbl.sizeA[1,]), list(id="A", width="30px", height="30px"))
-
-} # test.getNodeSize
-#----------------------------------------------------------------------------------------------------
-test.saveRestoreLayout <- function()
+test_saveRestoreLayout <- function()
 {
    if(!interactive())
        return(TRUE);
 
-   print("--- test.saveRestoreLayout");
+   printf("--- test_saveRestoreLayout");
 
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
    setBrowserWindowTitle(rcy, "restoreLayout");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   fit(rcy, 200)
+   tbl.pos.1 <- getPosition(rcy)
+   f <- tempfile(fileext=".RData")
+   saveLayout(rcy, f)
+   layout(rcy, "random")
+   restoreLayout(rcy, f)
+   fit(rcy, 200)
+   tbl.pos.2 <- getPosition(rcy)
+   checkEqualsNumeric(tbl.pos.1$x, tbl.pos.2$x, tol=1e-2)
+   checkEqualsNumeric(tbl.pos.1$y, tbl.pos.2$y, tol=1e-2)
 
-   tbl.layout <- getPosition(rcy)
+} # test_saveRestoreLayout
+#----------------------------------------------------------------------------------------------------
+test_savePNG <- function()
+{
+   if(!interactive())
+       return(TRUE);
 
-   layoutFilename <- "testLayout.RData";
-   if(file.exists(layoutFilename))
-      unlink(layoutFilename)
+   printf("--- test_savePNG")
 
-   saveLayout(rcy, layoutFilename)
-   checkTrue(file.exists(layoutFilename))
-
+   setBrowserWindowTitle(rcy, "savePNG")
+   g <- createTestGraph(100, 100)
+   setGraph(rcy, g)
    layout(rcy, "cose")
-   Sys.sleep(0.4)
-   restoreLayout(rcy, layoutFilename)
-   fitContent(rcy)
-   setZoom(rcy, 0.9 * getZoom(rcy))
 
-   tbl.layout2 <- getPosition(rcy)
-   checkEquals(tbl.layout, tbl.layout2)
-
-   closeWebSocket(rcy)
-
-} # test.saveRestoreLayout
-#----------------------------------------------------------------------------------------------------
-test.getJSON <- function()
-{
-   printf("--- test.getJSON")
-   rcy <- demo()
-   json <- getJSON(rcy)
-   checkTrue(nchar(json) > 2000)
-     # writeLines(json, "demo.json")
-
-} # test.getJSON
-#----------------------------------------------------------------------------------------------------
-test.setBackgroundColor <- function()
-{
-   print("--- test.setBackgroundColor");
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "setBackgroundColor");
-   setNodeLabelRule(rcy, "label");
-
-   redraw(rcy)
-   for(color in colors){
-     setBackgroundColor(rcy, color)
-     redraw(rcy)
-     } # for color
-
-   closeWebSocket(rcy)
-
-} # test.setBackgroundColor
-#----------------------------------------------------------------------------------------------------
-test.setNodeDefaults <- function()
-{
-   print("--- test.setNodeDefaults");
-
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "getSetPosition");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   setDefaultNodeSize(rcy, 200); redraw(rcy);
-   setDefaultNodeWidth(rcy, 40); redraw(rcy);
-   setDefaultNodeHeight(rcy, 10); redraw(rcy);
-   setDefaultNodeColor(rcy, "rgb(80,120,221)"); redraw(rcy);
-
-
-   setDefaultNodeSize(rcy, 80); redraw(rcy);
-   for(shape in shapes){
-      setDefaultNodeShape(rcy, shape);
-      redraw(rcy);
-      }
-   setDefaultNodeFontColor(rcy, "red"); redraw(rcy);
-   setDefaultNodeFontSize(rcy, 32); redraw(rcy);
-   setDefaultNodeBorderColor(rcy, "red"); redraw(rcy)
-   setDefaultNodeBorderColor(rcy, "black"); redraw(rcy)
-   setDefaultNodeBorderWidth(rcy, 10); redraw(rcy)
-   setDefaultNodeBorderWidth(rcy, 5); redraw(rcy)
-   setDefaultNodeBorderWidth(rcy, 3); redraw(rcy)
-   setDefaultNodeBorderWidth(rcy, 1); redraw(rcy)
-   setDefaultNodeBorderWidth(rcy, 5); redraw(rcy)
-   setDefaultNodeBorderWidth(rcy, 10); redraw(rcy)
-
-   closeWebSocket(rcy)
-
-} # test.setNodeDefaults
-#----------------------------------------------------------------------------------------------------
-test.setEdgeDefaults <- function()
-{
-   print("--- test.setEdgeDefaults")
-   g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   checkTrue(ready(rcy))
-   setBrowserWindowTitle(rcy, "setEdgeDefaults");
-   setNodeLabelRule(rcy, "label");
-   redraw(rcy)
-
-   setDefaultEdgeFontSize(rcy, 20); redraw(rcy);
-   setDefaultEdgeTargetArrowShape(rcy, "triangle"); redraw(rcy);
-   setDefaultEdgeTargetArrowShape(rcy, "none"); redraw(rcy);
-   setDefaultEdgeTargetArrowShape(rcy, "tee"); redraw(rcy);
-   setDefaultEdgeTargetArrowShape(rcy, "triangle"); redraw(rcy);
-
-   setDefaultEdgeColor(rcy, colors$red); redraw(rcy);
-   setDefaultEdgeTargetArrowColor(rcy, colors$blue); redraw(rcy);
-   setDefaultEdgeWidth(rcy, 5); redraw(rcy);
-   setDefaultEdgeLineColor(rcy, colors$green); redraw(rcy);
-   setDefaultEdgeFont(rcy, "SansSerif"); redraw(rcy);
-   setDefaultEdgeFontWeight(rcy, 1.0); redraw(rcy);
-   setDefaultEdgeTextOpacity(rcy, 1.0); redraw(rcy);
-
-   setDefaultEdgeLineStyle(rcy, "solid"); redraw(rcy);
-   setDefaultEdgeLineStyle(rcy, "dotted"); redraw(rcy);
-   setDefaultEdgeLineStyle(rcy, "dashed"); redraw(rcy);
-
-   setDefaultEdgeOpacity(rcy, 1.0); redraw(rcy);
-   setDefaultEdgeOpacity(rcy, 0.4); redraw(rcy);
-   setDefaultEdgeOpacity(rcy, 0.0); redraw(rcy);
-   setDefaultEdgeOpacity(rcy, 1.0); redraw(rcy);
-
-   setDefaultEdgeSourceArrowColor(rcy, colors$purple); redraw(rcy);
-   setDefaultEdgeSourceArrowShape(rcy, "tee"); redraw(rcy);
-
-   closeWebSocket(rcy)
-
-} # test.setEdgeDefaults
-#----------------------------------------------------------------------------------------------------
-test.setNodeAttributes <- function()
-{
-  rcy <- demo()
-     # originally lfc is c(-3, 0, 3)
-  setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(0, 0, 0))
-
-} # test.setNodeAttributes
-#----------------------------------------------------------------------------------------------------
-test.setEdgeAttributes <- function()
-{
-
-} # test.setEdgeAttributes
-#----------------------------------------------------------------------------------------------------
-test.compoundNodes <- function()
-{
-   print("--- test.compoundNodes")
-
-   nodes <- c("parent", "kid.1", "kid.2");
-
-   g = graphNEL(nodes, edgemode="directed");
-   nodeDataDefaults(g, attr = "label") <- "default node label"
-   nodeDataDefaults(g, attr = "parent") <- "";
-   edgeDataDefaults(g, attr = "edgeType") <- "undefined"
-
-   nodeData(g, nodes, "label") = nodes
-   nodeData(g, c("kid.1", "kid.2"), "parent") <- rep("parent", 2);
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
-   setNodeLabelRule(rcy, "label"); redraw(rcy)
-   setNodeLabelAlignment(rcy, "center", "center")
-   redraw(rcy)
-
-} # test.compoundNodes
-#----------------------------------------------------------------------------------------------------
-test.setNodeImage <- function()
-{
-   printf("--- test.setNodeImage")
-   rcy <- demo()
-   images <- list(A="http://farm1.staticflickr.com/231/524893064_f49a4d1d10_z.jpg",
-                  B="http://farm9.staticflickr.com/8316/8003798443_32d01257c8_b.jpg",
-                  C="http://localhost:5000/8003798443_32d01257c8_b.jpg")
-
-   setNodeImage(rcy, images)
-
-   images <- list(A="https://farm1.staticflickr.com/231/524893064_f49a4d1d10_z.jpg",
-                  B="http://localhost:5000/HellsCanyonJune2015.jpg",
-                  charlie="https://farm9.staticflickr.com/8316/8003798443_32d01257c8_b.jpg")
-   setNodeImage(rcy, images)
-
-} # test.setNodeImage
-#----------------------------------------------------------------------------------------------------
-demo.hypoxia <- function()
-{
-   require(org.Hs.eg.db)
-
-   if(!exists("refnet")){
-     library(RefNet)
-     refnet <<- RefNet();
-     tbl.hypoxia <<- interactions(refnet,provider="hypoxiaSignaling-2006")
-     }
-
-   g.hypoxia <- refnetToGraphNEL(tbl.hypoxia)
-   all.nodes <- nodes(g.hypoxia)
-   gene.nodes <- intersect(all.nodes, keys(org.Hs.egSYMBOL2EG))
-   process.nodes <- setdiff(all.nodes, gene.nodes)
-   nodeData(g.hypoxia, gene.nodes, attr="type") <- "gene"
-   nodeData(g.hypoxia, process.nodes, attr="type") <- "process"
-
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g.hypoxia);
-   setBackgroundColor(rcy, colors$lightGray)
-   setDefaultNodeSize(rcy, 60)
-   setDefaultNodeColor(rcy, "white")
-   setDefaultNodeBorderColor(rcy, "black")
-   setDefaultNodeBorderWidth(rcy, 3)
-   checkTrue(ready(rcy))
-   setNodeLabelRule(rcy, "label");
-   setNodeShapeRule(rcy, "type", c("gene", "process"), c("ellipse", "roundrectangle"))
-   redraw(rcy)
-   title <- "Hypoxia Signaling: Pouyssegur 2006"
-   setBrowserWindowTitle(rcy, title)
-   saved.layout.file <- system.file(package="RCyjs", "extdata", "hypoxiaLayout.RData")
-   restoreLayout(rcy, saved.layout.file)
-   fitContent(rcy)
-   setZoom(rcy, 0.9 * getZoom(rcy))
-
-
-   edgeColors <- list(activates = colors$darkerGreen,
-                      inhibits = colors$darkRed,
-                      inactivates = colors$darkRed,
-                      hydroxylates = colors$black,
-                      "TF cofactor" = colors$darkBlue,
-                      "TF binding" = colors$darkBlue,
-                      hydroxylated = colors$black,
-                      stabilizes.mrna = colors$darkerBlue,
-                      preserves = colors$darkGreen,
-                      proteolyzes = colors$darkRed)
-
-   setEdgeColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors), mode="lookup")
-   setEdgeTargetArrowColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors),
-                               mode="lookup")
-   edgeTargetShapes <- list(activates = "triangle",
-                            inhibits = "tee",
-                            inactivates = "tee",
-                            hydroxylates = "triangle",
-                            "TF cofactor" = "none",
-                            "TF binding" = "triangle",
-                            hydroxylated = "none",
-                            stabilizes.mrna = "triangle",
-                            preserves = "triangle",
-                            proteolyzes = "triangle")
-
-   setEdgeTargetArrowShapeRule(rcy, "edgeType", names(edgeTargetShapes), as.character(edgeTargetShapes))
-
-   redraw(rcy)
-
-   # closeWebSocket(rcy)
-
-   rcy
-
-} # demo.hypoxia
-#----------------------------------------------------------------------------------------------------
-refnetToGraphNEL <- function(tbl)
-{
-  g = new ("graphNEL", edgemode="directed")
-
-  nodeDataDefaults(g, attr="type") <- "undefined"
-  nodeDataDefaults(g, attr="label") <- "default node label"
-  nodeDataDefaults(g, attr="expression") <-  1.0
-  nodeDataDefaults(g, attr="gistic") <-  0
-  nodeDataDefaults(g, attr="mutation") <-  "none"
-
-  edgeDataDefaults(g, attr="edgeType") <- "undefined"
-  edgeDataDefaults(g, attr= "pubmedID") <- ""
-
-  all.nodes <- sort(unique(c(tbl$A, tbl$B)))
-  g = graph::addNode (all.nodes, g)
-  nodeData (g, all.nodes, "label") = all.nodes
-
-  g = graph::addEdge (tbl$A, tbl$B, g)
-
-  edgeData (g, tbl$A, tbl$B, "edgeType") = tbl$type
-
-  g
-
-} # refnetToGraphNEL
-#----------------------------------------------------------------------------------------------------
-getExpression <- function()
-{
-
-  strong.proneural.tumors <- c("TCGA.02.0014","TCGA.02.0069","TCGA.02.0074",
-                               "TCGA.02.0339","TCGA.02.0440","TCGA.02.0446",
-                               "TCGA.06.0174","TCGA.06.0177","TCGA.06.0241",
-                               "TCGA.06.0410","TCGA.08.0347","TCGA.08.0385",
-                               "TCGA.08.0524")
-  spn <- strong.proneural.tumors
-  print(load("~/s/bioc/trunk/RpacksTesting/ProneuralHeterogeneity/data/tbl.mrna.rda"))
-  tbl.mrna <- tbl.mrna[spn,]
-  name.map <- c("284"="ANGPT1",
-                "285"="ANGPT2",
-                "846"="CASR",
-                "54583"="EGLN1",
-                "112399"="EGLN3",
-                "2033"="EP300",
-                "3091"="HIF1A",
-                "3725"="JUN",
-                "3791"="KDR",
-                "1432"="MAPK14",
-                "6667"="SP1",
-                "7010"="TEK",
-                "7422"="VEGFA",
-                "7428"="VHL")
-   mtx <- tbl.mrna[, names(name.map)]
-
-} # getExpression
-#----------------------------------------------------------------------------------------------------
-getExpression <- function()
-{
-  library(cgdsr)
-  source("~/s/data/public/tcga/code/cgdsr.R")
-  url.new <- 'http://www.cbioportal.org/public-portal/';   # trailing slash needed!
-  cgdsr.server <- CGDS(url.new)
-  goi <- as.character(name.map)
-  case <- "gbm_tcga_pub2013_all"
-  profile <- "gbm_tcga_pub2013_rna_seq_v2_mrna_median_Zscores"
-  tbl.m <- cgdsrRequest(cgdsr.server, goi, profile, case, genesPerQuery = 50)   # 574 x 1582
-
-
-} #  getExpression
-#----------------------------------------------------------------------------------------------------
-test.httpSetStyle <- function(count=3)
-{
-   print("--- test.httpSetStyle")
-   rcy <- demo()
-   selectNodes(rcy, c("A", "B"))
    styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
-   styleFile.2 <- system.file(package="RCyjs", "extdata", "sampleStyle2.js");
+   loadStyleFile(rcy, styleFile.1)
 
-   for(i in 1:count){
-      httpSetStyle(rcy, styleFile.1)
-      Sys.sleep(1)
-      httpSetStyle(rcy, styleFile.2)
-      Sys.sleep(1)
-      } # for i
-
-} # test.httpSetStyle
-#----------------------------------------------------------------------------------------------------
-test.httpAddGraphToExistingGraph <- function()
-{
-   print("--- test.httpAddGraphToExistingGraph")
-   rcy <- demo()
-   setBackgroundColor(rcy, "#FAFAFA")
-   setDefaultEdgeColor(rcy, "blue")
-   redraw(rcy)
-   checkEquals(nrow(getNodes(rcy)), 3)
-   g2 <- createTestGraph(100, 100)
-   httpAddGraph(rcy, g2)
-   layout(rcy, "grid")
-   checkEquals(nrow(getNodes(rcy)), 103)
-
-} # test.httpAddGraphToExistingGraph
-#----------------------------------------------------------------------------------------------------
-test.httpAddGraphToEmptyGraph <- function()
-{
-   print("--- test.httpAddGraphToEmptyGraph")
-   rcy <- RCyjs(PORTS, graph=graphNEL())
-   setBackgroundColor(rcy, "#FAFAFA")
-   setDefaultEdgeColor(rcy, "blue")
-   redraw(rcy)
-   checkEquals(length(getNodes(rcy)), 0)
-   g2 <- createTestGraph(100, 100)
-   httpAddGraph(rcy, g2)
-   layout(rcy, "grid")
-   checkEquals(nrow(getNodes(rcy)), 100)
-
-} # test.httpAddGraphToEmptyGraph
-#----------------------------------------------------------------------------------------------------
-test.httpAddJsonGraphFromFile <- function()
-{
-   print("--- test.httpAddJsonGraphFromFile")
-   file <- system.file(package="RCyjs", "extdata", "g.json")
-   checkTrue(file.exists(file))
-
-   rcy <- RCyjs(PORTS, graph=graphNEL())
-   setBackgroundColor(rcy, "#FAFAFA")
-   setDefaultEdgeColor(rcy, "blue")
-   redraw(rcy)
-
-   httpAddJsonGraphFromFile(rcy, file)
-   fit(rcy)
-   layout(rcy, "grid")
-   dim(getNodes(rcy))
-   checkTrue(nrow(getNodes(rcy)) > 300)
-
-} # test.httpAddGraphToEmptyGraph
-#----------------------------------------------------------------------------------------------------
-test.savePNG <- function()
-{
-   print("--- test.savePNG")
-   rcy <- demo()
    filename <- tempfile(fileext=".png")
    savePNG(rcy, filename)
    checkTrue(file.exists(filename))
-   #system(sprintf("open %s", filename))
+   checkTrue(file.size(filename) > 100000)
 
-} # test.savePNG
+} # test_savePNG
 #----------------------------------------------------------------------------------------------------
-test.multiGraphSeparatelyVisibleEdges <- function()
+test_saveJPG <- function()
 {
    if(!interactive())
        return(TRUE);
 
-   print("--- test.multiGraphSeparatelyVisibleEdges")
+   printf("--- test_saveJPG")
+
+   setBrowserWindowTitle(rcy, "saveJPG")
+   g <- createTestGraph(100, 100)
+   setGraph(rcy, g)
+   layout(rcy, "cose")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+
+   selectNodes(rcy, paste("n", sample(1:100, size=10), sep=""))
+
+   filename.1 <- tempfile(fileext=".jpg")
+   filename.4 <- tempfile(fileext=".jpg")
+
+   saveJPG(rcy, filename.1, resolutionFactor=1)
+   checkTrue(file.exists(filename.1))
+   fs.1 <- file.size(filename.1)
+
+   saveJPG(rcy, filename.4, resolutionFactor=4)
+   checkTrue(file.exists(filename.4))
+   fs.2 <- file.size(filename.4)
+
+     # found ratio of fs2.4/fs.1 to be ~9.18.  aspect ratio preserved, file is
+     # larger therefore in x and y.
+
+   checkTrue(fs.2/fs.1 > 4)
+
+} # test_saveJPG
+#----------------------------------------------------------------------------------------------------
+test_setNodeAttributes <- function()
+{
+   if(!interactive())
+      return(TRUE)
+
+   printf("--- test_setNodeAttributes")
+
+   setBrowserWindowTitle(rcy, "setNodeAttributes")
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   layout(rcy, "cose")
+   fit(rcy, 100)
+   styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+   styleFile.2 <- system.file(package="RCyjs", "extdata", "sampleStyle2.js");
+   loadStyleFile(rcy, styleFile.2)
+
+     # originally lfc is c(-3, 0, 3)
+   setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(0, 0, 0))
+   redraw(rcy)
+   Sys.sleep(0.5)
+
+   setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(1, 2, 3))
+   redraw(rcy)
+   Sys.sleep(0.5)
+
+   setNodeAttributes(rcy, "lfc", c("A", "B", "C"), c(-3, -2, -1))
+   redraw(rcy)
+   Sys.sleep(0.5)
+
+} # test_setNodeAttributes
+#----------------------------------------------------------------------------------------------------
+test_setEdgeAttributes <- function()
+{
+   if(!interactive())
+      return(TRUE)
+
+   printf("--- test_setEdgeAttributes")
+   setBrowserWindowTitle(rcy, "setEdgeAttributes")
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   layout(rcy, "cose")
+   fit(rcy, 100)
+   styleFile.1 <- system.file(package="RCyjs", "extdata", "sampleStyle1.js");
+   styleFile.2 <- system.file(package="RCyjs", "extdata", "sampleStyle2.js");
+   loadStyleFile(rcy, styleFile.2)
+
+   setEdgeAttributes(rcy, attribute="score",
+                     sourceNodes=c("A", "B", "C"),
+                     targetNodes=c("B", "C", "A"),
+                     edgeTypes=c("phosphorylates", "synthetic lethal", "undefined"),
+                     values=c(0, 0, 0))
+
+   redraw(rcy)  # all edges should be lightgray
+   Sys.sleep(0.5)
+
+   setEdgeAttributes(rcy, attribute="score",
+                     sourceNodes=c("A", "B", "C"),
+                     targetNodes=c("B", "C", "A"),
+                     edgeTypes=c("phosphorylates", "synthetic lethal", "undefined"),
+                     values=c(30, 30, 30))
+
+   redraw(rcy)  # all edges should be green
+   Sys.sleep(0.5)
+
+   setEdgeAttributes(rcy, attribute="score",
+                     sourceNodes=c("A", "B", "C"),
+                     targetNodes=c("B", "C", "A"),
+                     edgeTypes=c("phosphorylates", "synthetic lethal", "undefined"),
+                     values=c(-30, 0, 30))
+
+   redraw(rcy)  # edges should be AB: red, BC: lightgray, CA: green
+   Sys.sleep(0.5)
+
+   setEdgeAttributes(rcy, attribute="score",
+                     sourceNodes=c("A", "B", "C"),
+                     targetNodes=c("B", "C", "A"),
+                     edgeTypes=c("phosphorylates", "synthetic lethal", "undefined"),
+                     values=c(30, -30, 0))
+
+   redraw(rcy)  # edges should be AB: red, BC: lightgray, CA: green
+   Sys.sleep(0.5)
+
+   setEdgeAttributes(rcy, attribute="score",
+                     sourceNodes=c("A", "B", "C"),
+                     targetNodes=c("B", "C", "A"),
+                     edgeTypes=c("phosphorylates", "synthetic lethal", "undefined"),
+                     values=c(0, 30, -30))
+
+   redraw(rcy)  # edges should be AB: red, BC: lightgray, CA: green
+   Sys.sleep(0.5)
+
+} # test_setEdgeAttributes
+#----------------------------------------------------------------------------------------------------
+test_hideShowEdges <- function()
+{
+   printf("--- test_hideShowEdges")
+   if(!interactive())
+      return(TRUE)
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+   target.edge.type <- "phosphorylates"
+   checkTrue(target.edge.type %in% eda(g, "edgeType"))
+   hideEdges(rcy, target.edge.type)
+   Sys.sleep(1)
+   showEdges(rcy, target.edge.type)
+   Sys.sleep(1)
+   hideEdges(rcy, target.edge.type)
+   Sys.sleep(1)
+   showAll(rcy, which="edges")
+
+   hideAllEdges(rcy)
+   Sys.sleep(1)
+   showAll(rcy, which="edges")
+
+} # test_hideShowEdges
+#----------------------------------------------------------------------------------------------------
+test_compoundNodes <- function()
+{
+   printf("--- test_compoundNodes")
+
+   setBrowserWindowTitle(rcy, "compoundNodes")
+   set.seed(17)
+   g <- createTestGraph(nodeCount=10, edgeCount=10)
+   nodeDataDefaults(g, attr="parent") <- ""
+   nodeData(g, c("n3", "n10"), attr="parent") <- "n8"
+   nodeData(g, c("n7"), attr="parent") <- "n3"
+   setGraph(rcy, g)
+   layout(rcy, "cola")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+
+   setNodeLabelAlignment(rcy, "center", "top")
+
+   redraw(rcy)
+   fit(rcy)
+   layout(rcy, "cola")
+
+} # test_compoundNodes
+#----------------------------------------------------------------------------------------------------
+test_queryAttributes <- function()
+{
+   printf("--- test_queryAttributes")
+
+   if(!interactive())
+      return(TRUE);
+
+   g <- simpleDemoGraph()
+   checkEquals(sort(noaNames(g)), c("count", "label", "lfc", "type"))
+   checkEquals(noa(g, "lfc"), c(A=-3, B=0, C=3))
+
+   checkEquals(sort(edaNames(g)), c("edgeType", "misc", "score"))
+   checkEquals(eda(g, "edgeType"), c("A|B"="phosphorylates", "B|C"="synthetic lethal", "C|A"="undefined"))
+
+} # test_queryAttributes
+#----------------------------------------------------------------------------------------------------
+deferred_test_multiGraphSeparatelyVisibleEdges <- function()
+{
+   if(!interactive())
+       return(TRUE);
+
+   printf("--- test_multiGraphSeparatelyVisibleEdges")
    g <- new("graphNEL", edgemode = "directed")
    g <- graph::addNode(c("A", "B"), g)
    g <- graph::addEdge("A", "B", g)
    g <- graph::addEdge("B", "A", g)
 
-   rcy <- RCyjs(PORTS, graph=g)
+   setGraph(rcy, g)
    fit(rcy, 200)
-   httpSetStyle(rcy, "style.js")
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
 
-} # test.multiGraphSeparatelyVisibleEdges
+} # deferred_test_multiGraphSeparatelyVisibleEdges
 #----------------------------------------------------------------------------------------------------
-test.httpAddCompoundEdgeToExistingGraph <- function()
+deferred_test_httpAddCompoundEdgeToExistingGraph <- function()
 {
    if(!interactive())
        return(TRUE);
 
-   print("--- test.httpAddCompoundEdgeToExistingGraph")
+   printf("--- test_httpAddCompoundEdgeToExistingGraph")
 
    g <- simpleDemoGraph()
-   rcy <- RCyjs(portRange=PORTS, quiet=TRUE, graph=g);
+   setGraphr(rcy, g)
    layout(rcy, "cose")
 
    setBrowserWindowTitle(rcy, "compoundEdge");
    setNodeLabelRule(rcy, "label");
    redraw(rcy)
 
-
-
-} # test.httpAddCompoundEdgeToExistingGraph
+} # deferred_test_httpAddCompoundEdgeToExistingGraph
 #----------------------------------------------------------------------------------------------------
-test.createStaticView <- function()
+skiptest_createStaticView <- function()
 {
-  printf("--- test.createStaticView")
-  rcy <- demo()
-  httpSetStyle(rcy, system.file(package="RCyjs", "extdata", "demoStyle.js"))
+  printf("--- test_createStaticView")
+  rcy <- rcy.demo()
+  loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "demoStyle.js"))
   fit(rcy, 100)
   json <- getJSON(rcy)
   fullAssignmentString <- sprintf("network = %s", json)
   templateFile <- system.file(package="RCyjs", "extdata", "staticViewTemplate.html")
   s <- paste(readLines(templateFile), collapse="\n")
   s.edited <- sub("STATIC_VIEW_NETWORK_ASSIGNMENT_GOES_HERE", fullAssignmentString, s, fixed=TRUE)
-  writeLines(text=s.edited, "test.html")
-  browseURL("test.html")
+  writeLines(text=s.edited, "test_html")
+  browseURL("test_html")
 
-} # test.createStaticView
+} # skiptest_createStaticView
 #----------------------------------------------------------------------------------------------------
-
 if(!interactive())
     runTests()

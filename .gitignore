@@ -33,5 +33,12 @@ vignettes/*.pdf
 *.knit.md
 
 
+# javascript intermediate buid files
+bundle.js
+
+
+# node etc
+
+
 # npm's node_modules is voluminous, easily reproduced from package.json
 node_modules

@@ -13,6 +13,9 @@
 
 \item{which}{a character string:  "both" (the default), "nodes" or "edges"}
 }
+\value{
+no return value
+}
 \description{
 \code{clearSelection} deselect all selected nodes, all selected edges, or both
 }

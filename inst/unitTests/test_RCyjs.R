@@ -18,7 +18,7 @@ runTests <- function()
    test_deleteSetAddGraph()
    test_largeGraph()
 
-   test_setGlobalStyleElements()
+   test_setDefaultStyleElements()
    test_nodeSpecificStyling()
 
    test_loadStyleFile();
@@ -234,14 +234,14 @@ test_largeGraph <- function()
 
 } # test_largeGraph
 #----------------------------------------------------------------------------------------------------
-test_setGlobalStyleElements <- function()
+test_setDefaultStyleElements <- function()
 {
-   printf("--- test_setGlobalStyleElement")
+   printf("--- test_setDefaultStyleElement")
 
    if(!interactive())
        return(TRUE);
 
-   setBrowserWindowTitle(rcy, "setGlobalStyleElements")
+   setBrowserWindowTitle(rcy, "setDefaultStyleElements")
 
    g <- createTestGraph(nodeCount=10, edgeCount=30)
    setGraph(rcy, g)
@@ -252,19 +252,19 @@ test_setGlobalStyleElements <- function()
    colors <- c("pink", "yellow", "lightblue", "lightgreen", "cyan", "gray", "lemonchiffon")
 
    for(size in sizes){
-      setGlobalNodeWidth(rcy, size); redraw(rcy);Sys.sleep(0.5)
+      setDefaultNodeWidth(rcy, size); redraw(rcy);Sys.sleep(0.5)
       } # for size
 
    for(size in sizes){
-      setGlobalNodeHeight(rcy, size); redraw(rcy); Sys.sleep(0.5)
+      setDefaultNodeHeight(rcy, size); redraw(rcy); Sys.sleep(0.5)
       } # for size
 
    for(size in sizes){
-      setGlobalNodeSize(rcy, size); redraw(rcy); Sys.sleep(0.5)
+      setDefaultNodeSize(rcy, size); redraw(rcy); Sys.sleep(0.5)
       } # for size
 
    for(color in colors){
-      setGlobalNodeColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      setDefaultNodeColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       } # for size
 
    shapes <- c("ellipse", "triangle", "rectangle", "roundrectangle",
@@ -274,70 +274,70 @@ test_setGlobalStyleElements <- function()
                "ellipse")
 
    for(shape in shapes){
-      setGlobalNodeShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
+      setDefaultNodeShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
       } # for size
 
-   setGlobalNodeShape(rcy, "roundrectangle");
-   setGlobalNodeColor(rcy, "#F0F0F0")
+   setDefaultNodeShape(rcy, "roundrectangle");
+   setDefaultNodeColor(rcy, "#F0F0F0")
    redraw(rcy)
 
    for(color in colors){
-      setGlobalNodeFontColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      setDefaultNodeFontColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       } # for size
 
-   setGlobalNodeColor(rcy, "lightblue")
-   setGlobalNodeFontColor(rcy, "darkblue")
+   setDefaultNodeColor(rcy, "lightblue")
+   setDefaultNodeFontColor(rcy, "darkblue")
    redraw(rcy);
 
    for(fontSize in seq(1, 20, by=2)){
-      setGlobalNodeFontSize(rcy, fontSize); redraw(rcy); Sys.sleep(0.5)
+      setDefaultNodeFontSize(rcy, fontSize); redraw(rcy); Sys.sleep(0.5)
       }
 
    for(width in c(0:5, 1)){
-      setGlobalNodeBorderWidth(rcy, width); redraw(rcy);Sys.sleep(0.5)
+      setDefaultNodeBorderWidth(rcy, width); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setGlobalNodeBorderColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      setDefaultNodeBorderColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    arrow.shapes <- c("triangle", "triangle-tee", "triangle-cross", "triangle-backcurve",
                      "vee", "tee", "square", "circle", "diamond", "none")
 
    for(shape in c(arrow.shapes, "triangle")){
-      setGlobalEdgeTargetArrowShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
+      setDefaultEdgeTargetArrowShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setGlobalEdgeTargetArrowColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      setDefaultEdgeTargetArrowColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(shape in c(arrow.shapes, "triangle")){
-      setGlobalEdgeSourceArrowShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
+      setDefaultEdgeSourceArrowShape(rcy, shape); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setGlobalEdgeSourceArrowColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      setDefaultEdgeSourceArrowColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setGlobalEdgeColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      setDefaultEdgeColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(width in c(0:5, 1)){
-      setGlobalEdgeWidth(rcy, width); redraw(rcy);Sys.sleep(0.5)
+      setDefaultEdgeWidth(rcy, width); redraw(rcy);Sys.sleep(0.5)
       }
 
    for(color in c(colors, "black")){
-      setGlobalEdgeLineColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
+      setDefaultEdgeLineColor(rcy, color); redraw(rcy);Sys.sleep(0.5)
       }
 
    line.styles <- c("solid", "dotted", "dashed", "solid")
    for(style in line.styles){
-      setGlobalEdgeLineStyle(rcy, style); redraw(rcy);Sys.sleep(0.5)
+      setDefaultEdgeLineStyle(rcy, style); redraw(rcy);Sys.sleep(0.5)
       }
 
-} # test_setGlobalStyleElements
+} # test_setDefaultStyleElements
 #----------------------------------------------------------------------------------------------------
 test_nodeSpecificStyling <- function()
 {
@@ -351,7 +351,7 @@ test_nodeSpecificStyling <- function()
    setGraph(rcy, g)
    layout(rcy, "cola")
    loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle1.js"))
-   setGlobalNodeBorderWidth(rcy, 1); redraw(rcy)
+   setDefaultNodeBorderWidth(rcy, 1); redraw(rcy)
    setBackgroundColor(rcy, "lemonchiffon")
 
    sizes <- c(2, 10, 20, 30, 40, 50, 30)
@@ -783,10 +783,10 @@ test_setNodeLabelAlignment <- function()
    title <- "setNodeLabelAlignment"
    setBrowserWindowTitle(rcy, title)
 
-   setGlobalNodeSize(rcy, 60)
-   setGlobalNodeColor(rcy, "white")
-   setGlobalNodeBorderColor(rcy, "black")
-   setGlobalNodeBorderWidth(rcy, 1)
+   setDefaultNodeSize(rcy, 60)
+   setDefaultNodeColor(rcy, "white")
+   setDefaultNodeBorderColor(rcy, "black")
+   setDefaultNodeBorderWidth(rcy, 1)
    redraw(rcy)
 
    hValues <- c("left", "center", "right")
@@ -806,16 +806,16 @@ test_setNodeLabelAlignment <- function()
    sizes <- seq(0, 32, 2)
 
    for(size in sizes){
-      setGlobalNodeFontSize(rcy, size)
+      setDefaultNodeFontSize(rcy, size)
       redraw(rcy)
       } # for size
 
    for(size in rev(sizes)){
-      setGlobalNodeFontSize(rcy, size)
+      setDefaultNodeFontSize(rcy, size)
       redraw(rcy)
       } # for size
 
-   setGlobalNodeFontSize(rcy, 16)
+   setDefaultNodeFontSize(rcy, 16)
    redraw(rcy)
 
 } # test_setNodeLabelAlignment

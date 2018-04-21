@@ -100722,6 +100722,7 @@ function addMessageHandlers()
 
    self.hub.addMessageHandler("setNodeAttributes",    setNodeAttributes.bind(self));
    self.hub.addMessageHandler("setEdgeAttributes",    setEdgeAttributes.bind(self));
+   self.hub.addMessageHandler("setDefaultStyle",      setDefaultStyle.bind(self));
    self.hub.addMessageHandler("loadStyleFile",        loadStyleFile.bind(self));
    self.hub.addMessageHandler("getNodeCount",         getNodeCount.bind(self));
    self.hub.addMessageHandler("getEdgeCount",         getEdgeCount.bind(self));
@@ -100781,8 +100782,6 @@ function addMessageHandlers()
    self.hub.addMessageHandler("setGlobalNodeSize",   setGlobalNodeSize.bind(self));
    self.hub.addMessageHandler("setGlobalNodeWidth",  setGlobalNodeWidth.bind(self));
    self.hub.addMessageHandler("setGlobalNodeHeight", setGlobalNodeHeight.bind(self));
-   self.hub.addMessageHandler("setGlobalNodeColor",  setGlobalNodeColor.bind(self));
-   self.hub.addMessageHandler("setGlobalNodeShape",  setGlobalNodeShape.bind(self));
    self.hub.addMessageHandler("setGlobalNodeFontColor", setGlobalNodeFontColor.bind(self));
    self.hub.addMessageHandler("setGlobalNodeFontSize", setGlobalNodeFontSize.bind(self));
    self.hub.addMessageHandler("setGlobalNodeBorderWidth", setGlobalNodeBorderWidth.bind(self));
@@ -101663,6 +101662,53 @@ function setNodeImage(msg)
   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // setNodeImage
+//----------------------------------------------------------------------------------------------------
+function setDefaultStyle(msg)
+{
+   var self = this;
+
+   var nodeStyle = {"height": 30,
+                    "width": 30,
+                    "shape": "ellipse",
+                    "text-halign": "center",
+                    "text-valign": "center",
+                    "background-color": "lightblue",
+                    "color": "black",
+                    "font-size": 12,
+                    "border-width": 1,
+                    "border-color": "gray",
+                    "content": "data(id)"
+                    };
+
+   var nodeSelectedStyle = {'overlay-color': 'grey',
+                            'overlay-opacity': 0.3};
+
+   var edgeStyle = {"line-color": "black",
+                    "width": 1,
+                    "line-style": "solid",
+                    "font-size": 0,
+                    "target-arrow-color": "black",
+                    "target-arrow-shape": "triangle",
+                    "source-arrow-color": "black",
+                    "source-arrow-shape": "none",
+                    "opacity": 1,
+                    "curve-style": "bezier"};
+
+   var edgeSelectedStyle = {'overlay-color': 'grey',
+                            'overlay-opacity': 0.3};
+
+   self.cy.style().selector('node').css(nodeStyle);
+   self.cy.style().selector('node:selected').css(nodeSelectedStyle);
+   self.cy.style().selector('edge').css(edgeStyle);
+   self.cy.style().selector('edge:selected').css(edgeSelectedStyle);
+
+   self.cy.style().update();
+
+   $("#cyDiv").css({"background-color": "white"});
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // setDefaultStyle
 //----------------------------------------------------------------------------------------------------
 function setGlobalNodeSize(msg)
 {

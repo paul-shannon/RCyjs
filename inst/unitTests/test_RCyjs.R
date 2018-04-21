@@ -18,6 +18,7 @@ runTests <- function()
    test_deleteSetAddGraph()
    test_largeGraph()
 
+   test_setDefaultStyle()
    test_setDefaultStyleElements()
    test_nodeSpecificStyling()
 
@@ -234,9 +235,29 @@ test_largeGraph <- function()
 
 } # test_largeGraph
 #----------------------------------------------------------------------------------------------------
+test_setDefaultStyle <- function()
+{
+   printf("--- test_setDefaultStyle")
+
+   if(!interactive())
+       return(TRUE);
+
+   setBrowserWindowTitle(rcy, "setDefaultStyle")
+
+   g <- createTestGraph(nodeCount=10, edgeCount=30)
+   setGraph(rcy, g)
+   layout(rcy, "cose")
+   setDefaultStyle(rcy)
+   Sys.sleep(1)
+   loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
+   Sys.sleep(1)
+   setDefaultStyle(rcy)
+
+} # test_setDefaultStyle
+#----------------------------------------------------------------------------------------------------
 test_setDefaultStyleElements <- function()
 {
-   printf("--- test_setDefaultStyleElement")
+   printf("--- test_setDefaultStyleElements")
 
    if(!interactive())
        return(TRUE);

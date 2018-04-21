@@ -45,6 +45,7 @@ setGeneric('setNodeAttributes',   signature='obj', function(obj, attribute, node
 setGeneric('setEdgeAttributes',   signature='obj', function(obj, attribute, sourceNodes, targetNodes, edgeTypes, values) standardGeneric('setEdgeAttributes'))
 
 
+setGeneric("setDefaultStyle",  signature='obj', function(obj) standardGeneric('setDefaultStyle'))
 setGeneric("setDefaultNodeSize",  signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeSize'))
 setGeneric("setDefaultNodeWidth", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeWidth'))
 setGeneric("setDefaultNodeHeight", signature='obj', function(obj, newValue) standardGeneric('setDefaultNodeHeight'))
@@ -966,6 +967,39 @@ setMethod('redraw', 'RCyjs',
         Sys.sleep(.1)
         }
      invisible(getBrowserResponse(obj));    # the empty string
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' setDefaultStyle
+#'
+#' \code{setDefaultStyle} use some sensible rendering options for all elements of the graph
+#'
+#' @rdname setDefaultStyle
+#' @aliases setDefaultStyle
+#'
+#' @param obj an RCyjs instance
+#'
+#' @return no value returned
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'   g <- simpleDemoGraph()
+#'   rcy <- RCyjs(title="setDefaultNodesSize", graph=g)
+#'   layout(rcy, "cose")
+#'   setDefaultStyle(rcy)
+#'   }
+#'
+setMethod("setDefaultStyle",  'RCyjs',
+
+  function (obj) {
+     send(obj, list(cmd="setDefaultStyle", callback="handleResponse", status="request",
+                    payload=""))
+     while (!browserResponseReady(obj)){
+        Sys.sleep(.1)
+        }
+     invisible(getBrowserResponse(obj));
      })
 
 #----------------------------------------------------------------------------------------------------

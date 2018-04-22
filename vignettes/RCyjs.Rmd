@@ -1,5 +1,5 @@
 ---
-title: "RCyjs: programmatic access to the web browser-based network viewer, cytoscape.js"
+title: "RCyjs: interactive network visualization using cytoscape.js"
 author: "Paul Shannon"
 package: RCyjs
 date: "`r Sys.Date()`"
@@ -29,189 +29,230 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-RCyjs is a BrowserViz subclass providing interactive access to Cytoscape.js running in your
-browser from an R session.  Cytoscape.js \url{http://js.cytoscape.org} provides full-featured network visualization in an HTML5
-browser window.  This web-based implementation is related to, and can exchange data with the
-desktop version of Cytoscape: \url{http://cytoscape.org}.    See the BrowserViz vignette for
-a description of the websocket and JSON techniques used here to connect your R session to your browser.
+Network (graph) visualization is useful for exploring relationships among entities, in biology as in other disciplines.  cytoscape.js \url{http://js.cytoscape.org} - part of the "Cytoscape ecosystem" of network vizualization and analysis tools - runs in all web browsers; RCyjs uses JSON messages over websockets to communicate between cytoscape.js and R, and all operations are provided as R function calls supplemented by interactive (mouse) operations in the browser.  
 
-# Simple Example
+This web-based implementation is related to, and can exchange data with the
+desktop version of Cytoscape: \url{http://cytoscape.org}, which has its own Bioconductor package, RCy3.  RCyjs requires no external software beyond your web browser.  RCy3, in contrast, and in order to provide access to the broad capabilities of desktop Cytoscape, requires its installation on your computer.  Both approaches are useful.
 
-RCyjs provides a utility function which creates a small 3-node, 3-edge graphNEL (see \Biocpkg{graph})
-with some attributes assigned to the nodes and edges:
+Following standard Bioconductor practice, full support is offered here for the core Bioconductor representation of network data: the graphNEL (node edge list) class.   graphNELs support an number of node and edge attributes on a graph, along with easy conversion from graphAM (adjacency matrix) objects.  Two alternative representations of graphs are indirectly supported at present, with direct support coming with the next release of RCyjs in autumn 2018:  that of the popular igraph package, and the new data.frame representation used by the Cytoscape Consortium in their updates to the RCy3 package.  But at present, users of these representations must transform their data into graphNELs:  see igraph.to.graphNEL in the igraph package.
 
-```{r, eval=TRUE, echo=FALSE}
-knitr::include_graphics("igv-vignette.png")
+One weakness of the graphNEL class, reflecting its origins in graph theory, is that at most one edge can exist between any two nodes.   In common biological practice - and in the cytoscape ecosystem - multiple edges between a pair of nodes, in the same direction, can be useful.   This weakness will be addressed in the next release of the package.
+
+# Overview
+
+Though a graph is fundamentally a static data structure, it can be used - and RCyjs encourages its use - as a represention of dynamic processes.  A few techniuqes enable this:  
+
+  - assigning and subsequently modifying node and edge attribute data
+  - flexible mapping of these attributes to various visual representations
+  - positioning nodes using supplied layout algorithms, by manual placement, by calculations (over time series data, for instance), or by a combination of these methods
+  
+Relations implicit in your data are thus made visible.  We demonstrate these techniques with a  small two-node example.
+
+# Load the RCyjs package and its dependencies
+```{r loadLibrary, results='hide', echo=FALSE}
+library(RCyjs)
 ```
+
+# Create the graph: two nodes, one edge between them
+The names you choose for nodes become their reference identifiers - their id.  These character strings are the names by which they are subsequently manipulated and queried.  Visual mapping rules, however, allow you to use other names for display purposes.  Here "A" and "T" is compact, easy to use, but we later set a "label" attribute on the nodes ("Activator" and "Target") and optionally use that in the display.
+```{r createGraph, results='hide'}
+nodes <- c("A", "T")
+g <- graphNEL(nodes, edgemode="directed")
+g <- graph::addEdge("A", "T", g)
+```
+# Set up default node and edge attributes on the graph
+Attributes are universal:  every node has all the node attributes, every edge has all the edge attributes.  This requirement is easily met by setting defaults:
+```{r defaultAttributes, results='hide'}
+nodeDataDefaults(g, attr="label") <- "undefined"
+nodeDataDefaults(g, attr="type") <- "undefined"
+nodeDataDefaults(g, attr="flux") <- 0
+edgeDataDefaults(g, attr="edgeType") <- "undefined"
+```
+# Add the actual initial attributes
+These attributes will remain fixed.  Node flux will change.
+```{r assignAttributes, results='hide'}
+nodeData(g, nodes, attr="label") <- c("Activator", "Target")
+nodeData(g, nodes, attr="type") <- c("ligand", "receptor")
+edgeData(g, "A", "T", attr="edgeType") <- "binds"
+```
+# Controlling Visual Attributes 
+
+## Methods for mapping data attributes to visual attributes
+We provide three methods to control the visual appearance of nodes and edges in the graph:
+
+ 1. programmatically assign defaults which then apply to all nodes and all edges
+ 2. programmatically assign specific visual attributes to specific nodes
+ 3. load "style" files containing data-to-appearnce rules of arbitrary complexity
+ 
+RCyjs provides a minimal style via the function _setDefaultStyle_ which we use to get started.  We now create an RCyjs instance, load the graph, and create a minimal display, after which the three mapping methods are presented.
+
+```{r displayGraph, results='hide'}
+rcy <- RCyjs(title="RCyjs vignette")
+setGraph(rcy, g)
+layout(rcy, "grid")
+fit(rcy, padding=200)
+setDefaultStyle(rcy)
+```
+## Builtin shapes
+cytoscape.js ships with seventeen node shapes, and ten "edge decorators" - the small symbols (arrows, tee) which can be placed at the ends of edges connecting the nodes.  Edges may be "solid", "dotted" or "dashed".
+```{r builtinShapes}
+getSupportedNodeShapes(rcy)
+getSupportedEdgeDecoratorShapes(rcy)
+```
+## Change some of the default styling
+These setting then apply equally to all nodes and all edges.
+For an exhaustive inventory and examples of these methods, see _test_setDefaultStyleElements() in 
+system.file(package="RCyjs", "unitTests", "test_RCyjs.R")
+```{r changeSomeDefaults, results='hide'}
+setDefaultNodeShape(rcy, "roundrectangle")
+setDefaultNodeSize(rcy, 50)
+setDefaultNodeColor(rcy, "lightgreen")
+setDefaultNodeFontSize(rcy, 8)
+setDefaultNodeFontColor(rcy, "darkgreen")
+setDefaultEdgeLineStyle(rcy, "dotted")
+setDefaultEdgeWidth(rcy, 1)
+setDefaultEdgeLineColor(rcy, "black")
+setDefaultNodeBorderWidth(rcy, 2)
+setDefaultNodeBorderColor(rcy, "white")
+setBackgroundColor(rcy, "#F0F0F0")
+setDefaultEdgeTargetArrowShape(rcy, "arrow")
+redraw(rcy)
+```
+## Assign visual properties directly to specific nodes
+Similar operations upon specific edges are not yet available - but are easily controlled via a style file as explained in the next section.
+```{r specificNodeVisualAssignements, results='hide'}
+setNodeColor(rcy, "A", "lightblue")
+setNodeSize(rcy, "T", 80)
+setNodeShape(rcy, "A", "hexagon")
+setNodeBorderWidth(rcy, "A", 3)
+redraw(rcy)
+```
+## Reset to the default style
+```{r resetStyle, results='hide'}
+setDefaultStyle(rcy)
+```
+## Motivating visual mapping rules
+In the two-node example given below we animate the display by successively updating the _flux_ parameter on each node, simulating (in the most basic form) the activity of the target based upon the activity of the activator.   We begin by specifying rules which map node color and node size to the current value of _flux_.  These rules are contained in the _extdata/vignetteStyle.js_ file included in the package, whose nature we introduce here by quoting the node style rules.
+
+Note that rules for ALL nodes are presented first, followed by specialized color and shape rules for nodes of different types (activator nodes and target nodes).  Note especially the _mapData_ functions: they calculate visual attributes from the current value of the specified data attributes.  Both nodes share the same size (width and height) rule, and different color rules.
+
+These rules are invoked and applied by RCyjs every time you call the _redraw_ method.
+
+```
+    {selector: "node", css: {
+        "width": "mapData(flux, 0, 1000, 20, 100)",
+        "height": "mapData(flux, 0, 1000, 20, 100)",
+        "shape": "ellipse",
+        "text-halign": "center",
+        "text-valign": "center",
+        "background-color": "lightblue",
+        "color": "black",
+        "font-size": 12,
+        "border-width": 1,
+        "border-color": "lightgray",
+        "content": "data(id)"
+        }},
+
+   {selector:"node[type='activator']", css: {
+       "shape": "diamond",
+       "background-color": "mapData(flux, 0, 1000, white, red)",
+       }},
+
+   {selector:"node[type='target']", css: {
+       "shape": "roundrectangle",
+       "background-color":"mapData(flux, 0, 1000, white, darkgreen)",
+       }},
+       
+    {selector:"node:selected", css: {
+       "overlay-opacity": 0.5,
+       }},
+
+    {selector: 'edge:selected', css: {
+       "overlay-opacity": 0.2,
+        }},
+
+
+```
+# Node positioning
+Before running the example code, let's discuss the several options RCyjs provides for node placement
+- arguably the most important aspect of graph visualization:
+ 
+ 1. layout by algorithm
+ 2. layout by ad hoc calculation
+ 3. interactive placement on the cytoscape.js canvas
+ 4. programmatic layout "assists", typically of selected nodes
+ 
+## Layout by algorithm
+ 
+For the currently displayed graph, these layout strategies are always available, written into the cytoscape.js code.  Their use here is not visually interesting: our graph is too small.   We conclude be resetting the basic grid layout which sets us up for subsequence code chunks later in this vignette. 
+```{r layouts, results='hide'}
+for(layout.name in getLayoutStrategies(rcy)){
+  layout(rcy, layout.name)
+  Sys.sleep(1)
+}
+layout(rcy, "grid")
+fit(rcy, padding=150)
+```
+## Layout by ad hoc calculation
+
+RCyjs provides two methods:  _getLayout_ and _setLayout_.  These return and consume, respectively, a data.frame with an id, x and y column.  Their use is demonstrated in the example below to perform a simple animation.  They can also be used if you wish to create your own layout algorithm.
+  
+## Interactive placement on the cytoscape.js canvas
+This traditional direct manipulation of nodes needs little introduction: simply click on a node, or drag a box around multiple nodes, then drag them to their new location.  You can use this approach for all the nodes in a graph but more plausibly you will find it useful following your use of an algorithmic layout, to fine-tune or correct its deficiencies.   Once you have a layout you like and wish to keep, these two methods will be useful:
+
+```
+saveLayout(rcy, filename)
+restoreLayout(rcy, filename)
+```
+RCyjs saves the layout as a data.frame in a compact RData format ready to be reused again later.
+
+## Programmitc layout assists 
+
+1. vAlign: align currently selected nodes vertically at their average x coordinate, preserving their y coordinates
+2. hAlign: currently selected nodes horizontally at their average y coordinate, preserving x
+3. layoutSelectionInGrid(rcy, x, y, w, h): anchor at x,y, grid is w x h
+4. layoutSelectionInGridInferAnchor(rcy, w, h): infer anchor from top-most, left-most node
+
+
+# Convenience functions for edge and node attributes
+
+RCyjs provides a utility function which creates a small 3-node, 3-edge graphNEL with several node and edge attributes.  We use this example to introduce simple attribute inspection:
 
 ```{r simpleExample, results='hide'}
 library(RCyjs)
-g <- simpleDemoGraph()
-noaNames(g)
-edaNames(g)
-noa(g, "type")
-noa(g, "lfc")
-eda(g, "edgeType")
-eda(g, "score")
+gDemo <- simpleDemoGraph()
+noaNames(gDemo)
+edaNames(gDemo)
+noa(gDemo, "type")
+noa(gDemo, "lfc")
+eda(gDemo, "edgeType")
+eda(gDemo, "score")
 ```
-Send this graph to your browser.  Request a simple layout and apply
-some simple rendering rules.
+# A two node Activator-Target example: data-driven node size, color, position
 
-In network visualization we commonly use edge and node attributes to control visual appearance.
-For instance, an edgeType of ``phosphorylates'' could be rendered in green, and ``regulates'' in black.
-Node size can reflect expression levels or population size.  Node borders can indicate abnormal modifications.
-This process, and the rules that govern it, go by the name of ``visual mapping''.
+This toy 2-node network illustrates all the principles and operations explained above - all of which scale easily to more realistic networks and their visualization.
 
-Before discussing and illustrating the use of these rules, let us first see how to set default
-visual properties which apply to all parts of the graph.  For instance: make all nodes round, with
-white interior, a thin black border, 50 pixels in diameter, connected by black edges (lines) which
-have no terminal decoration (that is, no arrows at the ends of the edges).  Note that \emph{redraw}
-must be called to \emph{apply} the currently specified rules.  First we define some useful colors:
+```{r twoNodeExample, results="hide", echo=FALSE}
+loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "vignetteStyle.js"))
+redraw(rcy)
+layout(rcy, "grid")
+tbl.pos <- getPosition(rcy)
+for(i in 1:10){
+   new.activator.flux <- i * 100
+   if(new.activator.flux > 1000)
+      new.activator.flux <- 1000
+   new.target.flux <- (i-3) * 100
+   setNodeAttributes(rcy, "flux", c("A", "T"), c(new.activator.flux, new.target.flux))
+   tbl.pos$x[1] <- tbl.pos$x[1] + 5
+   tbl.pos$x[2] <- tbl.pos$x[2] - 5
+   tbl.pos$y <- jitter(tbl.pos$y, amount=2)
+   setPosition(rcy, tbl.pos)
+   redraw(rcy)
+   Sys.sleep(0.3)
+   }
 
-```{r simpleRender,  results='hide'}
-g <- simpleDemoGraph()
-rcy <- RCyjs(title=title, graph=g)
-setBrowserWindowTitle(rcy, "simple demo")
-layout(rcy, "cose")
-setGlobalNodeSize(rcy, 30)
-setGlobalNodeShape(rcy, "ellipse")
-setGlobalNodeColor(rcy,
-setGlobalNodeBorderWidth(rcy, 1)
-```
-
-# Create a GRanges object specifying our region of interest, 285 kb centered on the MEF2C gene
-
-```{r roi,  results='hide'}
-chrom <- "chr5"
-shoulder <- 50000
-start.loc <- 88013975 - shoulder
-end.loc   <- 88199922 + shoulder
-mef2c.region <- GRanges(seqnames=chrom, IRanges(start=start.loc, end=end.loc))
-showGenomicRegion(igv, list(chrom=chrom, start=start.loc, end=end.loc))
-```
-
-# IGAP GWAS: read a tab-delimited file into a data.frame, create and display two tracks
-
-These next few steps expose the nuts and bolts of creating and displaying tracks from tabular data.
-None of the power and convenience of the Biocondcutor AnnotationHub, of rtracklayer and
-GenomicRanges is used here - that comes later.
-
-Add the IGAP GWAS track twice, first as an annotation track, so that names are avaialble by clicking,
-then again as a quantitative track, using a -log10(pValue) score, conveying strength of association
-of each SNP with the expression of the target gene, MEF2C.
-
-[IGAP](http://consortiapedia.fastercures.org/consortia/igap/), the International Genomics of Alzheimer's Project, provide these data.  See [Meta-analysis of 74,046 individuals identifies 11 new susceptibility loci for Alzheimer’s disease](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3896259/), Nature Genetics, Dec 2013.
-
-
-```{r data.frame.track,  results='hide'}
-load(system.file(package="igvR", "extdata", "tbl.mef2cGWAS.variants.RData"))
-tbl.mef2cGWAS.variants.bed <- tbl.mef2cGWAS.variants[, c("CHR", "oldPos", "oldPos", "SNP", "P")]
-tbl.mef2cGWAS.variants.bed$P <- -log10(tbl.mef2cGWAS.variants.bed$P)
-colnames(tbl.mef2cGWAS.variants.bed) <- c("chrom", "start", "end", "name", "score")
-track.gwas <- DataFrameAnnotationTrack("IGAP.gwas", tbl.mef2cGWAS.variants.bed, trackHeight=20, color="darkBlue")
-displayTrack(igv, track.gwas)
-
-tbl.mef2cGWAS.variants.bedGraph <-  tbl.mef2cGWAS.variants.bed[, -4]
-track.gwas.numeric <- DataFrameQuantitativeTrack("IGAP.gwas.scored",tbl.mef2cGWAS.variants.bedGraph)
-displayTrack(igv, track.gwas.numeric)
 
 ```
-# Use the AnnotationHub to create a promoter track
-
-A location-only calculation is used to identify gene promoters, rather than more nuanced
-experimental data, of which we will seem more later in this vignette.  We use default, conservative
-parameters (2kb upstream of TSS, 200bp downstream).
-
-```{r queryAHforPromoters,  results='hide'}
-ah <- AnnotationHub()
-ah.human <- subset(ah, species == "Homo sapiens")
-#----------------------------------------------------------------------------------------------------
-# add refseq promoters, available from RefSeq for each transcript which has been identified
-#----------------------------------------------------------------------------------------------------
-ah.human.refseq <- query(ah.human, "RefSeq", "hg19", "RefSeq Genes")
-
-# download the first set
-human.refseq <- ah.human.refseq[[1]]
-gr.promoters <- promoters(human.refseq, upstream=2000, downstream=200)
-  # get rid of score, itemRgb, thick, blocks columns in the mcols, keeping just the transcript name.
-  # these attributes are meaningful for transcript tracks since those include the represenation
-  # of UTRs, introns and exons.   but a promoter is a stretch of DNA for which those distinctions
-  # do not apply
-mcols(gr.promoters) <- mcols(gr.promoters)[,1]
-colnames(mcols(gr.promoters)) <- "name"
-ov <- findOverlaps(gr.promoters, mef2c.region)
-gr.mef2c.promoters <- gr.promoters[queryHits(ov)]
-track.promoters <- UCSCBedAnnotationTrack("promoters", gr.mef2c.promoters, color="darkGreen")
-displayTrack(igv, track.promoters)
-```
-# Overlap promoters and variants, create new track
-
-Non-coding SNPs which fall in promoter regions are plausible candidates for further examination.
-They may disrupt or create a transcription factor binding site, and thus possibly contribute to the
-disease under study.
-
-```{r overlapPromotersAndVariants,  results='hide'}
-gr.variants <- GRanges(tbl.mef2cGWAS.variants.bed)
-ov <- findOverlaps(gr.variants, gr.promoters)
-gr.variantsInPromoters <- gr.variants[queryHits(ov)]
-track.variantsInPromoters <-GRangesAnnotationTrack("snpInPromoters", gr.variantsInPromoters,
-                                                   color="red", displayMode="EXPANDED")
-displayTrack(igv, track.variantsInPromoters)
-```
-# Add Methylation Tracks
-
-H3K4me3 histone methylation marks are often associated with transcription initiation in promoter
-regions.  We will add three tracks from the AnnotationHub for H3K4me3 methylation in
-[Gm12878](https://www.genome.gov/26524238/encode-project-common-cell-types/) (lymphoblastoid) cells.
-
-```{r methylationTracks,  results='hide'}
-histone.tracks <- query(ah.human, c("H3K4me3", "Gm12878", "Peak", "narrow"))  # 3 tracks
-descriptions <- histone.tracks$description
-titles <- histone.tracks$title
-colors <- rep(terrain.colors(6), 4)
-color.index <- 0
-
-for(i in seq_len(length(histone.tracks))){
-   name <- names(histone.tracks)[i]
-   color.index <- color.index + 1
-   gr <- histone.tracks[[name]]
-   ov <- findOverlaps(gr, mef2c.region)
-   mef2c.histones <- gr[queryHits(ov)]
-   track.histones <- GRangesQuantitativeTrack(titles[i], mef2c.histones[, "pValue"],
-                                              color=colors[color.index], trackHeight=50)
-   displayTrack(igv, track.histones)
-   Sys.sleep(5)
-   } # for track
-
-```
-
-# VCF from ADNI, the Alzheimer's Disease Neuroimaging Initiative
-
-We include a very small slice of the ADNI whole genome sequencing
-[data](http://adni.loni.usc.edu/data-samples/genetic-data/wgs/).  349 samples (filtered from a
-larger set of 128 AD, 415 Mild Cognitive Impairment, 267 controls, 8 uncertains) are included, all
-in a ~4kb region including methylation marks, and IGAP GWAS SNPs in promoter regions.
-
-In order to illustrate some of genomic data exploration capabilities of igvR we are therefore mixing
-apples and oranges.  We have GWAS variants from IGAP (a very large meta-analysis), promoters from
-RefSeq (conservatively defined), methylation marks from a lymphoblastoid cell line, and WGS variants
-from ADNI. Note also that the ADNI variants in the VCF track are not stratified by disease
-phenotype.  Therefore, examining rsid rs80043958 at chr5:88,179,576 with an IGAP GWAS pvalue of
-0.002, we see the ADNI heterozygosity is 0.269 - this and other information about that variant is
-displayed in a popup by clicking on the pinkish "anchor block" - keep in mind that that number would
-be more informative if broken out by phenotype.
-
-```{r adniVCF,  results='hide'}
-vcfFilename <- system.file(package="igvR", "extdata", "mef2c-4kb.vcf")
-vcf <- readVcf(vcfFilename, "hg19")
-track.vcf <- VariantTrack("AMPAD VCF", vcf, trackHeight=1000)
-Sys.sleep(5)
-displayTrack(igv, track.vcf)
-Sys.sleep(10)  # allow plenty of time for this to complete, and the track to appear, before ending this chunk
-```
-# References
-
-1. Lambert, Jean-Charles, et al. "Meta-analysis of 74,046 individuals identifies 11 new susceptibility loci for Alzheimer's disease." [Nature genetics 45.12 (2013): 1452](https://www.ncbi.nlm.nih.gov/pubmed/24162737).
 
 ```{r sessionInfo}
 sessionInfo()

@@ -102661,7 +102661,7 @@ function loadStyle(filename)
 
 } // loadStyle
 //----------------------------------------------------------------------------------------------------
-function addNetwork (filename)
+function addNetwork(filename)
 {
    var self = this;
    var s = window.location.href + "?" + filename;
@@ -102673,11 +102673,13 @@ function addNetwork (filename)
          //console.log("nodes: " + network.elements.nodes.length);
          //if(typeof(network.elements.edges) != "undefined")
          //  console.log("edges: " + network.elements.edges.length);
+         //console.log("--- edges before: " + self.cy.edges().length);
          //if(hideEdges){
          //    console.log(" ---- hiding edges in getScript");
          //   self.cy.edges().style({"display": "none"});
          //   }
          self.cy.add(network.elements);  // no positions yet
+         //console.log("--- edges after: " + self.cy.edges().length);
          self.cy.nodes().map(function(node){node.data({degree: node.degree()})});
          //cy.edges().style({"display": "none"});  // default hide edges for now
          //cy.elements().qtip(qtipOptions());

@@ -25,6 +25,7 @@ runTests <- function()
    test_loadStyleFile();
    test_getJSON()
    test_addGraphFromFile()
+   test_multiGraph()
 
    test_getCounts()
    test_nodeSelection()
@@ -182,6 +183,25 @@ test_deleteSetAddGraph <- function()
    Sys.sleep(0.5)
 
 } # test_deleteSetAddGraph
+#----------------------------------------------------------------------------------------------------
+# TODO: multiple edges between two edges, in the same direction, do not work (21 apr 2018)
+doNotRun_test_multiGraph <- function()
+{
+   printf("--- test_multiGraph")
+
+   g1 <- graphNEL(c("n1", "n2"), edgemode="directed")
+   edgeDataDefaults(g1, "edgeType") <- "g1.edge"
+   g1 <- addEdge("n1", "n2", g1)
+   setGraph(rcy, g1)
+   setDefaultStyle(rcy)
+   layout(rcy, "cose")
+
+   g2 <- graphNEL(c("n1", "n2"), edgemode="directed")
+   edgeDataDefaults(g2, "edgeType") <- "g2.edge"
+   g2 <- addEdge("n1", "n2", g2)
+   addGraph(rcy, g2)
+
+} # test_multiGraph
 #----------------------------------------------------------------------------------------------------
 # to keep tests simple, this file creates an rcy object with an empty graph, at global scope, when
 # the file is read (sourced, loaded).  this test, unlike all the others, creates its own new RCyjs

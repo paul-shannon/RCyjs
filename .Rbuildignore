@@ -5,7 +5,7 @@ inst/browserCode/dist/bundle.js
 rcyjs.html-template
 .git/
 inst/unitTests/tmp*
-
+inst/demo/
 
 ^.*\.Rproj$
 ^\.Rproj\.user$

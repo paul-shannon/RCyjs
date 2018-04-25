@@ -1615,6 +1615,7 @@ function deleteGraph(msg)
    if(typeof(self.cy) != "undefined"){
       self.cy.remove(self.cy.elements())
       }
+
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // deleteGraph
@@ -2095,7 +2096,6 @@ return{
 }); // RCyjsModule
 //----------------------------------------------------------------------------------------------------
 var rcy = RCyjs(hub);
-hub.init();
 rcy.addMessageHandlers()
 hub.addOnDocumentReadyFunction(rcy.initializeUI.bind(rcy));
 rcy.bindFunctionsToSelf(rcy)

@@ -160,19 +160,18 @@ RCyjs = function(portRange=16000:16100, title="RCyjs", graph=graphNEL(), quiet=T
                             httpQueryProcessingFunction=myQP),
                  graph=graph)
 
+  #   if(length(nodes(graph)) > 0){
+  #      setGraph(obj, graph)
+  #      if(!quiet)
+  #         printf("loading graph with %d nodes", length(nodes(graph)))
+  #      layout(obj, "random")
+  #      } # if graph
 
-   if(length(nodes(graph)) > 0){
-      setGraph(obj, graph)
-      if(!quiet)
-         printf("loading graph with %d nodes", length(nodes(graph)))
-      layout(obj, "random")
-      } # if graph
 
+  #   if(!quiet)
+  #     message(sprintf("RCyjs ctor about to retrun RCyjs object"))
 
-   if(!quiet)
-     message(sprintf("RCyjs ctor about to retrun RCyjs object"))
-
-   setBrowserWindowTitle(obj, title)
+  #   setBrowserWindowTitle(obj, title)
 
    obj
 
@@ -241,7 +240,7 @@ setMethod('deleteGraph', 'RCyjs',
   function (obj) {
      send(obj, list(cmd="deleteGraph", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj))
      })
@@ -282,7 +281,7 @@ setMethod('addGraph', 'RCyjs',
      payload <- list(filename=temp.filename)
      send(obj, list(cmd="addGraph", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -319,7 +318,7 @@ setMethod('addGraphFromFile', 'RCyjs',
      payload <- list(filename=jsonFileName)
      send(obj, list(cmd="addGraph", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      #printf("browserResponseReady")
      getBrowserResponse(obj);
@@ -359,7 +358,7 @@ setMethod('loadStyleFile', 'RCyjs',
      send(obj, list(cmd="loadStyleFile", callback="handleResponse", status="request",
                     payload=filename))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      #printf("browserResponseReady")
      getBrowserResponse(obj);
@@ -398,7 +397,7 @@ setMethod('getNodes', 'RCyjs',
      payload <- list(which=which)
      send(obj, list(cmd="getNodes", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
@@ -433,7 +432,7 @@ setMethod('getNodeCount', 'RCyjs',
   function (obj) {
      send(obj, list(cmd="getNodeCount", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
@@ -468,7 +467,7 @@ setMethod('getEdgeCount', 'RCyjs',
   function (obj) {
      send(obj, list(cmd="getEdgeCount", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
@@ -508,7 +507,7 @@ setMethod('clearSelection', 'RCyjs',
      send(obj, list(cmd="clearSelection", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      return("")
      })
@@ -541,7 +540,7 @@ setMethod('getSelectedNodes', 'RCyjs',
      send(obj, list(cmd="getSelectedNodes", callback="handleResponse", status="request",
                                   payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0){
@@ -584,7 +583,7 @@ setMethod('invertNodeSelection', 'RCyjs',
      send(obj, list(cmd="invertNodeSelection", callback="handleResponse", status="request",
                     payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
@@ -629,7 +628,7 @@ setMethod('hideSelectedNodes', 'RCyjs',
      send(obj, list(cmd="hideSelectedNodes", callback="handleResponse", status="request",
                     payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
@@ -672,7 +671,7 @@ setMethod('deleteSelectedNodes', 'RCyjs',
      send(obj, list(cmd="deleteSelectedNodes", callback="handleResponse", status="request",
                     payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
@@ -721,7 +720,7 @@ setMethod('setNodeSizeRule', 'RCyjs',
      send(obj, list(cmd="setNodeSizeRule", callback="handleResponse", status="request",
                                   payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));  # the empty string.
      })
@@ -769,7 +768,7 @@ setMethod('setNodeColorRule', 'RCyjs',
      send(obj, list(cmd="setNodeColorRule", callback="handleResponse", status="request",
                                   payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));  # the empty string.
      })
@@ -811,7 +810,7 @@ setMethod('setEdgeStyle', 'RCyjs',
      send(obj, list(cmd="setEdgeStyle", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));  # the empty string.
      })
@@ -863,7 +862,7 @@ setMethod('setNodeAttributes', 'RCyjs',
      send(obj, list(cmd="setNodeAttributes", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
@@ -921,7 +920,7 @@ setMethod('setEdgeAttributes', 'RCyjs',
      send(obj, list(cmd="setEdgeAttributes", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
@@ -964,7 +963,7 @@ setMethod('redraw', 'RCyjs',
      send(obj, list(cmd="redraw", callback="handleResponse", status="request",
                                   payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -997,7 +996,7 @@ setMethod("setDefaultStyle",  'RCyjs',
      send(obj, list(cmd="setDefaultStyle", callback="handleResponse", status="request",
                     payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1031,7 +1030,7 @@ setMethod("setDefaultNodeSize",  'RCyjs',
      send(obj, list(cmd="setGlobalNodeSize", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1065,7 +1064,7 @@ setMethod("setDefaultNodeWidth",   'RCyjs',
      send(obj, list(cmd="setGlobalNodeWidth", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1107,7 +1106,7 @@ setMethod("setNodeWidth",   'RCyjs',
      send(obj, list(cmd="setNodeWidth", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1149,7 +1148,7 @@ setMethod("setNodeHeight",   'RCyjs',
      send(obj, list(cmd="setNodeHeight", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1191,7 +1190,7 @@ setMethod("setNodeSize",   'RCyjs',
      send(obj, list(cmd="setNodeSize", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1233,7 +1232,7 @@ setMethod("setNodeColor",   'RCyjs',
      send(obj, list(cmd="setNodeColor", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1280,7 +1279,7 @@ setMethod("setNodeShape", "RCyjs",
      send(obj, list(cmd="setNodeShape", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1322,7 +1321,7 @@ setMethod("setNodeFontColor", "RCyjs",
      send(obj, list(cmd="setNodeFontColor", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1364,7 +1363,7 @@ setMethod("setNodeFontSize", "RCyjs",
      send(obj, list(cmd="setNodeFontSize", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1408,7 +1407,7 @@ setMethod("setNodeBorderWidth", "RCyjs",
      send(obj, list(cmd="setNodeBorderWidth", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1452,7 +1451,7 @@ setMethod("setNodeBorderColor", "RCyjs",
      send(obj, list(cmd="setNodeBorderColor", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1487,7 +1486,7 @@ setMethod("setDefaultNodeHeight",   'RCyjs',
      send(obj, list(cmd="setGlobalNodeHeight", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1524,7 +1523,7 @@ setMethod("setDefaultNodeColor",   'RCyjs',
      send(obj, list(cmd="setGlobalNodeColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1565,7 +1564,7 @@ setMethod("setDefaultNodeShape",   'RCyjs',
      send(obj, list(cmd="setGlobalNodeShape", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1600,7 +1599,7 @@ setMethod("setDefaultNodeFontColor",   'RCyjs',
      send(obj, list(cmd="setGlobalNodeFontColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1638,7 +1637,7 @@ setMethod("setDefaultNodeFontSize",  'RCyjs',
      send(obj, list(cmd="setGlobalNodeFontSize", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1671,7 +1670,7 @@ setMethod("setDefaultNodeBorderWidth",  'RCyjs',
      send(obj, list(cmd="setGlobalNodeBorderWidth", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      getBrowserResponse(obj);
      })
@@ -1706,7 +1705,7 @@ setMethod("setDefaultNodeBorderColor",  'RCyjs',
      send(obj, list(cmd="setGlobalNodeBorderColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      getBrowserResponse(obj);
      })
@@ -1746,7 +1745,7 @@ setMethod("setDefaultEdgeTargetArrowShape", "RCyjs",
      send(obj, list(cmd="setGlobalEdgeTargetArrowShape", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
   })
@@ -1780,7 +1779,7 @@ setMethod("setDefaultEdgeColor", "RCyjs",
      send(obj, list(cmd="setGlobalEdgeColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1813,7 +1812,7 @@ setMethod("setDefaultEdgeTargetArrowColor", "RCyjs",
      send(obj, list(cmd="setGlobalEdgeTargetArrowColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1846,7 +1845,7 @@ setMethod("setDefaultEdgeWidth", "RCyjs",
      send(obj, list(cmd="setGlobalEdgeWidth", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
      })
@@ -1879,7 +1878,7 @@ setMethod("setDefaultEdgeLineColor", "RCyjs",
      send(obj, list(cmd="setGlobalEdgeLineColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));
   })
@@ -1917,7 +1916,7 @@ setMethod("setDefaultEdgeLineStyle", "RCyjs",
      send(obj, list(cmd="setGlobalEdgeLineStyle", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1951,7 +1950,7 @@ setMethod("setDefaultEdgeSourceArrowColor", "RCyjs",
      send(obj, list(cmd="setGlobalEdgeSourceArrowColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -1990,7 +1989,7 @@ setMethod("setDefaultEdgeSourceArrowShape", "RCyjs",
      send(obj, list(cmd="setGlobalEdgeSourceArrowShape", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
   })
@@ -2028,7 +2027,7 @@ setMethod('setNodeLabelRule', 'RCyjs',
      send(obj, list(cmd="setNodeLabelRule", callback="handleResponse", status="request",
                                   payload=attribute))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));  # the empty string.
      })
@@ -2071,7 +2070,7 @@ setMethod('setNodeLabelAlignment', 'RCyjs',
      send(obj, list(cmd="setNodeLabelAlignment", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));  # the empty string.
      })
@@ -2106,7 +2105,7 @@ setMethod('setNodeLabelAlignment', 'RCyjs',
 #      send(obj, list(cmd="setNodeImage", callback="handleResponse", status="request",
 #                                   payload=imageURLs))
 #      while (!browserResponseReady(obj)){
-#         Sys.sleep(.1)
+#         wait(obj, 100)
 #         }
 #      invisible(getBrowserResponse(obj));  # the empty string.
 #      })
@@ -2235,7 +2234,7 @@ setMethod('layout', 'RCyjs',
 
      send(obj, list(cmd="doLayout", callback="handleResponse", status="request", payload=strategy))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      getBrowserResponse(obj)
      })
@@ -2277,7 +2276,7 @@ setMethod('layoutSelectionInGrid', 'RCyjs',
      send(obj, list(cmd="layoutSelectionInGrid", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      getBrowserResponse(obj)
 
@@ -2321,7 +2320,7 @@ setMethod('layoutSelectionInGridInferAnchor', 'RCyjs',
      send(obj, list(cmd="layoutSelectionInGridInferAnchor", callback="handleResponse", status="request",
                     payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      getBrowserResponse(obj)
 
@@ -2361,7 +2360,7 @@ setMethod('getPosition', 'RCyjs',
      send(obj, list(cmd="getPosition", callback="handleResponse", status="request",
                                   payload=nodeIDs))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      fromJSON(getBrowserResponse(obj))
      })
@@ -2400,7 +2399,7 @@ setMethod('setPosition', 'RCyjs',
   function (obj, tbl.pos) {
      send(obj, list(cmd="setPosition", callback="handleResponse", status="request", payload=tbl.pos))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      getBrowserResponse(obj)
      })
@@ -2508,7 +2507,7 @@ setMethod('getJSON', 'RCyjs',
   function (obj) {
      send(obj, list(cmd="getJSON", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      getBrowserResponse(obj)
      })
@@ -2546,7 +2545,7 @@ setMethod('savePNG', 'RCyjs',
      send(obj, list(cmd="getPNG", callback="handleResponse", status="request",
                                   payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      png <- getBrowserResponse(obj)
      png.parsed <- fromJSON(png)
@@ -2593,7 +2592,7 @@ setMethod('saveJPG', 'RCyjs',
      send(obj, list(cmd="getJPG", callback="handleResponse", status="request",
                                   payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      jpg <- getBrowserResponse(obj)
      jpg.parsed <- fromJSON(jpg)
@@ -2639,7 +2638,7 @@ setMethod('saveJPG', 'RCyjs',
 ##      send(obj, list(cmd="getJPG", callback="handleResponse", status="request",
 ##                                   payload=payload))
 ##      while (!browserResponseReady(obj)){
-##         Sys.sleep(.1)
+##         wait(obj, 100)
 ##         }
 ##      jpg <- getBrowserResponse(obj)
 ##      jpg.parsed <- fromJSON(jpg)
@@ -2787,7 +2786,7 @@ setMethod('fit', 'RCyjs',
   function (obj, padding=30) {
      send(obj, list(cmd="fit", callback="handleResponse", status="request", payload=padding))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -2821,7 +2820,7 @@ setMethod('fitSelection', 'RCyjs',
   function (obj, padding=30) {
      send(obj, list(cmd="fitSelected", callback="handleResponse", status="request", payload=padding))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -2854,7 +2853,7 @@ setMethod('selectNodes', 'RCyjs',
      send(obj, list(cmd="selectNodes", callback="handleResponse", status="request",
                     payload=nodeIDs))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -2887,7 +2886,7 @@ setMethod('selectFirstNeighborsOfSelectedNodes', 'RCyjs',
   function (obj) {
      send(obj, list(cmd="sfn", callback="handleResponse", status="request", payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -2951,7 +2950,7 @@ setMethod('hideAllEdges', 'RCyjs',
      send(obj, list(cmd="hideAllEdges", callback="handleResponse", status="request",
                     payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -2988,7 +2987,7 @@ setMethod('showAll', 'RCyjs',
      payload <- match.arg(which)
      send(obj, list(cmd="showAll", callback="handleResponse", status="request", payload=payload))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -3028,7 +3027,7 @@ setMethod('hideEdges', 'RCyjs',
      send(obj, list(cmd="hideEdges", callback="handleResponse", status="request",
                     payload=edgeType))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -3068,7 +3067,7 @@ setMethod('showEdges', 'RCyjs',
      send(obj, list(cmd="showEdges", callback="handleResponse", status="request",
                     payload=edgeType))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -3103,7 +3102,7 @@ setMethod('getZoom', 'RCyjs',
      send(obj, list(cmd="getZoom", callback="handleResponse", status="request",
                     payload=""))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      getBrowserResponse(obj)
      })
@@ -3138,7 +3137,7 @@ setMethod('setZoom', 'RCyjs',
      send(obj, list(cmd="setZoom", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })
@@ -3172,7 +3171,7 @@ setMethod('setBackgroundColor', 'RCyjs',
      send(obj, list(cmd="setBackgroundColor", callback="handleResponse", status="request",
                     payload=newValue))
      while (!browserResponseReady(obj)){
-        Sys.sleep(.1)
+        wait(obj, 100)
         }
      invisible(getBrowserResponse(obj));    # the empty string
      })

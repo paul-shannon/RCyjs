@@ -1,186 +1,106 @@
-### R code from vignette source 'RCyjs.Rnw'
+## ----setup, include = FALSE-------------------------------------------------------------------------------------------
+options(width=120)
+knitr::opts_chunk$set(
+   collapse = TRUE,
+   eval=interactive(),
+   echo=TRUE,
+   comment = "#>"
+)
 
-###################################################
-### code chunk number 1: style
-###################################################
-BiocStyle::latex()
+## ----loadLibrary, results='hide', echo=FALSE--------------------------------------------------------------------------
+#  library(RCyjs)
 
+## ----createGraph, results='hide'--------------------------------------------------------------------------------------
+#  nodes <- c("A", "T")
+#  g <- graphNEL(nodes, edgemode="directed")
+#  g <- graph::addEdge("A", "T", g)
 
-###################################################
-### code chunk number 2: simpleExample (eval = FALSE)
-###################################################
-## library(RCyjs)
-## g <- simpleDemoGraph()
-## noaNames(g)
-## edaNames(g)
-## noa(g, "type")
-## noa(g, "lfc")
-## eda(g, "edgeType")
-## eda(g, "score")
+## ----defaultAttributes, results='hide'--------------------------------------------------------------------------------
+#  nodeDataDefaults(g, attr="label") <- "undefined"
+#  nodeDataDefaults(g, attr="type") <- "undefined"
+#  nodeDataDefaults(g, attr="flux") <- 0
+#  edgeDataDefaults(g, attr="edgeType") <- "undefined"
 
+## ----assignAttributes, results='hide'---------------------------------------------------------------------------------
+#  nodeData(g, nodes, attr="label") <- c("Activator", "Target")
+#  nodeData(g, nodes, attr="type") <- c("ligand", "receptor")
+#  edgeData(g, "A", "T", attr="edgeType") <- "binds"
 
-###################################################
-### code chunk number 3: simpleRender (eval = FALSE)
-###################################################
-## g <- simpleDemoGraph()
-## rcy <- RCyjs(portRange=9047:9067, quiet=TRUE, graph=g);
-## title <- "simple graph"
-## setBrowserWindowTitle(rcy, title)
+## ----displayGraph, results='hide'-------------------------------------------------------------------------------------
+#  rcy <- RCyjs(title="RCyjs vignette")
+#  setGraph(rcy, g)
+#  layout(rcy, "grid")
+#  fit(rcy, padding=200)
+#  setDefaultStyle(rcy)
 
+## ----builtinShapes----------------------------------------------------------------------------------------------------
+#  getSupportedNodeShapes(rcy)
+#  getSupportedEdgeDecoratorShapes(rcy)
 
-###################################################
-### code chunk number 4: colors (eval = FALSE)
-###################################################
-## green <- "rgb(0,255,0)"
-## white <- "rgb(255,255,255)"
-## red <- "rgb(255,0,0)"
-## blue <- "rgb(0,0,255)"
-## black <- "rgb(0,0,0)"
-## darkGreen <- "rgb(0,200,0)"
-## darkerGreen <- "rgb(0,120,0)"
-## darkRed <- "rgb(221,0,0)"
-## darkerRed <- "rgb(170,0,0)"
-## purple <- "rgb(221,221,0)"
-## darkBlue <- "rgb(0,0,170)"
-## darkerBlue <- "rgb(0,0,136)"
-## lightGray="rgb(230,230,230)"
-## 
+## ----changeSomeDefaults, results='hide'-------------------------------------------------------------------------------
+#  setDefaultNodeShape(rcy, "roundrectangle")
+#  setDefaultNodeSize(rcy, 50)
+#  setDefaultNodeColor(rcy, "lightgreen")
+#  setDefaultNodeFontSize(rcy, 8)
+#  setDefaultNodeFontColor(rcy, "darkgreen")
+#  setDefaultEdgeLineStyle(rcy, "dotted")
+#  setDefaultEdgeWidth(rcy, 1)
+#  setDefaultEdgeLineColor(rcy, "black")
+#  setDefaultNodeBorderWidth(rcy, 2)
+#  setDefaultNodeBorderColor(rcy, "white")
+#  setBackgroundColor(rcy, "#F0F0F0")
+#  setDefaultEdgeTargetArrowShape(rcy, "arrow")
+#  redraw(rcy)
 
+## ----specificNodeVisualAssignements, results='hide'-------------------------------------------------------------------
+#  setNodeColor(rcy, "A", "lightblue")
+#  setNodeSize(rcy, "T", 80)
+#  setNodeShape(rcy, "A", "hexagon")
+#  setNodeBorderWidth(rcy, "A", 3)
+#  redraw(rcy)
 
-###################################################
-### code chunk number 5: defaultRendering (eval = FALSE)
-###################################################
-## setDefaultNodeShape(rcy, "ellipse")
-## setNodeLabelRule(rcy, "label")  # we DO want a different label on each node.  this rule ensures that
-## setDefaultNodeSize(rcy, 70)
-## setDefaultNodeColor(rcy, "white")
-## setDefaultNodeBorderColor(rcy, "black")
-## setDefaultNodeBorderWidth(rcy, 1)
-## setDefaultEdgeColor(rcy, blue)
-## setNodeLabelAlignment(rcy, "center", "center");
-## layout(rcy, "circle")
-## fitContent(rcy)
-## setZoom(rcy, 0.75 * getZoom(rcy))
-## setDefaultEdgeSourceArrowShape(rcy, "tee")
-## setDefaultEdgeTargetArrowShape(rcy, "triangle")
-## setDefaultEdgeSourceArrowColor(rcy, blue)
-## setDefaultEdgeTargetArrowColor(rcy, blue)
-## redraw(rcy)
+## ----resetStyle, results='hide'---------------------------------------------------------------------------------------
+#  setDefaultStyle(rcy)
 
+## ----layouts, results='hide'------------------------------------------------------------------------------------------
+#  for(layout.name in getLayoutStrategies(rcy)){
+#    layout(rcy, layout.name)
+#    Sys.sleep(1)
+#  }
+#  layout(rcy, "grid")
+#  fit(rcy, padding=150)
 
-###################################################
-### code chunk number 6: firstRules (eval = FALSE)
-###################################################
-## noa(g, "lfc")
-## setNodeColorRule(rcy, "lfc", c(-5, 0, 5), c(green, white, red), mode="interpolate")
-## setEdgeColorRule(rcy, "edgeType",
-##                  c("phosphorylates", "synthetic lethal", "undefined"),
-##                  c(red, green, blue), mode="lookup")
-## 
-## redraw(rcy)
+## ----simpleExample, results='hide'------------------------------------------------------------------------------------
+#  library(RCyjs)
+#  gDemo <- simpleDemoGraph()
+#  noaNames(gDemo)
+#  edaNames(gDemo)
+#  noa(gDemo, "type")
+#  noa(gDemo, "lfc")
+#  eda(gDemo, "edgeType")
+#  eda(gDemo, "score")
 
+## ----twoNodeExample, results="hide", echo=FALSE-----------------------------------------------------------------------
+#  loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "vignetteStyle.js"))
+#  redraw(rcy)
+#  layout(rcy, "grid")
+#  tbl.pos <- getPosition(rcy)
+#  for(i in 1:10){
+#     new.activator.flux <- i * 100
+#     if(new.activator.flux > 1000)
+#        new.activator.flux <- 1000
+#     new.target.flux <- (i-3) * 100
+#     setNodeAttributes(rcy, "flux", c("A", "T"), c(new.activator.flux, new.target.flux))
+#     tbl.pos$x[1] <- tbl.pos$x[1] + 5
+#     tbl.pos$x[2] <- tbl.pos$x[2] - 5
+#     tbl.pos$y <- jitter(tbl.pos$y, amount=2)
+#     setPosition(rcy, tbl.pos)
+#     redraw(rcy)
+#     Sys.sleep(0.3)
+#     }
+#  
+#  
 
-###################################################
-### code chunk number 7: refnet (eval = FALSE)
-###################################################
-## refnetToGraphNEL <- function(tbl)
-## {
-##   g = new ("graphNEL", edgemode="directed")
-##   nodeDataDefaults(g, attr="type") <- "undefined"
-##   nodeDataDefaults(g, attr="label") <- "default node label"
-##   nodeDataDefaults(g, attr="expression") <-  1.0
-##   nodeDataDefaults(g, attr="gistic") <-  0
-##   nodeDataDefaults(g, attr="mutation") <-  "none"
-##   edgeDataDefaults(g, attr="edgeType") <- "undefined"
-##   edgeDataDefaults(g, attr= "pubmedID") <- ""
-##   all.nodes <- sort(unique(c(tbl$A, tbl$B)))
-##   g = graph::addNode (all.nodes, g)
-##   nodeData (g, all.nodes, "label") = all.nodes
-##   g = graph::addEdge (tbl$A, tbl$B, g)
-##   edgeData (g, tbl$A, tbl$B, "edgeType") = tbl$type
-##   g
-##   }
-
-
-###################################################
-### code chunk number 8: hypoxia0 (eval = FALSE)
-###################################################
-## library(org.Hs.eg.db)
-## library(RefNet)
-## refnet <- RefNet();
-## tbl.hypoxia <- interactions(refnet,provider="hypoxiaSignaling-2006")
-## g.hypoxia <- refnetToGraphNEL(tbl.hypoxia)
-
-
-###################################################
-### code chunk number 9: hypoxia1 (eval = FALSE)
-###################################################
-## all.nodes <- nodes(g.hypoxia)
-## gene.nodes <- intersect(all.nodes, keys(org.Hs.egSYMBOL2EG))
-## process.nodes <- setdiff(all.nodes, gene.nodes)
-## nodeData(g.hypoxia, gene.nodes, attr="type") <- "gene"
-## nodeData(g.hypoxia, process.nodes, attr="type") <- "process"
-
-
-###################################################
-### code chunk number 10: hypoxia2 (eval = FALSE)
-###################################################
-## rcy <- RCyjs(portRange=9047:9067, quiet=TRUE, graph=g.hypoxia);
-## setBackgroundColor(rcy, lightGray)
-## setDefaultNodeSize(rcy, 60)
-## setDefaultNodeColor(rcy, white)
-## setDefaultNodeBorderColor(rcy, black)
-## setDefaultNodeBorderWidth(rcy, 3)
-## setNodeLabelRule(rcy, "label");
-## setNodeShapeRule(rcy, "type", c("gene", "process"), c("ellipse", "roundrectangle"))
-## redraw(rcy)
-## title <- "Hypoxia Signaling: Pouyssegur 2006"
-## setBrowserWindowTitle(rcy, title)
-
-
-###################################################
-### code chunk number 11: hypoxia3 (eval = FALSE)
-###################################################
-## saved.layout.file <- system.file(package="RCyjs", "extdata", "hypoxiaLayout.RData")
-## stopifnot(file.exists(saved.layout.file))
-## restoreLayout(rcy, saved.layout.file)
-## fitContent(rcy)
-## setZoom(rcy, 0.9 *getZoom(rcy))
-
-
-###################################################
-### code chunk number 12: hypoxia4 (eval = FALSE)
-###################################################
-## edgeColors <- list(activates = darkerGreen,
-##                    inhibits = darkRed,
-##                    inactivates = darkRed,
-##                    hydroxylates = black,
-##                    "TF cofactor" = darkBlue,
-##                    "TF binding" = darkBlue,
-##                    hydroxylated = black,
-##                    stabilizes.mrna = darkerBlue,
-##                    preserves = darkGreen,
-##                    proteolyzes = darkRed)
-## 
-## setEdgeColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors), mode="lookup")
-## setEdgeTargetArrowColorRule(rcy, "edgeType", names(edgeColors), as.character(edgeColors),
-##                             mode="lookup")
-## 
-## edgeTargetShapes <- list(activates = "triangle",
-##                          inhibits = "tee",
-##                          inactivates = "tee",
-##                          hydroxylates = "triangle",
-##                          "TF cofactor" = "none",
-##                          "TF binding" = "triangle",
-##                          hydroxylated = "none",
-##                          stabilizes.mrna = "triangle",
-##                          preserves = "triangle",
-##                          proteolyzes = "triangle")
-## 
-## setEdgeTargetArrowShapeRule(rcy, "edgeType", names(edgeTargetShapes), as.character(edgeTargetShapes))
-## 
-## redraw(rcy)
-## 
-## 
-
+## ----sessionInfo------------------------------------------------------------------------------------------------------
+#  sessionInfo()
 

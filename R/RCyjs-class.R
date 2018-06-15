@@ -355,6 +355,10 @@ setMethod('addGraphFromFile', 'RCyjs',
 setMethod('loadStyleFile', 'RCyjs',
 
   function (obj, filename) {
+     if(!file.exists(filename)){
+        warning(sprintf("style file '%s' cannot be found", filename))
+        return(NULL)
+        }
      send(obj, list(cmd="loadStyleFile", callback="handleResponse", status="request",
                     payload=filename))
      while (!browserResponseReady(obj)){

@@ -1,5 +1,6 @@
-library (RCyjs)
-library (RUnit)
+library(RCyjs)
+library(RUnit)
+library(later)
 #----------------------------------------------------------------------------------------------------
 if(interactive()){
   if(!exists("rcy")){
@@ -255,14 +256,16 @@ test_largeGraph <- function()
    deleteGraph(rcy)
    g <- createTestGraph(nodeCount=1000, edgeCount=1200)
    addGraph(rcy, g)
-   #layout(rcy, "grid")
    later(function(){layout(rcy, "grid"); printf("all done waiting in later")}, 4)
+   later(function(){printf("starting cola"); layout(rcy, "cola");  printf("all done")}, 10)
+
+   service(30000);
+   printf("--- concluding test_largeGraph")
    return(TRUE)
 
    #Sys.sleep(3)
    #waitForDisplay(2000)
    #fit(rcy)
-   #layout(rcy, "cola")
    #waitForDisplay(10000)
 
 
@@ -291,8 +294,8 @@ test_setDefaultStyle <- function()
    later(function() {printf("--- style at 13");
                     loadStyleFile(rcy, system.file(package="RCyjs", "extdata", "sampleStyle2.js"))
                     }, 13)
-   later(function() {printf("--- dfs 1 at 14"); setDefaultStyle(rcy)}, 16)
-   waitForDisplay(5000)
+   later(function() {printf("--- dfs 1 at 14"); setDefaultStyle(rcy); waitForDisplay(10000)}, 16)
+
 
 } # test_setDefaultStyle
 #----------------------------------------------------------------------------------------------------

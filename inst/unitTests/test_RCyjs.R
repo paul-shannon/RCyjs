@@ -69,7 +69,7 @@ runTests <- function()
 # a utility: create and return simple instance, for further experimentation
 rcy.demo <- function()
 {
-   g <- simpleDemoGraph()
+   g <- simpleDemoGraph ()
 
    checkTrue(ready(rcy))
    setGraph(rcy, g)

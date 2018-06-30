@@ -5,7 +5,7 @@ library(later)
 if(interactive()){
   if(!exists("rcy")){
      title <- "rcy test"
-     rcy <- RCyjs(title=title)
+     rcy <- RCyjs(title=title, quiet=TRUE)
      #checkTrue(ready(rcy))
      #checkEquals(getBrowserWindowTitle(rcy), title)
      #checkEquals(length(getNodes(rcy)), 0);
@@ -75,7 +75,7 @@ rcy.demo <- function()
    setGraph(rcy, g)
    setBrowserWindowTitle(rcy, "rcy.demo")
    checkEquals(getBrowserWindowTitle(rcy), "rcy.demo")
-
+   checkEquals(getNodeCount(rcy), 3)
    tbl.nodes <- getNodes(rcy)
    checkEquals(nrow(tbl.nodes), 3)
    checkEquals(tbl.nodes$id, c("A", "B", "C"))
@@ -85,7 +85,7 @@ rcy.demo <- function()
    setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
    redraw(rcy)
    layout(rcy, "cose")
-   fit(rcy, 300)
+   fit(rcy, 100)
 
    rcy
 
@@ -547,26 +547,27 @@ test_getCounts <- function()
        return(TRUE);
 
    setBrowserWindowTitle(rcy, "getCounts");
-
    g <- simpleDemoGraph()
    setGraph(rcy, g)
-   layout(rcy, "cola")
+   layout(rcy, "cose")
+
    checkEquals(getNodeCount(rcy), length(nodes(g)))
    checkEquals(getEdgeCount(rcy), length(edgeNames(g)))
 
-   nodesRequested <- 10
-   edgesRequested <- 15
+   nodesRequested <- 1000
+   edgesRequested <- 1500
+
    g2 <- createTestGraph(nodeCount=nodesRequested, edgeCount=edgesRequested)
    setGraph(rcy, g2)
-   layout(rcy, "cola")
+   checkEquals(getEdgeCount(rcy), length(edgeNames(g2)))
+
       # createTestGraph cannot always return as many edges as requested
       # the edge possiblities may be used up before the full complement
       # is achieved.   so only expect as many edges in rcy as there are in R
-   checkEquals(getEdgeCount(rcy), length(edgeNames(g2)))
 
    addGraph(rcy, g)
+   print(ready(rcy))
    layout(rcy, "cola")
-   checkEquals(getNodeCount(rcy), 13)
    checkEquals(getEdgeCount(rcy), length(edgeNames(g2)) + length(edgeNames(g)))
 
 } # test_getCounts

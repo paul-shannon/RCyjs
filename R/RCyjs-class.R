@@ -16,9 +16,14 @@
                     )
 
 #----------------------------------------------------------------------------------------------------
-# built (cd inst/browserCode; make) with npm and webpack, this html+javascript file has all of the
-# browser-side code
-cyjsBrowserFile <- system.file(package="RCyjs", "browserCode", "dist", "rcyjs.html")
+# built with npm and webpack (cd inst/browserCode; make) this html+javascript file has all of the
+# browser-side code.  note that the determination of the RCyjs install directory happens
+#  at LOAD time, AFTER the package is built and installed.
+cyjsBrowserFile <- NULL
+
+.onLoad <- function(...){
+   cyjsBrowserFile <<- system.file(package="RCyjs", "browserCode", "dist", "rcyjs.html")
+   }
 #----------------------------------------------------------------------------------------------------
 printf <- function(...) print(noquote(sprintf(...)))
 #----------------------------------------------------------------------------------------------------
@@ -277,6 +282,9 @@ setMethod('addGraph', 'RCyjs',
   function (obj, graph) {
      g.json <- paste("network = ", .graphToJSON(graph))
      temp.filename <- tempfile(fileext=".json")
+     if(!obj@quiet)
+        printf("writing graph (%d nodes, %d edges to %s",
+               length(nodes(graph)), length(edgeNames(graph)), temp.filename)
      write(g.json, file=temp.filename)
      payload <- list(filename=temp.filename)
      send(obj, list(cmd="addGraph", callback="handleResponse", status="request", payload=payload))
@@ -320,7 +328,6 @@ setMethod('addGraphFromFile', 'RCyjs',
      while (!browserResponseReady(obj)){
         wait(obj, 100)
         }
-     #printf("browserResponseReady")
      getBrowserResponse(obj);
      })
 
@@ -364,7 +371,6 @@ setMethod('loadStyleFile', 'RCyjs',
      while (!browserResponseReady(obj)){
         wait(obj, 100)
         }
-     #printf("browserResponseReady")
      getBrowserResponse(obj);
      })
 
@@ -405,7 +411,7 @@ setMethod('getNodes', 'RCyjs',
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
-       return(fromJSON(getBrowserResponse(obj)))
+        return(fromJSON(result))
      else
        return("")
      })
@@ -440,7 +446,8 @@ setMethod('getNodeCount', 'RCyjs',
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
-       return(fromJSON(getBrowserResponse(obj)))
+       return(fromJSON(result))
+       #return(fromJSON(getBrowserResponse(obj)))
      else
        return("")
      })
@@ -475,7 +482,7 @@ setMethod('getEdgeCount', 'RCyjs',
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0)
-       return(fromJSON(getBrowserResponse(obj)))
+       return(fromJSON(result))
      else
        return("")
      })
@@ -548,7 +555,7 @@ setMethod('getSelectedNodes', 'RCyjs',
         }
      result <- getBrowserResponse(obj)
      if(nchar(result) > 0){
-        result <- fromJSON(getBrowserResponse(obj))
+        result <- fromJSON(result)
         if(!is.data.frame(result))  # always empty, indicates no selected nodes
           result <- data.frame()
         return(result)

@@ -1805,16 +1805,16 @@ function addGraph(msg)
 
   console.log("addGraph '" + filename + "'");
 
-  status = self.addNetwork(filename);
+  var status = self.addNetwork(filename);  // todo: .done promise does not return a value
 
   var return_msg;
 
-  if (status=="success") {
+  //if (status=="success") {
      return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
-     }
-  else{
-    return_msg = {cmd: msg.callback, status: "failure", callback: "", payload: status};
-    }
+  //   }
+  //else{
+  //  return_msg = {cmd: msg.callback, status: "failure", callback: "", payload: status};
+  //  }
 
   self.hub.send(return_msg);
 

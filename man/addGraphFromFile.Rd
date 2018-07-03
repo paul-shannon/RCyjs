@@ -24,6 +24,7 @@ More description
 }
 \examples{
 if(interactive()){
+  rcy <- RCyjs()
   filename <- system.file(package="RCyjs", "extdata", "sampleGraph.json")
   addGraphFromFile(rcy, filename)
   layout(rcy, "cose")

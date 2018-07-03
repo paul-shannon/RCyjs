@@ -527,15 +527,28 @@ test_addGraphFromFile <- function()
    addGraph(rcy, g)
    layout(rcy, "cola")
    tbl.nodes.0 <- getNodes(rcy)
-   g <- getJSON(rcy)
+
+   jsonText <- getJSON(rcy)
+   jsonText.augmented <- sprintf("network = %s", jsonText)
    temp.filename <- tempfile(fileext=".json")
-   write(g, file=temp.filename)
+   write(jsonText.augmented, file=temp.filename)
+
    deleteGraph(rcy)
    addGraphFromFile(rcy, temp.filename)
    layout(rcy, "cola")
    tbl.nodes.1 <- getNodes(rcy)
 
    checkEquals(sort(tbl.nodes.0$id), sort(tbl.nodes.1$id))
+
+     #------------------------------------------------------
+     # now test the json text file included with the package
+     #------------------------------------------------------
+
+   deleteGraph(rcy)
+   pre.existing.file <- system.file(package="RCyjs", "extdata", "sampleGraph.json")
+   addGraphFromFile(rcy, temp.filename)
+   layout(rcy, "cola")
+   checkEquals(getNodeCount(rcy), 10)
 
 } # test_addGraphFromFile
 #----------------------------------------------------------------------------------------------------

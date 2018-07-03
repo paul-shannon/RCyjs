@@ -14738,6 +14738,18 @@ function getEasedValue(type, start, end, percent, easingFn) {
   return val;
 }
 
+function getValue(prop, spec) {
+  if (prop.pfValue != null || prop.value != null) {
+    if (prop.pfValue != null && (spec == null || spec.type.units !== '%')) {
+      return prop.pfValue;
+    } else {
+      return prop.value;
+    }
+  } else {
+    return prop;
+  }
+}
+
 function ease(startProp, endProp, percent, easingFn, propSpec) {
   var type = propSpec != null ? propSpec.type : null;
 
@@ -14747,20 +14759,8 @@ function ease(startProp, endProp, percent, easingFn, propSpec) {
     percent = 1;
   }
 
-  var start = void 0,
-      end = void 0;
-
-  if (startProp.pfValue != null || startProp.value != null) {
-    start = startProp.pfValue != null ? startProp.pfValue : startProp.value;
-  } else {
-    start = startProp;
-  }
-
-  if (endProp.pfValue != null || endProp.value != null) {
-    end = endProp.pfValue != null ? endProp.pfValue : endProp.value;
-  } else {
-    end = endProp;
-  }
+  var start = getValue(startProp, propSpec);
+  var end = getValue(endProp, propSpec);
 
   if (is.number(start) && is.number(end)) {
     return getEasedValue(type, start, end, percent, easingFn);
@@ -17135,9 +17135,9 @@ styfn.parseImpl = function (name, value, propIsBypass, propIsFlat) {
   if (!property) {
     return null;
   } // return null on property of unknown name
-  if (value === undefined || value === null) {
+  if (value === undefined) {
     return null;
-  } // can't assign null
+  } // can't assign undefined
 
   // the property may be an alias
   if (property.alias) {
@@ -17309,7 +17309,9 @@ styfn.parseImpl = function (name, value, propIsBypass, propIsFlat) {
       name: name,
       value: valArr,
       pfValue: pfValArr,
-      strValue: valArr.join(' '),
+      strValue: valArr.map(function (val, i) {
+        return val + (unitsArr[i] || '');
+      }).join(' '),
       bypass: propIsBypass,
       units: unitsArr
     };
@@ -19385,6 +19387,9 @@ CoseLayout.prototype.run = function () {
     },
     stop: function stop() {
       return this;
+    },
+    stopped: function stopped() {
+      return true;
     }
   };
 
@@ -22870,7 +22875,7 @@ BRp.getControlPoints = function (edge) {
   var rs = edge[0]._private.rscratch;
   var type = rs.edgeType;
 
-  if (type === 'bezier' || type === 'multibezier') {
+  if (type === 'bezier' || type === 'multibezier' || type === 'self' || type === 'compound') {
     return getPts(rs.ctrlpts);
   }
 };
@@ -28305,13 +28310,13 @@ CRp.drawEdge = function (context, edge, shiftToOriginWithBb, drawLabel) {
   var rs = edge._private.rscratch;
   var usePaths = r.usePaths();
 
-  // if bezier ctrl pts can not be calculated, then die
-  if (rs.badLine || isNaN(rs.allpts[0])) {
-    // isNaN in case edge is impossible and browser bugs (e.g. safari)
+  if (!edge.visible()) {
     return;
   }
 
-  if (!edge.visible()) {
+  // if bezier ctrl pts can not be calculated, then die
+  if (rs.badLine || rs.allpts == null || isNaN(rs.allpts[0])) {
+    // isNaN in case edge is impossible and browser bugs (e.g. safari)
     return;
   }
 
@@ -30533,7 +30538,7 @@ module.exports = Stylesheet;
 "use strict";
 
 
-module.exports = "3.2.11";
+module.exports = "3.2.14";
 
 /***/ })
 /******/ ]);
@@ -102450,16 +102455,16 @@ function addGraph(msg)
 
   console.log("addGraph '" + filename + "'");
 
-  status = self.addNetwork(filename);
+  var status = self.addNetwork(filename);  // todo: .done promise does not return a value
 
   var return_msg;
 
-  if (status=="success") {
+  //if (status=="success") {
      return_msg = {cmd: msg.callback, status: "success", callback: "", payload: ""};
-     }
-  else{
-    return_msg = {cmd: msg.callback, status: "failure", callback: "", payload: status};
-    }
+  //   }
+  //else{
+  //  return_msg = {cmd: msg.callback, status: "failure", callback: "", payload: status};
+  //  }
 
   self.hub.send(return_msg);
 

@@ -165,12 +165,12 @@ RCyjs = function(portRange=16000:16100, title="RCyjs", graph=graphNEL(), quiet=T
                             httpQueryProcessingFunction=myQP),
                  graph=graph)
 
-  #   if(length(nodes(graph)) > 0){
-  #      setGraph(obj, graph)
-  #      if(!quiet)
-  #         printf("loading graph with %d nodes", length(nodes(graph)))
-  #      layout(obj, "random")
-  #      } # if graph
+   if(length(nodes(graph)) > 0){
+      setGraph(obj, graph)
+      if(!quiet)
+         printf("loading graph with %d nodes", length(nodes(graph)))
+      layout(obj, "random")
+      } # if graph
 
 
   #   if(!quiet)

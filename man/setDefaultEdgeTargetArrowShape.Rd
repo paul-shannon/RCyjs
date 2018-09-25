@@ -6,9 +6,10 @@
 \alias{setDefaultEdgeTargetArrowShape}
 \title{setDefaultEdgeTargetArrowShape}
 \usage{
-\S4method{setDefaultEdgeTargetArrowShape}{RCyjs}(obj, newValue = c("triangle",
-  "triangle-tee", "triangle-cross", "triangle-backcurve", "vee", "tee",
-  "square", "circle", "diamond", "none"))
+\S4method{setDefaultEdgeTargetArrowShape}{RCyjs}(obj,
+  newValue = c("triangle", "triangle-tee", "triangle-cross",
+  "triangle-backcurve", "vee", "tee", "square", "circle", "diamond",
+  "none"))
 }
 \arguments{
 \item{obj}{an RCyjs instance}

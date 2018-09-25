@@ -6,8 +6,8 @@
 \alias{setEdgeAttributes}
 \title{setEdgeAttributes}
 \usage{
-\S4method{setEdgeAttributes}{RCyjs}(obj, attribute, sourceNodes, targetNodes,
-  edgeTypes, values)
+\S4method{setEdgeAttributes}{RCyjs}(obj, attribute, sourceNodes,
+  targetNodes, edgeTypes, values)
 }
 \arguments{
 \item{obj}{an RCyjs instance}

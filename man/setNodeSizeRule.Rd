@@ -6,7 +6,8 @@
 \alias{setNodeSizeRule}
 \title{setNodeSizeRule}
 \usage{
-\S4method{setNodeSizeRule}{RCyjs}(obj, attribute, control.points, node.sizes)
+\S4method{setNodeSizeRule}{RCyjs}(obj, attribute, control.points,
+  node.sizes)
 }
 \arguments{
 \item{obj}{an RCyjs instance}

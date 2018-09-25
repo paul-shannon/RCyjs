@@ -6,10 +6,10 @@
 \alias{setDefaultNodeShape}
 \title{setDefaultNodeShape}
 \usage{
-\S4method{setDefaultNodeShape}{RCyjs}(obj, newValue = c("ellipse", "triangle",
-  "rectangle", "roundrectangle", "bottomroundrectangle", "cutrectangle",
-  "barrel", "rhomboid", "diamond", "pentagon", "hexagon", "concavehexagon",
-  "heptagon", "octagon", "star", "tag", "vee"))
+\S4method{setDefaultNodeShape}{RCyjs}(obj, newValue = c("ellipse",
+  "triangle", "rectangle", "roundrectangle", "bottomroundrectangle",
+  "cutrectangle", "barrel", "rhomboid", "diamond", "pentagon", "hexagon",
+  "concavehexagon", "heptagon", "octagon", "star", "tag", "vee"))
 }
 \arguments{
 \item{obj}{an RCyjs instance}

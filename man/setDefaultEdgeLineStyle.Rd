@@ -6,8 +6,8 @@
 \alias{setDefaultEdgeLineStyle}
 \title{setDefaultEdgeLineStyle}
 \usage{
-\S4method{setDefaultEdgeLineStyle}{RCyjs}(obj, newValue = c("solid", "dotted",
-  "dashed"))
+\S4method{setDefaultEdgeLineStyle}{RCyjs}(obj, newValue = c("solid",
+  "dotted", "dashed"))
 }
 \arguments{
 \item{obj}{an RCyjs instance}

@@ -1,0 +1,2 @@
+   if(!interactive())
+       return(TRUE);

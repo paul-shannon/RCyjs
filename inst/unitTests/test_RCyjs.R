@@ -581,6 +581,7 @@ test_getCounts <- function()
    addGraph(rcy, g)
    print(ready(rcy))
    layout(rcy, "cola")
+   Sys.sleep(5)
    checkEquals(getEdgeCount(rcy), length(edgeNames(g2)) + length(edgeNames(g)))
 
 } # test_getCounts
@@ -923,11 +924,15 @@ test_zoom <- function()
    loops = 8
 
    for(i in 1:loops){
-      setZoom(rcy, 0.5 * getZoom(rcy))
+      oldZoom <- getZoom(rcy)
+      newZoom <- 0.5 * oldZoom
+      setZoom(rcy, newZoom)
       } # for i
 
     for(i in 1:(loops)){
-      setZoom(rcy, 2.0 * getZoom(rcy))
+      oldZoom <- getZoom(rcy)
+      newZoom <- 2.0 * oldZoom
+      setZoom(rcy, newZoom)
       } # for i
 
 } # test_zoom
@@ -974,6 +979,7 @@ test_savePNG <- function()
 
    filename <- tempfile(fileext=".png")
    savePNG(rcy, filename)
+   Sys.sleep(3)
    checkTrue(file.exists(filename))
    checkTrue(file.size(filename) > 100000)
 
@@ -1002,6 +1008,7 @@ test_saveJPG <- function()
    fs.1 <- file.size(filename.1)
 
    saveJPG(rcy, filename.4, resolutionFactor=4)
+   Sys.sleep(3)
    checkTrue(file.exists(filename.4))
    fs.2 <- file.size(filename.4)
 

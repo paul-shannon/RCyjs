@@ -1,4 +1,9 @@
+quick: browserCode docs install
+
 all:  docs vig build install check biocCheck
+
+browserCode:
+	(cd inst/browserCode; make assemble)
 
 docs:
 	R -e "devtools::document()"

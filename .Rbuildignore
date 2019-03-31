@@ -1,3 +1,5 @@
+^Meta$
+^doc$
 
 example.txt
 node_modules/
@@ -6,6 +8,5 @@ rcyjs.html-template
 .git/
 inst/unitTests/tmp*
 inst/demo/
-
 ^.*\.Rproj$
 ^\.Rproj\.user$

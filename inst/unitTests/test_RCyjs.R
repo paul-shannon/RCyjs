@@ -120,6 +120,44 @@ test_setGraph <- function()
 
 } # test_setGraph
 #----------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------
+test_hideShowNodesByName <- function()
+{
+   printf("--- test_hideShowNodesByName")
+
+   if(!interactive())
+       return(TRUE);
+
+   checkTrue(ready(rcy))
+
+   title <- "setGraph"
+   setBrowserWindowTitle(rcy, title)
+   checkEquals(getBrowserWindowTitle(rcy), title)
+
+   g <- simpleDemoGraph()
+   setGraph(rcy, g)
+   setNodeLabelRule(rcy, "label");
+   setNodeSizeRule(rcy, "count", c(0, 30, 110), c(20, 50, 100));
+   setNodeColorRule(rcy, "count", c(0, 100), c("green", "red"), mode="interpolate")
+   redraw(rcy)
+   layout(rcy, "cola")
+   fit(rcy, 100)
+
+   hideNodes(rcy, c("A", "C"))
+   checkEquals(getNodes(rcy, "visible")$id, "B")
+   checkEquals(sort(getNodes(rcy, "hidden")$id), c("A", "C"))
+
+   showNodes(rcy, "A")
+   checkEquals(sort(getNodes(rcy, "visible")$id), c("A", "B"))
+   checkEquals(sort(getNodes(rcy, "hidden")$id), "C")
+
+   showNodes(rcy, nodes(g))
+   checkEquals(sort(getNodes(rcy, "visible")$id), sort(nodes(g)))
+
+   waitForDisplay(500)
+
+} # test_hideShowNodesByName
+#----------------------------------------------------------------------------------------------------
 test_setGraphEdgesInitiallyHidden <- function()
 {
    printf("--- test_setGraphEdgesInitiallyHidden")
@@ -222,7 +260,7 @@ test_constructorWithGraphSupplied <- function()
 
    g <- simpleDemoGraph()
 
-   rcy2 <- RCyjs(graph=g, title="constructorWithGraphSupplied");
+   rcy2 <- RCyjs(portRange=17000:17100, graph=g, title="constructorWithGraphSupplied");
    checkTrue(ready(rcy2))
    setNodeLabelRule(rcy2, "label");
    setNodeSizeRule(rcy2, "count", c(0, 30, 110), c(20, 50, 100));

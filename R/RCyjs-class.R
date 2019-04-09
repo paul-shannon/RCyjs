@@ -42,6 +42,8 @@ setGeneric('getSelectedNodes',    signature='obj', function(obj) standardGeneric
 setGeneric('clearSelection',      signature='obj', function(obj, which="both") standardGeneric ('clearSelection'))
 setGeneric('invertNodeSelection', signature='obj', function(obj) standardGeneric ('invertNodeSelection'))
 setGeneric('hideSelectedNodes',   signature='obj', function(obj) standardGeneric ('hideSelectedNodes'))
+setGeneric('hideNodes',           signature='obj', function(obj, nodeIDs) standardGeneric ('hideNodes'))
+setGeneric('showNodes',           signature='obj', function(obj, nodeIDs) standardGeneric ('showNodes'))
 setGeneric('deleteSelectedNodes', signature='obj', function(obj) standardGeneric ('deleteSelectedNodes'))
 setGeneric('redraw',              signature='obj', function(obj) standardGeneric ('redraw'))
 
@@ -692,6 +694,93 @@ setMethod('deleteSelectedNodes', 'RCyjs',
        return("")
      })
 
+
+#----------------------------------------------------------------------------------------------------
+#' hideNodes
+#'
+#' \code{hideNodes} hide the named nodes from view
+#'
+#' The hidden nodes are not deleted from the graph
+#'
+#' @rdname hideNodes
+#' @aliases hideNodes
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    target <- nodes(g)[1]
+#'    selectNodes(rcy, target)
+#'    hideNodes(rcy)
+#'    getNodes(rcy, "hidden")
+#'    getNodes(rcy, "visible")
+#'    showAll(rcy, which="nodes")
+#'    }
+#'
+#' @seealso \code{\link{showAll}}
+
+setMethod('hideNodes', 'RCyjs',
+
+  function (obj, nodeIDs) {
+     send(obj, list(cmd="hideNodes", callback="handleResponse", status="request", payload=nodeIDs))
+     while (!browserResponseReady(obj)){
+        wait(obj, 100)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       return("")
+     })
+
+#----------------------------------------------------------------------------------------------------
+#' showNodes
+#'
+#' \code{showNodes} show the named nodes from view
+#'
+#'
+#' @rdname showNodes
+#' @aliases showNodes
+#'
+#' @param obj  an RCyjs instance
+#'
+#' @return no return value
+#'
+#' @export
+#'
+#' @examples
+#' if(interactive()){
+#'    g <- simpleDemoGraph()
+#'    rcy <- RCyjs(title="rcyjs demo", graph=g)
+#'    target <- nodes(g)[1]
+#'    hideNodes(rcy, "A")
+#'    getNodes(rcy, "hidden")
+#'    getNodes(rcy, "visible")
+#'    showNodes(rcy, "A")
+#'    getNodes(rcy, "visible")
+#'    }
+#'
+#' @seealso \code{\link{showAll}}
+
+setMethod('showNodes', 'RCyjs',
+
+  function (obj, nodeIDs) {
+     send(obj, list(cmd="showNodes", callback="handleResponse", status="request", payload=nodeIDs))
+     while (!browserResponseReady(obj)){
+        wait(obj, 100)
+        }
+     result <- getBrowserResponse(obj)
+     if(nchar(result) > 0)
+       return(fromJSON(getBrowserResponse(obj)))
+     else
+       return("")
+     })
 
 #----------------------------------------------------------------------------------------------------
 #' setNodeSizeRule

@@ -1,4 +1,4 @@
-build: webpack assemble buildPackage installPackage
+build: webpack assemble
 
 assemble:
 	(cd ./dist; m4 -P rcyjs.html-template | sed s/\`//g > rcyjs.html)

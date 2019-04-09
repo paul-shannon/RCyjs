@@ -118,6 +118,8 @@ function addMessageHandlers()
    self.hub.addMessageHandler("showAllEdges",         showAllEdges.bind(self));
    self.hub.addMessageHandler("hideEdges",            hideEdges.bind(self));
    self.hub.addMessageHandler("showEdges",            showEdges.bind(self));
+   self.hub.addMessageHandler("hideNodes",            hideNodes.bind(self));
+   self.hub.addMessageHandler("showNodes",            showNodes.bind(self));
    self.hub.addMessageHandler("showAll",              showAll.bind(self));
 
    self.hub.addMessageHandler("getJSON",              getJSON.bind(self));
@@ -1573,6 +1575,54 @@ function hideSelectedNodes(msg)
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
 
 } // hideSelectedNodes
+//----------------------------------------------------------------------------------------------------
+function hideNodes(msg)
+{
+   var self = this;
+   console.log("==== hideNodes");
+   console.log(msg.payload);
+   var nodeIDs = msg.payload;
+
+   if(typeof(nodeIDs) == "string")
+      nodeIDs = [nodeIDs];
+
+   var filterStrings = [];
+
+   for(var i=0; i < nodeIDs.length; i++){
+     var s = '[id="' + nodeIDs[i] + '"]';
+     filterStrings.push(s);
+     } // for i
+
+   var nodesToHide = self.cy.nodes(filterStrings.join());
+   nodesToHide.hide()
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // hideNodes
+//----------------------------------------------------------------------------------------------------
+function showNodes(msg)
+{
+   var self = this;
+   console.log("==== showNodes");
+   console.log(msg.payload);
+   var nodeIDs = msg.payload;
+
+   if(typeof(nodeIDs) == "string")
+      nodeIDs = [nodeIDs];
+
+   var filterStrings = [];
+
+   for(var i=0; i < nodeIDs.length; i++){
+     var s = '[id="' + nodeIDs[i] + '"]';
+     filterStrings.push(s);
+     } // for i
+
+   var nodesToShow = self.cy.nodes(filterStrings.join());
+   nodesToShow.show()
+
+   self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
+
+} // hideNodes
 //----------------------------------------------------------------------------------------------------
 function deleteSelectedNodes(msg)
 {

@@ -1682,9 +1682,8 @@ function setNodeAttributes(msg)
    for(var i=0; i < nodeIDs.length; i++){
       var id = nodeIDs[i];
       var newValue = msg.payload.values[i];
-      var filterString = "[id='" + id + "']";
-      var dataObj = self.cy.nodes().filter(filterString).data();
-      Object.defineProperty(dataObj, attributeName, {value: newValue});
+      var node = self.cy.getElementById(id);
+      node.data({[attributeName]:  newValue});
       } // for i
 
    self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
@@ -1702,14 +1701,18 @@ function setEdgeAttributes(msg)
    var values = msg.payload.values
 
    for(var i=0; i < sourceNodes.length; i++){
-      var selectorString = "edge[source='" + sourceNodes[i] + "'][target='" + targetNodes[i] +
-                           "'][edgeType='" + edgeTypes[i] + "']";
-
-      console.log(selectorString);
-      var dataObj = self.cy.edges().filter(selectorString).data();
-      if(dataObj != undefined){
-         Object.defineProperty(dataObj, attributeName, {value: values[i]});
+      var id = sourceNodes[i] + "-(" + edgeTypes[i] + ")-" + targetNodes[i];
+      var edge = self.cy.getElementById(id)
+      if(edge != undefined){
+         edge.data({[attributeName]: values[i]})
          }
+      //var selectorString = "edge[source='" + sourceNodes[i] + "'][target='" + targetNodes[i] +
+      //                     "'][edgeType='" + edgeTypes[i] + "']";
+      //console.log(selectorString);
+      //var dataObj = self.cy.edges().filter(selectorString).data();
+      //if(dataObj != undefined){
+       //  Object.defineProperty(dataObj, attributeName, {value: values[i]});
+       //  }
       //cy.edges("edge[source='Crem'][target='Hk2'][edgeType='undefined']").data({"score": 3})
       } // for i
 

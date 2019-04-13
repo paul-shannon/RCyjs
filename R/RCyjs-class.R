@@ -3389,7 +3389,9 @@ myQP <- function(queryString)
    #printf("myQP filename: '%s'", filename)
    #printf("       exists?  %s", file.exists(filename));
 
-   stopifnot(file.exists(filename))
+   if(!file.exists(filename)){
+      return(list(contentType="text/plain", body=sprintf("file not found: %s", filename)))
+      }
 
    #printf("--- about to scan %s", filename);
       # reconstitute linefeeds though collapsing file into one string, so json
@@ -3397,7 +3399,7 @@ myQP <- function(queryString)
    text <- paste(scan(filename, what=character(0), sep="\n", quiet=TRUE), collapse="\n")
    #printf("%d chars read from %s", nchar(text), filename);
 
-   return(text);
+   return(list(contentType="text/plain", body=text));
 
 } # myQP
 #----------------------------------------------------------------------------------------------------
